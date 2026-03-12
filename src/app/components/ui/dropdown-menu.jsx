@@ -65,9 +65,6 @@ function DropdownMenuItem({
   variant = "default",
   ...props
 }) {
-  inset?;
-  variant;
-}) {
   return (
     <DropdownMenuPrimitive.Item
       data-slot="dropdown-menu-item"
