@@ -1,15 +1,20 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
-import { Button } from '../components/ui/button';
-import { RadioGroup, RadioGroupItem } from '../components/ui/radio-group';
-import { Label } from '../components/ui/label';
-import { Progress } from '../components/ui/progress';
-import { Loader } from '../components/Loader';
-import { ConfirmDialog } from '../components/ConfirmDialog';
-import { examsApi, questionsApi } from '../services/api';
-import { Clock, ChevronLeft, ChevronRight, Flag } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "../components/ui/card";
+import { Button } from "../components/ui/button";
+import { RadioGroup, RadioGroupItem } from "../components/ui/radio-group";
+import { Label } from "../components/ui/label";
+import { Progress } from "../components/ui/progress";
+import { Loader } from "../components/Loader";
+import { ConfirmDialog } from "../components/ConfirmDialog";
+import { examsApi, questionsApi } from "../services/api";
+import { Clock, ChevronLeft, ChevronRight, Flag } from "lucide-react";
+import toast from "react-hot-toast";
 
 export const TakeExam = () => {
   const { examId } = useParams();
@@ -54,15 +59,15 @@ export const TakeExam = () => {
       setQuestions(questionsRes.data);
       setTimeRemaining(examRes.data.duration * 60); // Convert to seconds
     } catch (error) {
-      toast.error('Failed to load exam');
-      navigate('/exams');
+      toast.error("Failed to load exam");
+      navigate("/exams");
     } finally {
       setLoading(false);
     }
   };
 
   const handleAutoSubmit = async () => {
-    toast.error('Time is up! Submitting exam...');
+    toast.error("Time is up! Submitting exam...");
     await handleSubmitExam();
   };
 
@@ -70,10 +75,10 @@ export const TakeExam = () => {
     setSubmitting(true);
     try {
       const response = await examsApi.submit(parseInt(examId), answers);
-      toast.success('Exam submitted successfully!');
-      navigate('/results', { state: { result: response.data } });
+      toast.success("Exam submitted successfully!");
+      navigate("/results", { state: { result: response.data } });
     } catch (error) {
-      toast.error('Failed to submit exam');
+      toast.error("Failed to submit exam");
     } finally {
       setSubmitting(false);
       setSubmitDialog(false);
@@ -90,7 +95,7 @@ export const TakeExam = () => {
   const formatTime = (seconds) => {
     const minutes = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   };
 
   const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
@@ -114,11 +119,15 @@ export const TakeExam = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-semibold">{exam?.title}</h1>
-              <p className="text-sm text-muted-foreground">{exam?.courseName}</p>
+              <p className="text-sm text-muted-foreground">
+                {exam?.courseName}
+              </p>
             </div>
             <div className="flex items-center gap-6">
               <div className="text-center">
-                <p className="text-sm text-muted-foreground">Questions Answered</p>
+                <p className="text-sm text-muted-foreground">
+                  Questions Answered
+                </p>
                 <p className="text-xl font-semibold">
                   {answeredCount} / {questions.length}
                 </p>
@@ -126,9 +135,12 @@ export const TakeExam = () => {
               <div className="text-center">
                 <div className="flex items-center gap-2 mb-1">
                   <Clock className="h-5 w-5 text-primary" />
-                  <p className="text-sm text-muted-foreground">Time Remaining</p>
+                  <p className="text-sm text-muted-foreground">
+                    Time Remaining
+                  </p>
                 </div>
-                <p className={`text-2xl font-semibold ${timeRemaining < 300 ? 'text-destructive' : 'text-primary'}`}>
+                <p
+                  className={`text-2xl font-semibold ${timeRemaining < 300 ? "text-destructive" : "text-primary"}`}>
                   {formatTime(timeRemaining)}
                 </p>
               </div>
@@ -154,12 +166,11 @@ export const TakeExam = () => {
                       onClick={() => setCurrentQuestionIndex(index)}
                       className={`h-10 w-10 rounded-lg border transition-colors ${
                         currentQuestionIndex === index
-                          ? 'bg-primary text-primary-foreground border-primary'
+                          ? "bg-primary text-primary-foreground border-primary"
                           : answers[q.id]
-                          ? 'bg-green-100 dark:bg-green-900/20 border-green-500 text-green-700 dark:text-green-400'
-                          : 'bg-muted hover:bg-accent border-border'
-                      }`}
-                    >
+                            ? "bg-green-100 dark:bg-green-900/20 border-green-500 text-green-700 dark:text-green-400"
+                            : "bg-muted hover:bg-accent border-border"
+                      }`}>
                       {index + 1}
                     </button>
                   ))}
@@ -191,34 +202,40 @@ export const TakeExam = () => {
                     <p className="text-sm text-muted-foreground mb-2">
                       Question {currentQuestionIndex + 1} of {questions.length}
                     </p>
-                    <CardTitle className="text-xl">{currentQuestion?.questionText}</CardTitle>
+                    <CardTitle className="text-xl">
+                      {currentQuestion?.questionText}
+                    </CardTitle>
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-lg">
                     <Flag className="h-4 w-4 text-primary" />
-                    <span className="text-sm font-medium">{currentQuestion?.marks} marks</span>
+                    <span className="text-sm font-medium">
+                      {currentQuestion?.marks} marks
+                    </span>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <RadioGroup
-                  value={answers[currentQuestion?.id] || ''}
-                  onValueChange={(value) => handleAnswerChange(currentQuestion?.id, value)}
-                >
+                  value={answers[currentQuestion?.id] || ""}
+                  onValueChange={(value) =>
+                    handleAnswerChange(currentQuestion?.id, value)
+                  }>
                   <div className="space-y-3">
-                    {['A', 'B', 'C', 'D'].map((option) => (
+                    {["A", "B", "C", "D"].map((option) => (
                       <div
                         key={option}
                         className={`flex items-center space-x-3 p-4 rounded-lg border transition-colors ${
                           answers[currentQuestion?.id] === option
-                            ? 'border-primary bg-primary/5'
-                            : 'border-border hover:bg-accent'
-                        }`}
-                      >
-                        <RadioGroupItem value={option} id={`option-${option}`} />
+                            ? "border-primary bg-primary/5"
+                            : "border-border hover:bg-accent"
+                        }`}>
+                        <RadioGroupItem
+                          value={option}
+                          id={`option-${option}`}
+                        />
                         <Label
                           htmlFor={`option-${option}`}
-                          className="flex-1 cursor-pointer font-normal"
-                        >
+                          className="flex-1 cursor-pointer font-normal">
                           <span className="font-medium mr-2">{option}.</span>
                           {currentQuestion?.[`option${option}`]}
                         </Label>
@@ -233,9 +250,10 @@ export const TakeExam = () => {
             <div className="flex items-center justify-between">
               <Button
                 variant="outline"
-                onClick={() => setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))}
-                disabled={currentQuestionIndex === 0}
-              >
+                onClick={() =>
+                  setCurrentQuestionIndex((prev) => Math.max(0, prev - 1))
+                }
+                disabled={currentQuestionIndex === 0}>
                 <ChevronLeft className="mr-2 h-4 w-4" />
                 Previous
               </Button>
@@ -244,12 +262,17 @@ export const TakeExam = () => {
                 <Button
                   onClick={() => setSubmitDialog(true)}
                   className="bg-green-600 hover:bg-green-700"
-                  disabled={submitting}
-                >
+                  disabled={submitting}>
                   Submit Exam
                 </Button>
-              ) ((prev) => Math.min(questions.length - 1, prev + 1))}
-                >
+              ) : (
+                <Button
+                  variant="outline"
+                  onClick={() =>
+                    setCurrentQuestionIndex((prev) =>
+                      Math.min(questions.length - 1, prev + 1),
+                    )
+                  }>
                   Next
                   <ChevronRight className="ml-2 h-4 w-4" />
                 </Button>
