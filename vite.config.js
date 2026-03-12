@@ -20,6 +20,6 @@ export default defineConfig({
     },
   },
 
-  // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
+  // File types to support raw imports. Never add .css, .jsx, or .js files to this.
   assetsInclude: ["**/*.svg", "**/*.csv"],
 });
