@@ -50,7 +50,7 @@ function SheetContent({
   side = "right",
   ...props
 }) {
-  side?: "top" | "right" | "bottom" | "left";
+  side;
 }) {
   return (
     <SheetPortal>

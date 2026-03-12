@@ -62,10 +62,6 @@ const useFormField = () => {
   };
 };
 
-type FormItemContextValue = {
-  id;
-};
-
 const FormItemContext = React.createContext<FormItemContextValue>(
   {} as FormItemContextValue,
 );

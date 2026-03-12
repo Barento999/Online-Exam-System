@@ -118,7 +118,7 @@ function ContextMenuItem({
   ...props
 }) {
   inset?;
-  variant?: "default" | "destructive";
+  variant;
 }) {
   return (
     <ContextMenuPrimitive.Item

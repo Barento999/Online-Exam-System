@@ -248,9 +248,7 @@ export const TakeExam = () => {
                 >
                   Submit Exam
                 </Button>
-              ) : (
-                <Button
-                  onClick={() => setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1))}
+              ) ((prev) => Math.min(questions.length - 1, prev + 1))}
                 >
                   Next
                   <ChevronRight className="ml-2 h-4 w-4" />

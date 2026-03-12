@@ -6,23 +6,9 @@ import * as RechartsPrimitive from "recharts";
 import { cn } from "./utils";
 
 // Format: { THEME_NAME: CSS_SELECTOR }
-const THEMES = { light: "", dark: ".dark" } as const;
+const THEMES = { light: "", dark: ".dark" };
 
-export type ChartConfig = {
-  [k in string]: {
-    label?: React.ReactNode;
-    icon?: React.ComponentType;
-  } & (
-    | { color?; theme?: never }
-    | { color?: never; theme: Record<keyof typeof THEMES, string> }
-  );
-};
-
-type ChartContextProps = {
-  config: ChartConfig;
-};
-
-const ChartContext = React.createContext<ChartContextProps | null>(null);
+const ChartContext = React.createContext(null);
 
 function useChart() {
   const context = React.useContext(ChartContext);
@@ -121,7 +107,7 @@ function ChartTooltipContent({
 }) {
     hideLabel?;
     hideIndicator?;
-    indicator?: "line" | "dot" | "dashed";
+    indicator;
     nameKey?;
     labelKey?;
   }) {

@@ -95,7 +95,7 @@ function MenubarItem({
   ...props
 }) {
   inset?;
-  variant?: "default" | "destructive";
+  variant;
 }) {
   return (
     <MenubarPrimitive.Item

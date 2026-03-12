@@ -34,7 +34,7 @@ function SelectTrigger({
   children,
   ...props
 }) {
-  size?: "sm" | "default";
+  size;
 }) {
   return (
     <SelectPrimitive.Trigger

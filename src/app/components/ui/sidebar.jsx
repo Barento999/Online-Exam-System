@@ -32,16 +32,6 @@ const SIDEBAR_WIDTH_MOBILE = "18rem";
 const SIDEBAR_WIDTH_ICON = "3rem";
 const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
-type SidebarContextProps = {
-  state: "expanded" | "collapsed";
-  open;
-  setOpen: (open) => void;
-  openMobile;
-  setOpenMobile: (open) => void;
-  isMobile;
-  toggleSidebar: () => void;
-};
-
 const SidebarContext = React.createContext<SidebarContextProps | null>(null);
 
 function useSidebar() {
@@ -64,7 +54,7 @@ function SidebarProvider({
 }) {
   defaultOpen?;
   open?;
-  onOpenChange?: (open) => void;
+  onOpenChange;
 }) {
   const isMobile = useIsMobile();
   const [openMobile, setOpenMobile] = React.useState(false);
@@ -159,9 +149,9 @@ function Sidebar({
   children,
   ...props
 }) {
-  side?: "left" | "right";
-  variant?: "sidebar" | "floating" | "inset";
-  collapsible?: "offcanvas" | "icon" | "none";
+  side;
+  variant;
+  collapsible;
 }) {
   const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
@@ -397,7 +387,7 @@ function SidebarGroupLabel({
   className,
   asChild = false,
   ...props
-}) { asChild?: boolean }) {
+}) {
   const Comp = asChild ? Slot : "div";
 
   return (
@@ -418,7 +408,7 @@ function SidebarGroupAction({
   className,
   asChild = false,
   ...props
-}) { asChild?: boolean }) {
+}) {
   const Comp = asChild ? Slot : "button";
 
   return (
@@ -506,8 +496,8 @@ function SidebarMenuButton({
 }) {
   asChild?;
   isActive?;
-  tooltip?: string | React.ComponentProps<typeof TooltipContent>;
-} & VariantProps<typeof sidebarMenuButtonVariants>) {
+  tooltip;
+}) {
   const Comp = asChild ? Slot : "button";
   const { isMobile, state } = useSidebar();
 
@@ -674,7 +664,7 @@ function SidebarMenuSubButton({
   ...props
 }) {
   asChild?;
-  size?: "sm" | "md";
+  size;
   isActive?;
 }) {
   const Comp = asChild ? Slot : "a";

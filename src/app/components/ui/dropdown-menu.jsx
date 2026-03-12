@@ -66,7 +66,7 @@ function DropdownMenuItem({
   ...props
 }) {
   inset?;
-  variant?: "default" | "destructive";
+  variant;
 }) {
   return (
     <DropdownMenuPrimitive.Item
