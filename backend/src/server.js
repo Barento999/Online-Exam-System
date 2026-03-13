@@ -47,6 +47,7 @@ import courseRoutes from "./routes/courseRoutes.js";
 import examRoutes from "./routes/examRoutes.js";
 import questionRoutes from "./routes/questionRoutes.js";
 import resultRoutes from "./routes/resultRoutes.js";
+import enrollmentRoutes from "./routes/enrollmentRoutes.js";
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
@@ -54,6 +55,7 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/results", resultRoutes);
+app.use("/api/enrollments", enrollmentRoutes);
 app.use("/api/dashboard", resultRoutes);
 
 // Root route
@@ -70,6 +72,7 @@ app.get("/", (req, res) => {
       exams: "/api/exams",
       questions: "/api/questions",
       results: "/api/results",
+      enrollments: "/api/enrollments",
       dashboard: "/api/dashboard",
     },
     documentation: "See README.md for complete API documentation",
