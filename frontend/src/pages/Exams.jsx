@@ -105,9 +105,13 @@ export const Exams = () => {
 
   const handleEdit = (exam) => {
     setEditingExam(exam);
+    // Handle courseId whether it's an object or string
+    const courseId =
+      typeof exam.courseId === "object" ? exam.courseId._id : exam.courseId;
+
     setFormData({
       title: exam.title,
-      courseId: exam.courseId.toString(),
+      courseId: courseId.toString(),
       duration: exam.duration.toString(),
       totalMarks: exam.totalMarks.toString(),
       passingMarks: exam.passingMarks.toString(),

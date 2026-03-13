@@ -21,11 +21,19 @@ export const getExams = async (req, res, next) => {
       ];
     }
 
-    // Students only see published exams
+    // Students only see published exams for courses they're enrolled in
     if (req.user.role === "student") {
+      const Enrollment = (await import("../models/Enrollment.js")).default;
+      const enrollments = await Enrollment.find({
+        studentId: req.user._id,
+        status: "active",
+      });
+      const enrolledCourseIds = enrollments.map((e) => e.courseId);
+
       query.status = "published";
       query.startTime = { $lte: new Date() };
       query.endTime = { $gte: new Date() };
+      query.courseId = { $in: enrolledCourseIds };
     }
 
     // Teachers only see exams for their courses
@@ -68,6 +76,21 @@ export const getExamById = async (req, res, next) => {
     if (!exam) {
       res.status(404);
       throw new Error("Exam not found");
+    }
+
+    // Students can only view exams for courses they're enrolled in
+    if (req.user.role === "student") {
+      const Enrollment = (await import("../models/Enrollment.js")).default;
+      const enrollment = await Enrollment.findOne({
+        studentId: req.user._id,
+        courseId: exam.courseId._id,
+        status: "active",
+      });
+
+      if (!enrollment) {
+        res.status(403);
+        throw new Error("Not enrolled in this course");
+      }
     }
 
     // Teachers can only view exams for their courses
@@ -219,10 +242,23 @@ export const submitExam = async (req, res, next) => {
     const { answers } = req.body; // answers: { questionId: selectedAnswer }
     const examId = req.params.id;
 
-    const exam = await Exam.findById(examId);
+    const exam = await Exam.findById(examId).populate("courseId");
     if (!exam) {
       res.status(404);
       throw new Error("Exam not found");
+    }
+
+    // Check if student is enrolled in the course
+    const Enrollment = (await import("../models/Enrollment.js")).default;
+    const enrollment = await Enrollment.findOne({
+      studentId: req.user._id,
+      courseId: exam.courseId._id,
+      status: "active",
+    });
+
+    if (!enrollment) {
+      res.status(403);
+      throw new Error("Not enrolled in this course");
     }
 
     // Check if exam is available
@@ -290,10 +326,19 @@ export const getAvailableExams = async (req, res, next) => {
   try {
     const now = new Date();
 
+    // Get student's enrolled courses
+    const Enrollment = (await import("../models/Enrollment.js")).default;
+    const enrollments = await Enrollment.find({
+      studentId: req.user._id,
+      status: "active",
+    });
+    const enrolledCourseIds = enrollments.map((e) => e.courseId);
+
     const exams = await Exam.find({
       status: "published",
       startTime: { $lte: now },
       endTime: { $gte: now },
+      courseId: { $in: enrolledCourseIds },
     }).populate("courseId", "name description");
 
     // Filter out exams already taken by student
