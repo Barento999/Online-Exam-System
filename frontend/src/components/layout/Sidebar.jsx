@@ -14,6 +14,7 @@ import {
   UserCircle,
   Menu,
   X,
+  UserPlus,
 } from "lucide-react";
 
 export const Sidebar = () => {
@@ -25,6 +26,7 @@ export const Sidebar = () => {
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: Users, label: "Users", path: "/users" },
     { icon: BookOpen, label: "Courses", path: "/courses" },
+    { icon: UserPlus, label: "Enrollments", path: "/enrollments" },
     { icon: FileText, label: "Exams", path: "/exams" },
     { icon: ClipboardList, label: "Questions", path: "/questions" },
     { icon: BarChart, label: "Results", path: "/results" },
@@ -34,6 +36,7 @@ export const Sidebar = () => {
   const teacherMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: BookOpen, label: "My Courses", path: "/courses" },
+    { icon: UserPlus, label: "Enrollments", path: "/enrollments" },
     { icon: PlusCircle, label: "Create Exam", path: "/exams/create" },
     { icon: ClipboardList, label: "Question Bank", path: "/questions" },
     { icon: BarChart, label: "Student Results", path: "/results" },
