@@ -1,11 +1,17 @@
 import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import connectDB from "../config/database.js";
 import User from "../models/User.js";
 import Course from "../models/Course.js";
 import Exam from "../models/Exam.js";
 import Question from "../models/Question.js";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load .env from backend directory
+dotenv.config({ path: join(__dirname, "../../.env") });
 
 const seedData = async () => {
   try {
