@@ -327,7 +327,16 @@ export const Questions = () => {
                 </div>
               ) : (
                 filteredQuestions.map((question, index) => {
-                  const exam = exams.find((e) => e._id === question.examId);
+                  // Handle both populated and non-populated examId
+                  const examId =
+                    typeof question.examId === "object"
+                      ? question.examId?._id
+                      : question.examId;
+                  const examTitle =
+                    typeof question.examId === "object"
+                      ? question.examId?.title
+                      : exams.find((e) => e._id === examId)?.title;
+
                   return (
                     <Card key={question._id}>
                       <CardContent className="p-6">
@@ -335,7 +344,7 @@ export const Questions = () => {
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               <Badge variant="outline">Q{index + 1}</Badge>
-                              <Badge>{exam?.title || "Unknown Exam"}</Badge>
+                              <Badge>{examTitle || "Unknown Exam"}</Badge>
                               <Badge variant="secondary">
                                 {question.marks} marks
                               </Badge>

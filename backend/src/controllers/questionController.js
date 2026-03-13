@@ -141,6 +141,14 @@ export const createQuestion = async (req, res, next) => {
       marks,
     });
 
+    // Update exam questionsCount
+    const Exam = (await import("../models/Exam.js")).default;
+    const exam = await Exam.findById(examId);
+    if (exam) {
+      exam.questionsCount = await Question.countDocuments({ examId });
+      await exam.save();
+    }
+
     res.status(201).json(question);
   } catch (error) {
     next(error);
@@ -181,6 +189,14 @@ export const bulkCreateQuestions = async (req, res, next) => {
     }));
 
     const createdQuestions = await Question.insertMany(questionsWithExamId);
+
+    // Update exam questionsCount
+    const Exam = (await import("../models/Exam.js")).default;
+    const exam = await Exam.findById(examId);
+    if (exam) {
+      exam.questionsCount = await Question.countDocuments({ examId });
+      await exam.save();
+    }
 
     res.status(201).json({
       message: `${createdQuestions.length} questions created successfully`,
@@ -268,7 +284,17 @@ export const deleteQuestion = async (req, res, next) => {
       }
     }
 
+    const examId = question.examId._id;
     await question.deleteOne();
+
+    // Update exam questionsCount
+    const Exam = (await import("../models/Exam.js")).default;
+    const exam = await Exam.findById(examId);
+    if (exam) {
+      exam.questionsCount = await Question.countDocuments({ examId });
+      await exam.save();
+    }
+
     res.json({ message: "Question deleted successfully" });
   } catch (error) {
     next(error);
