@@ -1,33 +1,55 @@
-import { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { ConfirmDialog } from '@/components/common/ConfirmDialog';
-import { Loader } from '@/components/common/Loader';
-import { usersApi } from '@/services/api';
-import { Plus, Pencil, Trash2, Search } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { Loader } from "@/components/common/Loader";
+import { usersApi } from "@/services/api";
+import { Plus, Pencil, Trash2, Search } from "lucide-react";
+import toast from "react-hot-toast";
 
 export const Users = () => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, userId: null });
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    userId: null,
+  });
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'student',
-    status: 'active',
+    name: "",
+    email: "",
+    password: "",
+    role: "student",
+    status: "active",
   });
 
   useEffect(() => {
@@ -35,9 +57,10 @@ export const Users = () => {
   }, []);
 
   useEffect(() => {
-    const filtered = users.filter((user) =>
-      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const filtered = users.filter(
+      (user) =>
+        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()),
     );
     setFilteredUsers(filtered);
   }, [searchTerm, users]);
@@ -45,10 +68,11 @@ export const Users = () => {
   const loadUsers = async () => {
     try {
       const response = await usersApi.getAll();
-      setUsers(response.data);
-      setFilteredUsers(response.data);
+      const usersData = response.data.users || response.data;
+      setUsers(usersData);
+      setFilteredUsers(usersData);
     } catch (error) {
-      toast.error('Failed to load users');
+      toast.error("Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -59,16 +83,16 @@ export const Users = () => {
     try {
       if (editingUser) {
         await usersApi.update(editingUser.id, formData);
-        toast.success('User updated successfully');
+        toast.success("User updated successfully");
       } else {
         await usersApi.create(formData);
-        toast.success('User created successfully');
+        toast.success("User created successfully");
       }
       setIsDialogOpen(false);
       resetForm();
       loadUsers();
     } catch (error) {
-      toast.error(error.message || 'Operation failed');
+      toast.error(error.message || "Operation failed");
     }
   };
 
@@ -77,7 +101,7 @@ export const Users = () => {
     setFormData({
       name: user.name,
       email: user.email,
-      password: '',
+      password: "",
       role: user.role,
       status: user.status,
     });
@@ -87,21 +111,21 @@ export const Users = () => {
   const handleDelete = async () => {
     try {
       await usersApi.delete(deleteDialog.userId);
-      toast.success('User deleted successfully');
+      toast.success("User deleted successfully");
       setDeleteDialog({ open: false, userId: null });
       loadUsers();
     } catch (error) {
-      toast.error('Failed to delete user');
+      toast.error("Failed to delete user");
     }
   };
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      email: '',
-      password: '',
-      role: 'student',
-      status: 'active',
+      name: "",
+      email: "",
+      password: "",
+      role: "student",
+      status: "active",
     });
     setEditingUser(null);
   };
@@ -140,7 +164,9 @@ export const Users = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingUser ? 'Edit User' : 'Add New User'}</DialogTitle>
+                <DialogTitle>
+                  {editingUser ? "Edit User" : "Add New User"}
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -148,7 +174,9 @@ export const Users = () => {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -158,23 +186,33 @@ export const Users = () => {
                     id="email"
                     type="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
                     required
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="password">Password {editingUser && '(leave blank to keep current)'}</Label>
+                  <Label htmlFor="password">
+                    Password {editingUser && "(leave blank to keep current)"}
+                  </Label>
                   <Input
                     id="password"
                     type="password"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
                     required={!editingUser}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="role">Role</Label>
-                  <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+                  <Select
+                    value={formData.role}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, role: value })
+                    }>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -187,7 +225,11 @@ export const Users = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="status">Status</Label>
-                  <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, status: value })
+                    }>
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
@@ -198,10 +240,15 @@ export const Users = () => {
                   </Select>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => handleDialogClose(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleDialogClose(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit">{editingUser ? 'Update' : 'Create'}</Button>
+                  <Button type="submit">
+                    {editingUser ? "Update" : "Create"}
+                  </Button>
                 </div>
               </form>
             </DialogContent>
@@ -237,14 +284,18 @@ export const Users = () => {
                 <TableBody>
                   {filteredUsers.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground">
+                      <TableCell
+                        colSpan={5}
+                        className="text-center text-muted-foreground">
                         No users found
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredUsers.map((user) => (
                       <TableRow key={user.id}>
-                        <TableCell className="font-medium">{user.name}</TableCell>
+                        <TableCell className="font-medium">
+                          {user.name}
+                        </TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>
                           <Badge variant="outline" className="capitalize">
@@ -252,7 +303,10 @@ export const Users = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={user.status === 'active' ? 'default' : 'secondary'}>
+                          <Badge
+                            variant={
+                              user.status === "active" ? "default" : "secondary"
+                            }>
                             {user.status}
                           </Badge>
                         </TableCell>
@@ -261,15 +315,15 @@ export const Users = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(user)}
-                            >
+                              onClick={() => handleEdit(user)}>
                               <Pencil className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => setDeleteDialog({ open: true, userId: user.id })}
-                            >
+                              onClick={() =>
+                                setDeleteDialog({ open: true, userId: user.id })
+                              }>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>
