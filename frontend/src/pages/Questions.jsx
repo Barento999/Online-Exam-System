@@ -77,7 +77,7 @@ export const Questions = () => {
       };
 
       if (editingQuestion) {
-        await questionsApi.update(editingQuestion.id, questionData);
+        await questionsApi.update(editingQuestion._id, questionData);
         toast.success("Question updated successfully");
       } else {
         await questionsApi.create(questionData);
@@ -187,7 +187,7 @@ export const Questions = () => {
                     </SelectTrigger>
                     <SelectContent>
                       {exams.map((exam) => (
-                        <SelectItem key={exam.id} value={exam.id.toString()}>
+                        <SelectItem key={exam._id} value={exam._id.toString()}>
                           {exam.title}
                         </SelectItem>
                       ))}
@@ -311,7 +311,7 @@ export const Questions = () => {
                 <SelectContent>
                   <SelectItem value="all">All Exams</SelectItem>
                   {exams.map((exam) => (
-                    <SelectItem key={exam.id} value={exam.id.toString()}>
+                    <SelectItem key={exam._id} value={exam._id.toString()}>
                       {exam.title}
                     </SelectItem>
                   ))}
@@ -327,9 +327,9 @@ export const Questions = () => {
                 </div>
               ) : (
                 filteredQuestions.map((question, index) => {
-                  const exam = exams.find((e) => e.id === question.examId);
+                  const exam = exams.find((e) => e._id === question.examId);
                   return (
-                    <Card key={question.id}>
+                    <Card key={question._id}>
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex-1">
@@ -373,7 +373,7 @@ export const Questions = () => {
                               onClick={() =>
                                 setDeleteDialog({
                                   open: true,
-                                  questionId: question.id,
+                                  questionId: question._id,
                                 })
                               }>
                               <Trash2 className="h-4 w-4 text-destructive" />

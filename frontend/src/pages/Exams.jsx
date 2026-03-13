@@ -89,7 +89,7 @@ export const Exams = () => {
       };
 
       if (editingExam) {
-        await examsApi.update(editingExam.id, examData);
+        await examsApi.update(editingExam._id, examData);
         toast.success("Exam updated successfully");
       } else {
         await examsApi.create(examData);
@@ -223,8 +223,8 @@ export const Exams = () => {
                         <SelectContent>
                           {courses.map((course) => (
                             <SelectItem
-                              key={course.id}
-                              value={course.id.toString()}>
+                              key={course._id}
+                              value={course._id.toString()}>
                               {course.name}
                             </SelectItem>
                           ))}
@@ -361,7 +361,7 @@ export const Exams = () => {
                     </TableRow>
                   ) : (
                     exams.map((exam) => (
-                      <TableRow key={exam.id}>
+                      <TableRow key={exam._id}>
                         <TableCell className="font-medium">
                           {exam.title}
                         </TableCell>
@@ -380,7 +380,7 @@ export const Exams = () => {
                                   variant="ghost"
                                   size="sm"
                                   onClick={() =>
-                                    navigate(`/exams/${exam.id}/take`)
+                                    navigate(`/exams/${exam._id}/take`)
                                   }>
                                   <Play className="h-4 w-4 mr-1" />
                                   Take Exam
@@ -400,7 +400,7 @@ export const Exams = () => {
                                   onClick={() =>
                                     setDeleteDialog({
                                       open: true,
-                                      examId: exam.id,
+                                      examId: exam._id,
                                     })
                                   }>
                                   <Trash2 className="h-4 w-4 text-destructive" />
