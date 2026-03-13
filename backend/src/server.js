@@ -54,8 +54,6 @@ app.use("/api/courses", courseRoutes);
 app.use("/api/exams", examRoutes);
 app.use("/api/questions", questionRoutes);
 app.use("/api/results", resultRoutes);
-
-// Dashboard routes (moved to resultRoutes for better organization)
 app.use("/api/dashboard", resultRoutes);
 
 // Root route

@@ -14,10 +14,10 @@ const router = express.Router();
 
 router.use(protect);
 
-// Dashboard routes
-router.get("/dashboard/admin", authorize("admin"), getAdminDashboard);
-router.get("/dashboard/teacher", authorize("teacher"), getTeacherDashboard);
-router.get("/dashboard/student", authorize("student"), getStudentDashboard);
+// Dashboard routes (when mounted at /api/dashboard)
+router.get("/admin", authorize("admin"), getAdminDashboard);
+router.get("/teacher", authorize("teacher"), getTeacherDashboard);
+router.get("/student", authorize("student"), getStudentDashboard);
 
 // Result routes
 router.get("/", authorize("admin", "teacher"), getResults);
