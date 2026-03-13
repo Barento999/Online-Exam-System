@@ -188,6 +188,14 @@ export const resultsApi = {
   getById: async (id) => {
     return api.get(`/results/${id}`);
   },
+
+  publishResult: async (id, published) => {
+    return api.put(`/results/${id}/publish`, { published });
+  },
+
+  bulkPublishResults: async (examId, published) => {
+    return api.put(`/results/exam/${examId}/publish`, { published });
+  },
 };
 
 // Enrollments API

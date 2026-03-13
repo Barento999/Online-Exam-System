@@ -20,18 +20,34 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader } from "@/components/common/Loader";
-import { resultsApi } from "@/services/api";
+import { resultsApi, examsApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
-import { Trophy, TrendingUp, Search, Download } from "lucide-react";
+import {
+  Trophy,
+  TrendingUp,
+  Search,
+  Download,
+  Send,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import toast from "react-hot-toast";
 
 export const Results = () => {
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
+  const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
+  const [filterExam, setFilterExam] = useState("all");
+  const [publishDialog, setPublishDialog] = useState({
+    open: false,
+    examId: null,
+    action: null,
+  });
   const { user } = useAuth();
   const location = useLocation();
   const newResult = location.state?.result;
@@ -46,7 +62,7 @@ export const Results = () => {
     if (searchTerm) {
       filtered = filtered.filter(
         (result) =>
-          result.examName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          result.examName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           result.studentName?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
@@ -55,8 +71,12 @@ export const Results = () => {
       filtered = filtered.filter((result) => result.status === filterStatus);
     }
 
+    if (filterExam !== "all") {
+      filtered = filtered.filter((result) => result.examId?._id === filterExam);
+    }
+
     setFilteredResults(filtered);
-  }, [searchTerm, filterStatus, results]);
+  }, [searchTerm, filterStatus, filterExam, results]);
 
   const loadResults = async () => {
     try {
@@ -69,10 +89,44 @@ export const Results = () => {
       const resultsData = response.data.results || response.data;
       setResults(resultsData);
       setFilteredResults(resultsData);
+
+      // Load exams for teachers/admins
+      if (user?.role !== "student") {
+        const examsRes = await examsApi.getAll();
+        setExams(examsRes.data.exams || examsRes.data);
+      }
     } catch (error) {
       toast.error("Failed to load results");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleBulkPublish = async () => {
+    try {
+      await resultsApi.bulkPublishResults(
+        publishDialog.examId,
+        publishDialog.action === "publish",
+      );
+      toast.success(
+        `Results ${publishDialog.action === "publish" ? "published" : "unpublished"} successfully`,
+      );
+      setPublishDialog({ open: false, examId: null, action: null });
+      loadResults();
+    } catch (error) {
+      toast.error("Failed to update results");
+    }
+  };
+
+  const handleTogglePublish = async (resultId, currentStatus) => {
+    try {
+      await resultsApi.publishResult(resultId, !currentStatus);
+      toast.success(
+        `Result ${!currentStatus ? "published" : "unpublished"} successfully`,
+      );
+      loadResults();
+    } catch (error) {
+      toast.error("Failed to update result");
     }
   };
 
@@ -267,6 +321,21 @@ export const Results = () => {
                   className="pl-10"
                 />
               </div>
+              {user?.role !== "student" && (
+                <Select value={filterExam} onValueChange={setFilterExam}>
+                  <SelectTrigger className="w-full md:w-64">
+                    <SelectValue placeholder="Filter by exam" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Exams</SelectItem>
+                    {exams.map((exam) => (
+                      <SelectItem key={exam._id} value={exam._id}>
+                        {exam.title}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               <Select value={filterStatus} onValueChange={setFilterStatus}>
                 <SelectTrigger className="w-full md:w-48">
                   <SelectValue />
@@ -278,6 +347,35 @@ export const Results = () => {
                 </SelectContent>
               </Select>
             </div>
+            {user?.role !== "student" && filterExam !== "all" && (
+              <div className="flex gap-2 mt-4">
+                <Button
+                  onClick={() =>
+                    setPublishDialog({
+                      open: true,
+                      examId: filterExam,
+                      action: "publish",
+                    })
+                  }
+                  size="sm">
+                  <Send className="mr-2 h-4 w-4" />
+                  Publish All Results
+                </Button>
+                <Button
+                  onClick={() =>
+                    setPublishDialog({
+                      open: true,
+                      examId: filterExam,
+                      action: "unpublish",
+                    })
+                  }
+                  variant="outline"
+                  size="sm">
+                  <EyeOff className="mr-2 h-4 w-4" />
+                  Unpublish All Results
+                </Button>
+              </div>
+            )}
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
@@ -290,21 +388,25 @@ export const Results = () => {
                     <TableHead>Total Marks</TableHead>
                     <TableHead>Percentage</TableHead>
                     <TableHead>Status</TableHead>
+                    {user?.role !== "student" && (
+                      <TableHead>Published</TableHead>
+                    )}
                     <TableHead>Submitted At</TableHead>
+                    {user?.role !== "student" && <TableHead>Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {filteredResults.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={user?.role === "student" ? 6 : 7}
+                        colSpan={user?.role === "student" ? 6 : 9}
                         className="text-center text-muted-foreground">
                         No results found
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredResults.map((result) => (
-                      <TableRow key={result.id}>
+                      <TableRow key={result._id}>
                         <TableCell className="font-medium">
                           {result.examName}
                         </TableCell>
@@ -335,9 +437,43 @@ export const Results = () => {
                             {result.status}
                           </Badge>
                         </TableCell>
+                        {user?.role !== "student" && (
+                          <TableCell>
+                            <Badge
+                              variant={
+                                result.published ? "default" : "secondary"
+                              }>
+                              {result.published ? (
+                                <Eye className="h-3 w-3 mr-1" />
+                              ) : (
+                                <EyeOff className="h-3 w-3 mr-1" />
+                              )}
+                              {result.published ? "Published" : "Hidden"}
+                            </Badge>
+                          </TableCell>
+                        )}
                         <TableCell>
                           {new Date(result.submittedAt).toLocaleString()}
                         </TableCell>
+                        {user?.role !== "student" && (
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleTogglePublish(
+                                  result._id,
+                                  result.published,
+                                )
+                              }>
+                              {result.published ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Send className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))
                   )}
@@ -346,6 +482,14 @@ export const Results = () => {
             </div>
           </CardContent>
         </Card>
+
+        <ConfirmDialog
+          open={publishDialog.open}
+          onOpenChange={(open) => setPublishDialog({ ...publishDialog, open })}
+          title={`${publishDialog.action === "publish" ? "Publish" : "Unpublish"} Results`}
+          description={`Are you sure you want to ${publishDialog.action === "publish" ? "publish" : "unpublish"} all results for this exam? ${publishDialog.action === "publish" ? "Students will be able to see their results." : "Students will no longer see their results."}`}
+          onConfirm={handleBulkPublish}
+        />
       </div>
     </Layout>
   );

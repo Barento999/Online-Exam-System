@@ -48,6 +48,10 @@ const resultSchema = new mongoose.Schema(
       enum: ["passed", "failed"],
       required: true,
     },
+    published: {
+      type: Boolean,
+      default: false,
+    },
     submittedAt: {
       type: Date,
       default: Date.now,

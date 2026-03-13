@@ -60,6 +60,12 @@ export const getResultById = async (req, res, next) => {
       throw new Error("Not authorized to view this result");
     }
 
+    // Students can only view published results
+    if (req.user.role === "student" && !result.published) {
+      res.status(403);
+      throw new Error("Result not yet published");
+    }
+
     res.json(result);
   } catch (error) {
     next(error);
@@ -79,7 +85,14 @@ export const getResultsByStudent = async (req, res, next) => {
       throw new Error("Not authorized to view these results");
     }
 
-    const results = await Result.find({ studentId })
+    const query = { studentId };
+
+    // Students can only see published results
+    if (req.user.role === "student") {
+      query.published = true;
+    }
+
+    const results = await Result.find(query)
       .populate("examId", "title courseId totalMarks passingMarks")
       .sort({ submittedAt: -1 });
 
@@ -205,10 +218,10 @@ export const getTeacherDashboard = async (req, res, next) => {
 // @access  Private/Student
 export const getStudentDashboard = async (req, res, next) => {
   try {
-    const results = await Result.find({ studentId: req.user._id }).populate(
-      "examId",
-      "title courseId",
-    );
+    const results = await Result.find({
+      studentId: req.user._id,
+      published: true,
+    }).populate("examId", "title courseId");
 
     const completedExams = results.length;
     const passedExams = results.filter((r) => r.status === "passed").length;
@@ -219,10 +232,18 @@ export const getStudentDashboard = async (req, res, next) => {
 
     // Available exams
     const now = new Date();
+    const Enrollment = (await import("../models/Enrollment.js")).default;
+    const enrollments = await Enrollment.find({
+      studentId: req.user._id,
+      status: "active",
+    });
+    const enrolledCourseIds = enrollments.map((e) => e.courseId);
+
     const allExams = await Exam.find({
       status: "published",
       startTime: { $lte: now },
       endTime: { $gte: now },
+      courseId: { $in: enrolledCourseIds },
     });
 
     const takenExamIds = results.map((r) => r.examId._id.toString());
@@ -236,6 +257,77 @@ export const getStudentDashboard = async (req, res, next) => {
       upcomingExams,
       avgScore: avgScore.toFixed(2),
       recentResults: results.slice(0, 5),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Publish/unpublish result
+// @route   PUT /api/results/:id/publish
+// @access  Private/Admin/Teacher
+export const publishResult = async (req, res, next) => {
+  try {
+    const result = await Result.findById(req.params.id).populate({
+      path: "examId",
+      populate: { path: "courseId" },
+    });
+
+    if (!result) {
+      res.status(404);
+      throw new Error("Result not found");
+    }
+
+    // Teachers can only publish results for their exams
+    if (req.user.role === "teacher") {
+      if (
+        result.examId.courseId.teacherId.toString() !== req.user._id.toString()
+      ) {
+        res.status(403);
+        throw new Error("Not authorized to publish this result");
+      }
+    }
+
+    result.published =
+      req.body.published !== undefined ? req.body.published : !result.published;
+    await result.save();
+
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Bulk publish results for an exam
+// @route   PUT /api/results/exam/:examId/publish
+// @access  Private/Admin/Teacher
+export const bulkPublishResults = async (req, res, next) => {
+  try {
+    const exam = await Exam.findById(req.params.examId).populate("courseId");
+
+    if (!exam) {
+      res.status(404);
+      throw new Error("Exam not found");
+    }
+
+    // Teachers can only publish results for their exams
+    if (req.user.role === "teacher") {
+      if (exam.courseId.teacherId.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error("Not authorized to publish results for this exam");
+      }
+    }
+
+    const published =
+      req.body.published !== undefined ? req.body.published : true;
+
+    await Result.updateMany({ examId: req.params.examId }, { published });
+
+    const count = await Result.countDocuments({ examId: req.params.examId });
+
+    res.json({
+      message: `${count} results ${published ? "published" : "unpublished"} successfully`,
+      count,
     });
   } catch (error) {
     next(error);
