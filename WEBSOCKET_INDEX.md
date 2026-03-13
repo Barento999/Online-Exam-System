@@ -65,13 +65,15 @@ Quick navigation guide for all WebSocket-related documentation.
 
 ### Core Documentation
 
-| File                                                   | Purpose                  | Audience   |
-| ------------------------------------------------------ | ------------------------ | ---------- |
-| [WEBSOCKET_README.md](WEBSOCKET_README.md)             | Quick start and overview | Everyone   |
-| [WEBSOCKET_FEATURES.md](WEBSOCKET_FEATURES.md)         | Complete technical docs  | Developers |
-| [WEBSOCKET_FLOW_DIAGRAM.md](WEBSOCKET_FLOW_DIAGRAM.md) | Visual diagrams          | Developers |
-| [TESTING_WEBSOCKET.md](TESTING_WEBSOCKET.md)           | Testing guide            | QA/Testers |
-| [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)     | Deployment guide         | DevOps     |
+| File                                                     | Purpose                  | Audience   |
+| -------------------------------------------------------- | ------------------------ | ---------- |
+| [WEBSOCKET_README.md](WEBSOCKET_README.md)               | Quick start and overview | Everyone   |
+| [WEBSOCKET_FEATURES.md](WEBSOCKET_FEATURES.md)           | Complete technical docs  | Developers |
+| [WEBSOCKET_FLOW_DIAGRAM.md](WEBSOCKET_FLOW_DIAGRAM.md)   | Visual diagrams          | Developers |
+| [TESTING_WEBSOCKET.md](TESTING_WEBSOCKET.md)             | Testing guide            | QA/Testers |
+| [TESTING_QUICK_REFERENCE.md](TESTING_QUICK_REFERENCE.md) | Quick testing reference  | QA/Testers |
+| [BROWSER_SETUP_GUIDE.md](BROWSER_SETUP_GUIDE.md)         | Multi-user testing setup | QA/Testers |
+| [DEPLOYMENT_CHECKLIST.md](DEPLOYMENT_CHECKLIST.md)       | Deployment guide         | DevOps     |
 
 ### Summary Documents
 

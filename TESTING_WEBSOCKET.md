@@ -2,6 +2,20 @@
 
 Quick guide to test the new real-time exam monitoring features.
 
+## 🚨 IMPORTANT: Testing with Multiple Users
+
+**You CANNOT test with multiple users in regular tabs of the same browser!**
+
+Why? Both tabs share the same `localStorage`, so they'll be logged in as the same user.
+
+**Solution:** Use separate browser contexts:
+
+- ✅ Incognito/Private windows (Recommended)
+- ✅ Different browsers (Chrome, Firefox, Edge)
+- ✅ Different browser profiles
+
+See [TESTING_QUICK_REFERENCE.md](TESTING_QUICK_REFERENCE.md) for detailed instructions.
+
 ## Prerequisites
 
 1. Backend and frontend servers running
@@ -59,13 +73,36 @@ npm run dev
 5. Click the eye icon (👁️) to open monitoring
 6. You should see "Live Monitoring" page with "Connected" badge
 
-#### B. Open Student View
+#### B. Open Student View (IMPORTANT: Use Different Browser Context)
 
-1. Open a new browser window (or incognito)
+**Choose ONE of these methods:**
+
+**Method 1: Incognito/Private Window (Recommended)**
+
+1. Open Incognito window (Ctrl+Shift+N / Cmd+Shift+N)
 2. Go to: http://localhost:5173
 3. Login as student (student@exam.com / student123)
 4. Navigate to "Exams" page
 5. Click "Take Exam" on a published exam
+
+**Method 2: Different Browser**
+
+1. Open different browser (Firefox, Edge, etc.)
+2. Go to: http://localhost:5173
+3. Login as student (student@exam.com / student123)
+4. Navigate to "Exams" page
+5. Click "Take Exam" on a published exam
+
+**Method 3: Different Browser Profile**
+
+1. Create new Chrome profile (Settings → Add Person)
+2. Open in new profile window
+3. Go to: http://localhost:5173
+4. Login as student (student@exam.com / student123)
+5. Navigate to "Exams" page
+6. Click "Take Exam" on a published exam
+
+**Why?** Both tabs share the same localStorage, so you need separate browser contexts to login as different users.
 
 #### C. Observe Real-Time Updates
 
@@ -121,11 +158,26 @@ While taking an exam, students see:
 
 ### 5. Test Multiple Students
 
-1. Open 3+ browser windows/tabs
-2. Login as different students in each
-3. Have all students join the same exam
-4. Teacher monitoring shows all students
-5. Each student's progress updates independently
+**Important: Each student needs a separate browser context**
+
+1. **Student 1**: Normal browser window
+   - Login as student@exam.com
+   - Take exam
+
+2. **Student 2**: Incognito window
+   - Login as different student (or create new student account)
+   - Take same exam
+
+3. **Student 3**: Different browser
+   - Login as another student
+   - Take same exam
+
+4. **Teacher**: Another incognito window or browser
+   - Login as teacher
+   - Monitor the exam
+   - See all 3 students in real-time
+
+**Note:** You can create additional student accounts using the Register page or Admin panel.
 
 ## Expected Behavior
 
