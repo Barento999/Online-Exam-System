@@ -69,11 +69,13 @@ export const TakeExam = () => {
   const handleSubmitExam = async () => {
     setSubmitting(true);
     try {
-      const response = await examsApi.submit(examId, answers);
-      toast.success("Exam submitted successfully!");
-      navigate("/results", { state: { result: response.data } });
+      await examsApi.submit(examId, answers);
+      toast.success(
+        "Exam submitted successfully! Results will be published by your teacher.",
+      );
+      navigate("/exams");
     } catch (error) {
-      toast.error("Failed to submit exam");
+      toast.error(error.response?.data?.message || "Failed to submit exam");
     } finally {
       setSubmitting(false);
       setSubmitDialog(false);

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -205,37 +204,6 @@ export const Results = () => {
             </Button>
           )}
         </div>
-
-        {newResult && (
-          <Card className="border-green-500 bg-green-50 dark:bg-green-900/20">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4">
-                <div className="h-16 w-16 rounded-full bg-green-500 flex items-center justify-center">
-                  <Trophy className="h-8 w-8 text-white" />
-                </div>
-                <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-1">
-                    Exam Submitted Successfully!
-                  </h3>
-                  <p className="text-muted-foreground">
-                    You scored {newResult.score} out of {newResult.totalMarks}{" "}
-                    marks ({newResult.percentage}%)
-                  </p>
-                </div>
-                <div className="text-center">
-                  <p className="text-sm text-muted-foreground">Result</p>
-                  <Badge
-                    variant={
-                      newResult.status === "passed" ? "default" : "destructive"
-                    }
-                    className="mt-1 text-lg px-4 py-1">
-                    {newResult.status === "passed" ? "PASSED" : "FAILED"}
-                  </Badge>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        )}
 
         {user?.role !== "student" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
