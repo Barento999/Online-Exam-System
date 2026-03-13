@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +28,7 @@ import { Plus, Pencil, Trash2, BookOpen, Users } from "lucide-react";
 import toast from "react-hot-toast";
 
 export const Courses = () => {
+  const { user } = useAuth();
   const [courses, setCourses] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -48,13 +50,15 @@ export const Courses = () => {
 
   const loadData = async () => {
     try {
-      const [coursesRes, usersRes] = await Promise.all([
-        coursesApi.getAll(),
-        usersApi.getAll(),
-      ]);
+      const coursesRes = await coursesApi.getAll();
       setCourses(coursesRes.data.courses || coursesRes.data);
-      const usersData = usersRes.data.users || usersRes.data;
-      setTeachers(usersData.filter((u) => u.role === "teacher"));
+
+      // Only load users if admin (teachers can't access this endpoint)
+      if (user?.role === "admin") {
+        const usersRes = await usersApi.getAll();
+        const usersData = usersRes.data.users || usersRes.data;
+        setTeachers(usersData.filter((u) => u.role === "teacher"));
+      }
     } catch (error) {
       toast.error("Failed to load data");
     } finally {
