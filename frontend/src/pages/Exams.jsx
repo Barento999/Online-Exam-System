@@ -1,37 +1,59 @@
-import { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { ConfirmDialog } from '@/components/common/ConfirmDialog';
-import { Loader } from '@/components/common/Loader';
-import { examsApi, coursesApi } from '@/services/api';
-import { useAuth } from '@/context/AuthContext';
-import { Plus, Pencil, Trash2, Play } from 'lucide-react';
-import { useNavigate } from 'react-router';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { Loader } from "@/components/common/Loader";
+import { examsApi, coursesApi } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import { Plus, Pencil, Trash2, Play } from "lucide-react";
+import { useNavigate } from "react-router";
+import toast from "react-hot-toast";
 
 export const Exams = () => {
   const [exams, setExams] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, examId: null });
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    examId: null,
+  });
   const [editingExam, setEditingExam] = useState(null);
   const [formData, setFormData] = useState({
-    title: '',
-    courseId: '',
-    duration: '',
-    totalMarks: '',
-    passingMarks: '',
-    startTime: '',
-    endTime: '',
-    status: 'draft',
+    title: "",
+    courseId: "",
+    duration: "",
+    totalMarks: "",
+    passingMarks: "",
+    startTime: "",
+    endTime: "",
+    status: "draft",
   });
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -46,10 +68,10 @@ export const Exams = () => {
         examsApi.getAll(),
         coursesApi.getAll(),
       ]);
-      setExams(examsRes.data);
-      setCourses(coursesRes.data);
+      setExams(examsRes.data.exams || examsRes.data);
+      setCourses(coursesRes.data.courses || coursesRes.data);
     } catch (error) {
-      toast.error('Failed to load data');
+      toast.error("Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -65,19 +87,19 @@ export const Exams = () => {
         totalMarks: parseInt(formData.totalMarks),
         passingMarks: parseInt(formData.passingMarks),
       };
-      
+
       if (editingExam) {
         await examsApi.update(editingExam.id, examData);
-        toast.success('Exam updated successfully');
+        toast.success("Exam updated successfully");
       } else {
         await examsApi.create(examData);
-        toast.success('Exam created successfully');
+        toast.success("Exam created successfully");
       }
       setIsDialogOpen(false);
       resetForm();
       loadData();
     } catch (error) {
-      toast.error(error.message || 'Operation failed');
+      toast.error(error.message || "Operation failed");
     }
   };
 
@@ -99,24 +121,24 @@ export const Exams = () => {
   const handleDelete = async () => {
     try {
       await examsApi.delete(deleteDialog.examId);
-      toast.success('Exam deleted successfully');
+      toast.success("Exam deleted successfully");
       setDeleteDialog({ open: false, examId: null });
       loadData();
     } catch (error) {
-      toast.error('Failed to delete exam');
+      toast.error("Failed to delete exam");
     }
   };
 
   const resetForm = () => {
     setFormData({
-      title: '',
-      courseId: '',
-      duration: '',
-      totalMarks: '',
-      passingMarks: '',
-      startTime: '',
-      endTime: '',
-      status: 'draft',
+      title: "",
+      courseId: "",
+      duration: "",
+      totalMarks: "",
+      passingMarks: "",
+      startTime: "",
+      endTime: "",
+      status: "draft",
     });
     setEditingExam(null);
   };
@@ -130,11 +152,11 @@ export const Exams = () => {
 
   const getStatusBadge = (status) => {
     const variants = {
-      draft: 'secondary',
-      published: 'default',
-      completed: 'outline',
+      draft: "secondary",
+      published: "default",
+      completed: "outline",
     };
-    return <Badge variant={variants[status] || 'secondary'}>{status}</Badge>;
+    return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
   };
 
   if (loading) {
@@ -147,7 +169,7 @@ export const Exams = () => {
     );
   }
 
-  const canCreateEdit = user?.role === 'admin' || user?.role === 'teacher';
+  const canCreateEdit = user?.role === "admin" || user?.role === "teacher";
 
   return (
     <Layout>
@@ -156,7 +178,9 @@ export const Exams = () => {
           <div>
             <h1 className="text-3xl font-semibold">Exams Management</h1>
             <p className="text-muted-foreground">
-              {user?.role === 'student' ? 'View and take available exams' : 'Manage all exams'}
+              {user?.role === "student"
+                ? "View and take available exams"
+                : "Manage all exams"}
             </p>
           </div>
           {canCreateEdit && (
@@ -169,7 +193,9 @@ export const Exams = () => {
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{editingExam ? 'Edit Exam' : 'Create New Exam'}</DialogTitle>
+                  <DialogTitle>
+                    {editingExam ? "Edit Exam" : "Create New Exam"}
+                  </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
@@ -178,19 +204,27 @@ export const Exams = () => {
                       <Input
                         id="title"
                         value={formData.title}
-                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
                         required
                       />
                     </div>
                     <div className="space-y-2 col-span-2">
                       <Label htmlFor="course">Course</Label>
-                      <Select value={formData.courseId} onValueChange={(value) => setFormData({ ...formData, courseId: value })}>
+                      <Select
+                        value={formData.courseId}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, courseId: value })
+                        }>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a course" />
                         </SelectTrigger>
                         <SelectContent>
                           {courses.map((course) => (
-                            <SelectItem key={course.id} value={course.id.toString()}>
+                            <SelectItem
+                              key={course.id}
+                              value={course.id.toString()}>
                               {course.name}
                             </SelectItem>
                           ))}
@@ -203,7 +237,9 @@ export const Exams = () => {
                         id="duration"
                         type="number"
                         value={formData.duration}
-                        onChange={(e) => setFormData({ ...formData, duration: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, duration: e.target.value })
+                        }
                         required
                       />
                     </div>
@@ -213,7 +249,12 @@ export const Exams = () => {
                         id="totalMarks"
                         type="number"
                         value={formData.totalMarks}
-                        onChange={(e) => setFormData({ ...formData, totalMarks: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            totalMarks: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
@@ -223,13 +264,22 @@ export const Exams = () => {
                         id="passingMarks"
                         type="number"
                         value={formData.passingMarks}
-                        onChange={(e) => setFormData({ ...formData, passingMarks: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            passingMarks: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="status">Status</Label>
-                      <Select value={formData.status} onValueChange={(value) => setFormData({ ...formData, status: value })}>
+                      <Select
+                        value={formData.status}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, status: value })
+                        }>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -246,7 +296,12 @@ export const Exams = () => {
                         id="startTime"
                         type="datetime-local"
                         value={formData.startTime}
-                        onChange={(e) => setFormData({ ...formData, startTime: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            startTime: e.target.value,
+                          })
+                        }
                         required
                       />
                     </div>
@@ -256,16 +311,23 @@ export const Exams = () => {
                         id="endTime"
                         type="datetime-local"
                         value={formData.endTime}
-                        onChange={(e) => setFormData({ ...formData, endTime: e.target.value })}
+                        onChange={(e) =>
+                          setFormData({ ...formData, endTime: e.target.value })
+                        }
                         required
                       />
                     </div>
                   </div>
                   <div className="flex justify-end gap-2">
-                    <Button type="button" variant="outline" onClick={() => handleDialogClose(false)}>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleDialogClose(false)}>
                       Cancel
                     </Button>
-                    <Button type="submit">{editingExam ? 'Update' : 'Create'}</Button>
+                    <Button type="submit">
+                      {editingExam ? "Update" : "Create"}
+                    </Button>
                   </div>
                 </form>
               </DialogContent>
@@ -291,45 +353,56 @@ export const Exams = () => {
                 <TableBody>
                   {exams.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground">
+                      <TableCell
+                        colSpan={7}
+                        className="text-center text-muted-foreground">
                         No exams found
                       </TableCell>
                     </TableRow>
                   ) : (
                     exams.map((exam) => (
                       <TableRow key={exam.id}>
-                        <TableCell className="font-medium">{exam.title}</TableCell>
+                        <TableCell className="font-medium">
+                          {exam.title}
+                        </TableCell>
                         <TableCell>{exam.courseName}</TableCell>
                         <TableCell>{exam.duration} min</TableCell>
                         <TableCell>{exam.totalMarks}</TableCell>
-                        <TableCell>{new Date(exam.startTime).toLocaleDateString()}</TableCell>
+                        <TableCell>
+                          {new Date(exam.startTime).toLocaleDateString()}
+                        </TableCell>
                         <TableCell>{getStatusBadge(exam.status)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            {user?.role === 'student' && exam.status === 'published' && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => navigate(`/exams/${exam.id}/take`)}
-                              >
-                                <Play className="h-4 w-4 mr-1" />
-                                Take Exam
-                              </Button>
-                            )}
+                            {user?.role === "student" &&
+                              exam.status === "published" && (
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() =>
+                                    navigate(`/exams/${exam.id}/take`)
+                                  }>
+                                  <Play className="h-4 w-4 mr-1" />
+                                  Take Exam
+                                </Button>
+                              )}
                             {canCreateEdit && (
                               <>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handleEdit(exam)}
-                                >
+                                  onClick={() => handleEdit(exam)}>
                                   <Pencil className="h-4 w-4" />
                                 </Button>
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => setDeleteDialog({ open: true, examId: exam.id })}
-                                >
+                                  onClick={() =>
+                                    setDeleteDialog({
+                                      open: true,
+                                      examId: exam.id,
+                                    })
+                                  }>
                                   <Trash2 className="h-4 w-4 text-destructive" />
                                 </Button>
                               </>

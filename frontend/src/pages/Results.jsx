@@ -1,24 +1,37 @@
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Loader } from '@/components/common/Loader';
-import { resultsApi } from '@/services/api';
-import { useAuth } from '@/context/AuthContext';
-import { Trophy, TrendingUp, Search, Download } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { useLocation } from "react-router";
+import { Layout } from "@/components/layout/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Loader } from "@/components/common/Loader";
+import { resultsApi } from "@/services/api";
+import { useAuth } from "@/context/AuthContext";
+import { Trophy, TrendingUp, Search, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import toast from "react-hot-toast";
 
 export const Results = () => {
   const [results, setResults] = useState([]);
   const [filteredResults, setFilteredResults] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const { user } = useAuth();
   const location = useLocation();
   const newResult = location.state?.result;
@@ -34,11 +47,11 @@ export const Results = () => {
       filtered = filtered.filter(
         (result) =>
           result.examName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          result.studentName?.toLowerCase().includes(searchTerm.toLowerCase())
+          result.studentName?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
     }
 
-    if (filterStatus !== 'all') {
+    if (filterStatus !== "all") {
       filtered = filtered.filter((result) => result.status === filterStatus);
     }
 
@@ -48,28 +61,30 @@ export const Results = () => {
   const loadResults = async () => {
     try {
       let response;
-      if (user?.role === 'student') {
-        response = await resultsApi.getByStudent(user.id);
+      if (user?.role === "student") {
+        response = await resultsApi.getByStudent(user._id);
       } else {
         response = await resultsApi.getAll();
       }
-      setResults(response.data);
-      setFilteredResults(response.data);
+      const resultsData = response.data.results || response.data;
+      setResults(resultsData);
+      setFilteredResults(resultsData);
     } catch (error) {
-      toast.error('Failed to load results');
+      toast.error("Failed to load results");
     } finally {
       setLoading(false);
     }
   };
 
   const calculateStats = () => {
-    if (results.length === 0) return { avg: 0, highest: 0, lowest: 0, passRate: 0 };
+    if (results.length === 0)
+      return { avg: 0, highest: 0, lowest: 0, passRate: 0 };
 
     const scores = results.map((r) => r.percentage);
     const avg = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
     const highest = Math.max(...scores);
     const lowest = Math.min(...scores);
-    const passed = results.filter((r) => r.status === 'passed').length;
+    const passed = results.filter((r) => r.status === "passed").length;
     const passRate = Math.round((passed / results.length) * 100);
 
     return { avg, highest, lowest, passRate };
@@ -78,25 +93,33 @@ export const Results = () => {
   const stats = calculateStats();
 
   const exportToCSV = () => {
-    const headers = ['Exam Name', 'Student', 'Score', 'Total Marks', 'Percentage', 'Status', 'Submitted At'];
+    const headers = [
+      "Exam Name",
+      "Student",
+      "Score",
+      "Total Marks",
+      "Percentage",
+      "Status",
+      "Submitted At",
+    ];
     const rows = filteredResults.map((r) => [
       r.examName,
-      r.studentName || 'N/A',
+      r.studentName || "N/A",
       r.score,
       r.totalMarks,
-      r.percentage + '%',
+      r.percentage + "%",
       r.status,
       new Date(r.submittedAt).toLocaleString(),
     ]);
 
-    const csv = [headers, ...rows].map((row) => row.join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const csv = [headers, ...rows].map((row) => row.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'exam-results.csv';
+    a.download = "exam-results.csv";
     a.click();
-    toast.success('Results exported successfully');
+    toast.success("Results exported successfully");
   };
 
   if (loading) {
@@ -116,10 +139,12 @@ export const Results = () => {
           <div>
             <h1 className="text-3xl font-semibold">Exam Results</h1>
             <p className="text-muted-foreground">
-              {user?.role === 'student' ? 'View your exam results' : 'View all student results'}
+              {user?.role === "student"
+                ? "View your exam results"
+                : "View all student results"}
             </p>
           </div>
-          {user?.role !== 'student' && (
+          {user?.role !== "student" && (
             <Button onClick={exportToCSV}>
               <Download className="mr-2 h-4 w-4" />
               Export CSV
@@ -135,18 +160,22 @@ export const Results = () => {
                   <Trophy className="h-8 w-8 text-white" />
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-xl font-semibold mb-1">Exam Submitted Successfully!</h3>
+                  <h3 className="text-xl font-semibold mb-1">
+                    Exam Submitted Successfully!
+                  </h3>
                   <p className="text-muted-foreground">
-                    You scored {newResult.score} out of {newResult.totalMarks} marks ({newResult.percentage}%)
+                    You scored {newResult.score} out of {newResult.totalMarks}{" "}
+                    marks ({newResult.percentage}%)
                   </p>
                 </div>
                 <div className="text-center">
                   <p className="text-sm text-muted-foreground">Result</p>
                   <Badge
-                    variant={newResult.status === 'passed' ? 'default' : 'destructive'}
-                    className="mt-1 text-lg px-4 py-1"
-                  >
-                    {newResult.status === 'passed' ? 'PASSED' : 'FAILED'}
+                    variant={
+                      newResult.status === "passed" ? "default" : "destructive"
+                    }
+                    className="mt-1 text-lg px-4 py-1">
+                    {newResult.status === "passed" ? "PASSED" : "FAILED"}
                   </Badge>
                 </div>
               </div>
@@ -154,13 +183,15 @@ export const Results = () => {
           </Card>
         )}
 
-        {user?.role !== 'student' && (
+        {user?.role !== "student" && (
           <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Average Score</p>
+                    <p className="text-sm text-muted-foreground">
+                      Average Score
+                    </p>
                     <p className="text-3xl font-semibold mt-2">{stats.avg}%</p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
@@ -174,8 +205,12 @@ export const Results = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Highest Score</p>
-                    <p className="text-3xl font-semibold mt-2">{stats.highest}%</p>
+                    <p className="text-sm text-muted-foreground">
+                      Highest Score
+                    </p>
+                    <p className="text-3xl font-semibold mt-2">
+                      {stats.highest}%
+                    </p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
                     <Trophy className="h-6 w-6 text-green-600" />
@@ -188,8 +223,12 @@ export const Results = () => {
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-muted-foreground">Lowest Score</p>
-                    <p className="text-3xl font-semibold mt-2">{stats.lowest}%</p>
+                    <p className="text-sm text-muted-foreground">
+                      Lowest Score
+                    </p>
+                    <p className="text-3xl font-semibold mt-2">
+                      {stats.lowest}%
+                    </p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
                     <TrendingUp className="h-6 w-6 text-orange-600" />
@@ -203,7 +242,9 @@ export const Results = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm text-muted-foreground">Pass Rate</p>
-                    <p className="text-3xl font-semibold mt-2">{stats.passRate}%</p>
+                    <p className="text-3xl font-semibold mt-2">
+                      {stats.passRate}%
+                    </p>
                   </div>
                   <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
                     <TrendingUp className="h-6 w-6 text-purple-600" />
@@ -244,7 +285,7 @@ export const Results = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Exam Name</TableHead>
-                    {user?.role !== 'student' && <TableHead>Student</TableHead>}
+                    {user?.role !== "student" && <TableHead>Student</TableHead>}
                     <TableHead>Score</TableHead>
                     <TableHead>Total Marks</TableHead>
                     <TableHead>Percentage</TableHead>
@@ -255,32 +296,48 @@ export const Results = () => {
                 <TableBody>
                   {filteredResults.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={user?.role === 'student' ? 6 : 7} className="text-center text-muted-foreground">
+                      <TableCell
+                        colSpan={user?.role === "student" ? 6 : 7}
+                        className="text-center text-muted-foreground">
                         No results found
                       </TableCell>
                     </TableRow>
                   ) : (
                     filteredResults.map((result) => (
                       <TableRow key={result.id}>
-                        <TableCell className="font-medium">{result.examName}</TableCell>
-                        {user?.role !== 'student' && <TableCell>{result.studentName}</TableCell>}
+                        <TableCell className="font-medium">
+                          {result.examName}
+                        </TableCell>
+                        {user?.role !== "student" && (
+                          <TableCell>{result.studentName}</TableCell>
+                        )}
                         <TableCell>{result.score}</TableCell>
                         <TableCell>{result.totalMarks}</TableCell>
                         <TableCell>
-                          <span className={`font-medium ${
-                            result.percentage >= 70 ? 'text-green-600' :
-                            result.percentage >= 40 ? 'text-orange-600' :
-                            'text-red-600'
-                          }`}>
+                          <span
+                            className={`font-medium ${
+                              result.percentage >= 70
+                                ? "text-green-600"
+                                : result.percentage >= 40
+                                  ? "text-orange-600"
+                                  : "text-red-600"
+                            }`}>
                             {result.percentage}%
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Badge variant={result.status === 'passed' ? 'default' : 'destructive'}>
+                          <Badge
+                            variant={
+                              result.status === "passed"
+                                ? "default"
+                                : "destructive"
+                            }>
                             {result.status}
                           </Badge>
                         </TableCell>
-                        <TableCell>{new Date(result.submittedAt).toLocaleString()}</TableCell>
+                        <TableCell>
+                          {new Date(result.submittedAt).toLocaleString()}
+                        </TableCell>
                       </TableRow>
                     ))
                   )}
