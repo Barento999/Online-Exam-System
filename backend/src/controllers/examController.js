@@ -28,6 +28,14 @@ export const getExams = async (req, res, next) => {
       query.endTime = { $gte: new Date() };
     }
 
+    // Teachers only see exams for their courses
+    if (req.user.role === "teacher") {
+      const Course = (await import("../models/Course.js")).default;
+      const teacherCourses = await Course.find({ teacherId: req.user._id });
+      const courseIds = teacherCourses.map((c) => c._id);
+      query.courseId = { $in: courseIds };
+    }
+
     const exams = await Exam.find(query)
       .populate("courseId", "name description")
       .limit(limit)
@@ -54,12 +62,20 @@ export const getExamById = async (req, res, next) => {
   try {
     const exam = await Exam.findById(req.params.id).populate(
       "courseId",
-      "name description",
+      "name description teacherId",
     );
 
     if (!exam) {
       res.status(404);
       throw new Error("Exam not found");
+    }
+
+    // Teachers can only view exams for their courses
+    if (req.user.role === "teacher") {
+      if (exam.courseId.teacherId.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error("Not authorized to view this exam");
+      }
     }
 
     res.json(exam);
@@ -84,6 +100,22 @@ export const createExam = async (req, res, next) => {
       status,
     } = req.body;
 
+    // Teachers can only create exams for their own courses
+    if (req.user.role === "teacher") {
+      const Course = (await import("../models/Course.js")).default;
+      const course = await Course.findById(courseId);
+
+      if (!course) {
+        res.status(404);
+        throw new Error("Course not found");
+      }
+
+      if (course.teacherId.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error("Not authorized to create exam for this course");
+      }
+    }
+
     const exam = await Exam.create({
       title,
       courseId,
@@ -107,11 +139,19 @@ export const createExam = async (req, res, next) => {
 // @access  Private/Admin/Teacher
 export const updateExam = async (req, res, next) => {
   try {
-    const exam = await Exam.findById(req.params.id);
+    const exam = await Exam.findById(req.params.id).populate("courseId");
 
     if (!exam) {
       res.status(404);
       throw new Error("Exam not found");
+    }
+
+    // Teachers can only update exams for their own courses
+    if (req.user.role === "teacher") {
+      if (exam.courseId.teacherId.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error("Not authorized to update this exam");
+      }
     }
 
     const {
@@ -146,11 +186,19 @@ export const updateExam = async (req, res, next) => {
 // @access  Private/Admin/Teacher
 export const deleteExam = async (req, res, next) => {
   try {
-    const exam = await Exam.findById(req.params.id);
+    const exam = await Exam.findById(req.params.id).populate("courseId");
 
     if (!exam) {
       res.status(404);
       throw new Error("Exam not found");
+    }
+
+    // Teachers can only delete exams for their own courses
+    if (req.user.role === "teacher") {
+      if (exam.courseId.teacherId.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error("Not authorized to delete this exam");
+      }
     }
 
     // Delete all questions associated with this exam

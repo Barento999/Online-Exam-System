@@ -40,15 +40,20 @@ const bulkQuestionValidation = [
 ];
 
 router.use(protect);
-router.use(authorize("admin", "teacher"));
 
 router
   .route("/")
-  .get(getQuestions)
-  .post(questionValidation, validateRequest, createQuestion);
+  .get(getQuestions) // All authenticated users can get questions (with restrictions in controller)
+  .post(
+    authorize("admin", "teacher"),
+    questionValidation,
+    validateRequest,
+    createQuestion,
+  );
 
 router.post(
   "/bulk",
+  authorize("admin", "teacher"),
   bulkQuestionValidation,
   validateRequest,
   bulkCreateQuestions,
@@ -57,7 +62,7 @@ router.post(
 router
   .route("/:id")
   .get(getQuestionById)
-  .put(updateQuestion)
-  .delete(deleteQuestion);
+  .put(authorize("admin", "teacher"), updateQuestion)
+  .delete(authorize("admin", "teacher"), deleteQuestion);
 
 export default router;
