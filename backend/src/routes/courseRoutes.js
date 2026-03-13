@@ -12,14 +12,33 @@ import { validateRequest } from "../middlewares/validateRequest.js";
 
 const router = express.Router();
 
-// Validation rules
-const courseValidation = [
+// Validation rules for creating courses
+const createCourseValidation = [
   body("name").trim().notEmpty().withMessage("Course name is required"),
   body("description")
     .trim()
     .notEmpty()
     .withMessage("Course description is required"),
-  body("teacherId").notEmpty().withMessage("Teacher ID is required"),
+  body("teacherId").optional(), // Optional - teachers auto-assigned to themselves
+];
+
+// Validation rules for updating courses (admin can change teacherId)
+const updateCourseValidation = [
+  body("name")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Course name cannot be empty"),
+  body("description")
+    .optional()
+    .trim()
+    .notEmpty()
+    .withMessage("Course description cannot be empty"),
+  body("teacherId").optional(),
+  body("status")
+    .optional()
+    .isIn(["active", "inactive"])
+    .withMessage("Invalid status"),
 ];
 
 router.use(protect);
@@ -29,7 +48,7 @@ router
   .get(getCourses)
   .post(
     authorize("admin", "teacher"),
-    courseValidation,
+    createCourseValidation,
     validateRequest,
     createCourse,
   );
@@ -37,7 +56,12 @@ router
 router
   .route("/:id")
   .get(getCourseById)
-  .put(authorize("admin", "teacher"), updateCourse)
+  .put(
+    authorize("admin", "teacher"),
+    updateCourseValidation,
+    validateRequest,
+    updateCourse,
+  )
   .delete(authorize("admin"), deleteCourse);
 
 export default router;
