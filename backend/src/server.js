@@ -58,6 +58,26 @@ app.use("/api/results", resultRoutes);
 // Dashboard routes (moved to resultRoutes for better organization)
 app.use("/api/dashboard", resultRoutes);
 
+// Root route
+app.get("/", (req, res) => {
+  res.json({
+    message: "Online Exam System API",
+    version: "1.0.0",
+    status: "running",
+    endpoints: {
+      health: "/api/health",
+      auth: "/api/auth",
+      users: "/api/users",
+      courses: "/api/courses",
+      exams: "/api/exams",
+      questions: "/api/questions",
+      results: "/api/results",
+      dashboard: "/api/dashboard",
+    },
+    documentation: "See README.md for complete API documentation",
+  });
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({
