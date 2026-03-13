@@ -31,7 +31,7 @@ import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { examsApi, coursesApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
-import { Plus, Pencil, Trash2, Play } from "lucide-react";
+import { Plus, Pencil, Trash2, Play, Eye } from "lucide-react";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 
@@ -391,6 +391,17 @@ export const Exams = () => {
                               )}
                             {canCreateEdit && (
                               <>
+                                {exam.status === "published" && (
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() =>
+                                      navigate(`/exams/${exam._id}/monitor`)
+                                    }
+                                    title="Monitor Live">
+                                    <Eye className="h-4 w-4 text-primary" />
+                                  </Button>
+                                )}
                                 <Button
                                   variant="ghost"
                                   size="sm"

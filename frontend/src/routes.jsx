@@ -17,6 +17,7 @@ import { Courses } from "@/pages/Courses";
 import { Exams } from "@/pages/Exams";
 import { Questions } from "@/pages/Questions";
 import { TakeExam } from "@/pages/TakeExam";
+import { ExamMonitoring } from "@/pages/ExamMonitoring";
 import { Results } from "@/pages/Results";
 import { Enrollments } from "@/pages/Enrollments";
 import { Profile } from "@/pages/Profile";
@@ -110,6 +111,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute allowedRoles={["student"]}>
         <TakeExam />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/exams/:examId/monitor",
+    element: (
+      <ProtectedRoute allowedRoles={["admin", "teacher"]}>
+        <ExamMonitoring />
       </ProtectedRoute>
     ),
   },

@@ -1,35 +1,38 @@
 import { RouterProvider } from "react-router";
 import { AuthProvider } from "./context/AuthContext.jsx";
+import { SocketProvider } from "./context/SocketContext.jsx";
 import { Toaster } from "react-hot-toast";
 import { router } from "./routes.jsx";
 
 export default function App() {
   return (
     <AuthProvider>
-      <RouterProvider router={router} />
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: "var(--card)",
-            color: "var(--card-foreground)",
-            border: "1px solid var(--border)",
-          },
-          success: {
-            iconTheme: {
-              primary: "#22C55E",
-              secondary: "#FFFFFF",
+      <SocketProvider>
+        <RouterProvider router={router} />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 3000,
+            style: {
+              background: "var(--card)",
+              color: "var(--card-foreground)",
+              border: "1px solid var(--border)",
             },
-          },
-          error: {
-            iconTheme: {
-              primary: "#EF4444",
-              secondary: "#FFFFFF",
+            success: {
+              iconTheme: {
+                primary: "#22C55E",
+                secondary: "#FFFFFF",
+              },
             },
-          },
-        }}
-      />
+            error: {
+              iconTheme: {
+                primary: "#EF4444",
+                secondary: "#FFFFFF",
+              },
+            },
+          }}
+        />
+      </SocketProvider>
     </AuthProvider>
   );
 }

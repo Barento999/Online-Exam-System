@@ -91,6 +91,7 @@ VITE_API_URL=http://localhost:3000/api
 - Question bank management
 - View student results
 - Grade submissions
+- **Live exam monitoring** - Monitor students taking exams in real-time
 
 ### Student Dashboard
 
@@ -98,6 +99,7 @@ VITE_API_URL=http://localhost:3000/api
 - Take available exams
 - View results and grades
 - Track progress
+- **Live connection status** - See real-time connection during exams
 
 ## Tech Stack
 
@@ -116,6 +118,14 @@ VITE_API_URL=http://localhost:3000/api
 - JWT-based authentication
 - Role-based access control (RBAC)
 - Protected routes
+
+### Real-Time Features
+
+- WebSocket-based live exam monitoring
+- Real-time student progress tracking
+- Live activity feed for teachers/admins
+- Connection status indicators
+- See [WEBSOCKET_FEATURES.md](WEBSOCKET_FEATURES.md) for details
 
 ## Development
 

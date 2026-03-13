@@ -3,8 +3,10 @@ import dotenv from "dotenv";
 import cors from "cors";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
+import { createServer } from "http";
 import connectDB from "./config/database.js";
 import { errorHandler, notFound } from "./middlewares/errorHandler.js";
+import { initializeSocket } from "./config/socket.js";
 
 // Load env vars
 dotenv.config();
@@ -13,6 +15,7 @@ dotenv.config();
 connectDB();
 
 const app = express();
+const httpServer = createServer(app);
 
 // Body parser middleware
 app.use(express.json());
@@ -94,8 +97,12 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 3000;
 
-app.listen(PORT, () => {
+// Initialize Socket.IO
+initializeSocket(httpServer);
+
+httpServer.listen(PORT, () => {
   console.log(`Server running in ${process.env.NODE_ENV} mode on port ${PORT}`);
+  console.log(`WebSocket server initialized`);
 });
 
 export default app;

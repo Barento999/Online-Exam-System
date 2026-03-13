@@ -8,7 +8,15 @@ import { Progress } from "@/components/ui/progress";
 import { Loader } from "@/components/common/Loader";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { examsApi, questionsApi } from "@/services/api";
-import { Clock, ChevronLeft, ChevronRight, Flag } from "lucide-react";
+import { useExamSession } from "@/hooks/useExamSession";
+import {
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  Flag,
+  Wifi,
+  WifiOff,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 export const TakeExam = () => {
@@ -22,6 +30,13 @@ export const TakeExam = () => {
   const [loading, setLoading] = useState(true);
   const [submitDialog, setSubmitDialog] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const {
+    updateProgress,
+    submitExam: notifySubmit,
+    connected,
+  } = useExamSession(examId, user._id);
 
   useEffect(() => {
     loadExamData();
@@ -70,6 +85,7 @@ export const TakeExam = () => {
     setSubmitting(true);
     try {
       await examsApi.submit(examId, answers);
+      notifySubmit(); // Notify via WebSocket
       toast.success(
         "Exam submitted successfully! Results will be published by your teacher.",
       );
@@ -87,6 +103,13 @@ export const TakeExam = () => {
       ...answers,
       [questionId]: answer,
     });
+
+    // Update progress via WebSocket
+    const newAnsweredCount = Object.keys({
+      ...answers,
+      [questionId]: answer,
+    }).length;
+    updateProgress(currentQuestionIndex, newAnsweredCount);
   };
 
   const formatTime = (seconds) => {
@@ -121,6 +144,16 @@ export const TakeExam = () => {
               </p>
             </div>
             <div className="flex items-center gap-6">
+              <div className="flex items-center gap-2">
+                {connected ? (
+                  <Wifi className="h-4 w-4 text-green-500" />
+                ) : (
+                  <WifiOff className="h-4 w-4 text-destructive" />
+                )}
+                <span className="text-xs text-muted-foreground">
+                  {connected ? "Live" : "Offline"}
+                </span>
+              </div>
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
                   Questions Answered
