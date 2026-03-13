@@ -43,8 +43,16 @@ import { useAuth } from "@/context/AuthContext";
 - **components/common**: Shared components like dialogs and loaders
 - **pages**: Each file represents a route in the application
 - **context**: React Context for global state (authentication, theme, etc.)
-- **services**: API calls and external service integrations
+- **services**: API calls and external service integrations (no mock data)
 - **lib**: Utility functions like `cn()` for className merging
+
+## API Integration
+
+All mock data has been removed. The application now connects to a real backend API.
+
+- Configure your backend URL in `.env` file
+- See `API_INTEGRATION.md` for complete API documentation
+- All API calls use axios with automatic token management
 
 ## Configuration
 
