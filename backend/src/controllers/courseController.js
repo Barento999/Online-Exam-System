@@ -10,7 +10,17 @@ export const getCourses = async (req, res, next) => {
     const skip = (page - 1) * limit;
 
     const query = {};
-    if (req.query.teacherId) query.teacherId = req.query.teacherId;
+
+    // Teachers can only see their own courses
+    if (req.user.role === "teacher") {
+      query.teacherId = req.user._id;
+    }
+
+    // Admins can filter by teacherId if provided
+    if (req.user.role === "admin" && req.query.teacherId) {
+      query.teacherId = req.query.teacherId;
+    }
+
     if (req.query.status) query.status = req.query.status;
     if (req.query.search) {
       query.$or = [
@@ -53,6 +63,15 @@ export const getCourseById = async (req, res, next) => {
       throw new Error("Course not found");
     }
 
+    // Teachers can only view their own courses
+    if (
+      req.user.role === "teacher" &&
+      course.teacherId._id.toString() !== req.user._id.toString()
+    ) {
+      res.status(403);
+      throw new Error("Not authorized to view this course");
+    }
+
     res.json(course);
   } catch (error) {
     next(error);
@@ -66,10 +85,16 @@ export const createCourse = async (req, res, next) => {
   try {
     const { name, description, teacherId } = req.body;
 
+    // Teachers can only create courses for themselves
+    let assignedTeacherId = teacherId;
+    if (req.user.role === "teacher") {
+      assignedTeacherId = req.user._id;
+    }
+
     const course = await Course.create({
       name,
       description,
-      teacherId,
+      teacherId: assignedTeacherId,
     });
 
     res.status(201).json(course);
@@ -90,11 +115,25 @@ export const updateCourse = async (req, res, next) => {
       throw new Error("Course not found");
     }
 
+    // Teachers can only update their own courses
+    if (
+      req.user.role === "teacher" &&
+      course.teacherId.toString() !== req.user._id.toString()
+    ) {
+      res.status(403);
+      throw new Error("Not authorized to update this course");
+    }
+
     const { name, description, teacherId, status } = req.body;
 
     course.name = name || course.name;
     course.description = description || course.description;
-    course.teacherId = teacherId || course.teacherId;
+
+    // Only admins can change the teacher assignment
+    if (req.user.role === "admin") {
+      course.teacherId = teacherId || course.teacherId;
+    }
+
     course.status = status || course.status;
 
     const updatedCourse = await course.save();
