@@ -66,7 +66,7 @@ export const Courses = () => {
     e.preventDefault();
     try {
       if (editingCourse) {
-        await coursesApi.update(editingCourse.id, formData);
+        await coursesApi.update(editingCourse._id, formData);
         toast.success("Course updated successfully");
       } else {
         await coursesApi.create(formData);
@@ -186,8 +186,8 @@ export const Courses = () => {
                     <SelectContent>
                       {teachers.map((teacher) => (
                         <SelectItem
-                          key={teacher.id}
-                          value={teacher.id.toString()}>
+                          key={teacher._id}
+                          value={teacher._id.toString()}>
                           {teacher.name}
                         </SelectItem>
                       ))}
@@ -219,7 +219,7 @@ export const Courses = () => {
             </Card>
           ) : (
             courses.map((course) => (
-              <Card key={course.id}>
+              <Card key={course._id}>
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2">
@@ -241,7 +241,7 @@ export const Courses = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() =>
-                          setDeleteDialog({ open: true, courseId: course.id })
+                          setDeleteDialog({ open: true, courseId: course._id })
                         }>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
