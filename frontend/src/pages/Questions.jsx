@@ -47,6 +47,8 @@ export const Questions = () => {
     correctAnswer: "A",
     marks: "",
   });
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     loadData();
@@ -70,17 +72,25 @@ export const Questions = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const questionData = {
-        ...formData,
-        examId: parseInt(formData.examId),
-        marks: parseInt(formData.marks),
-      };
+      const formDataToSend = new FormData();
+      formDataToSend.append("examId", formData.examId);
+      formDataToSend.append("questionText", formData.questionText);
+      formDataToSend.append("optionA", formData.optionA);
+      formDataToSend.append("optionB", formData.optionB);
+      formDataToSend.append("optionC", formData.optionC);
+      formDataToSend.append("optionD", formData.optionD);
+      formDataToSend.append("correctAnswer", formData.correctAnswer);
+      formDataToSend.append("marks", formData.marks);
+
+      if (imageFile) {
+        formDataToSend.append("image", imageFile);
+      }
 
       if (editingQuestion) {
-        await questionsApi.update(editingQuestion._id, questionData);
+        await questionsApi.update(editingQuestion._id, formDataToSend);
         toast.success("Question updated successfully");
       } else {
-        await questionsApi.create(questionData);
+        await questionsApi.create(formDataToSend);
         toast.success("Question created successfully");
       }
       setIsDialogOpen(false);
@@ -103,6 +113,11 @@ export const Questions = () => {
       correctAnswer: question.correctAnswer,
       marks: question.marks.toString(),
     });
+    if (question.imageUrl) {
+      setImagePreview(
+        `${import.meta.env.VITE_API_URL.replace("/api", "")}${question.imageUrl}`,
+      );
+    }
     setIsDialogOpen(true);
   };
 
@@ -129,6 +144,25 @@ export const Questions = () => {
       marks: "",
     });
     setEditingQuestion(null);
+    setImageFile(null);
+    setImagePreview(null);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size must be less than 5MB");
+        return;
+      }
+      setImageFile(file);
+      setImagePreview(URL.createObjectURL(file));
+    }
+  };
+
+  const removeImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
   };
 
   const handleDialogClose = (open) => {
@@ -206,6 +240,39 @@ export const Questions = () => {
                     rows={3}
                   />
                 </div>
+
+                {/* Image Upload */}
+                <div className="space-y-2">
+                  <Label htmlFor="image">Question Image (Optional)</Label>
+                  <Input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="cursor-pointer"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Max size: 5MB. Supported: JPG, PNG, GIF, WebP
+                  </p>
+                  {imagePreview && (
+                    <div className="relative mt-2">
+                      <img
+                        src={imagePreview}
+                        alt="Preview"
+                        className="max-w-full h-auto max-h-48 rounded border"
+                      />
+                      <Button
+                        type="button"
+                        variant="destructive"
+                        size="sm"
+                        className="absolute top-2 right-2"
+                        onClick={removeImage}>
+                        Remove
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="optionA">Option A</Label>

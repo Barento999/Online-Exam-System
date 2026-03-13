@@ -155,11 +155,19 @@ export const questionsApi = {
   },
 
   create: async (questionData) => {
-    return api.post("/questions", questionData);
+    return api.post("/questions", questionData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 
   update: async (id, questionData) => {
-    return api.put(`/questions/${id}`, questionData);
+    return api.put(`/questions/${id}`, questionData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
   },
 
   delete: async (id) => {

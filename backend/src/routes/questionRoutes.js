@@ -10,6 +10,7 @@ import {
 } from "../controllers/questionController.js";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
 import { validateRequest } from "../middlewares/validateRequest.js";
+import { upload } from "../config/upload.js";
 
 const router = express.Router();
 
@@ -46,6 +47,7 @@ router
   .get(getQuestions) // All authenticated users can get questions (with restrictions in controller)
   .post(
     authorize("admin", "teacher"),
+    upload.single("image"),
     questionValidation,
     validateRequest,
     createQuestion,
@@ -62,7 +64,7 @@ router.post(
 router
   .route("/:id")
   .get(getQuestionById)
-  .put(authorize("admin", "teacher"), updateQuestion)
+  .put(authorize("admin", "teacher"), upload.single("image"), updateQuestion)
   .delete(authorize("admin", "teacher"), deleteQuestion);
 
 export default router;

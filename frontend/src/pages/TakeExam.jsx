@@ -228,13 +228,22 @@ export const TakeExam = () => {
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between">
-                  <div>
+                  <div className="flex-1">
                     <p className="text-sm text-muted-foreground mb-2">
                       Question {currentQuestionIndex + 1} of {questions.length}
                     </p>
                     <CardTitle className="text-xl">
                       {currentQuestion?.questionText}
                     </CardTitle>
+                    {currentQuestion?.imageUrl && (
+                      <div className="mt-4">
+                        <img
+                          src={`${import.meta.env.VITE_API_URL.replace("/api", "")}${currentQuestion.imageUrl}`}
+                          alt="Question"
+                          className="max-w-full h-auto max-h-96 rounded border"
+                        />
+                      </div>
+                    )}
                   </div>
                   <div className="flex items-center gap-2 px-3 py-1 bg-primary/10 rounded-lg">
                     <Flag className="h-4 w-4 text-primary" />

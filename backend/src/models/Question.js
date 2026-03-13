@@ -11,6 +11,10 @@ const questionSchema = new mongoose.Schema(
       type: String,
       required: [true, "Please provide question text"],
     },
+    imageUrl: {
+      type: String,
+      default: null,
+    },
     optionA: {
       type: String,
       required: [true, "Please provide option A"],

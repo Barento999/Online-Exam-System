@@ -4,9 +4,14 @@ import cors from "cors";
 import morgan from "morgan";
 import rateLimit from "express-rate-limit";
 import { createServer } from "http";
+import path from "path";
+import { fileURLToPath } from "url";
 import connectDB from "./config/database.js";
 import { errorHandler, notFound } from "./middlewares/errorHandler.js";
 import { initializeSocket } from "./config/socket.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Load env vars
 dotenv.config();
@@ -20,6 +25,9 @@ const httpServer = createServer(app);
 // Body parser middleware
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Serve static files (uploaded images)
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 // CORS
 app.use(

@@ -89,6 +89,7 @@ VITE_API_URL=http://localhost:3000/api
 - Create and manage courses
 - Create and manage exams
 - Question bank management
+- **Add images to questions** - Visual questions with image support
 - View student results
 - Grade submissions
 - **Live exam monitoring** - Monitor students taking exams in real-time

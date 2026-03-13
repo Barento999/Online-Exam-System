@@ -1,4 +1,5 @@
 import Question from "../models/Question.js";
+import { deleteFile } from "../config/upload.js";
 
 // @desc    Get all questions
 // @route   GET /api/questions
@@ -130,7 +131,7 @@ export const createQuestion = async (req, res, next) => {
       }
     }
 
-    const question = await Question.create({
+    const questionData = {
       examId,
       questionText,
       optionA,
@@ -139,7 +140,14 @@ export const createQuestion = async (req, res, next) => {
       optionD,
       correctAnswer,
       marks,
-    });
+    };
+
+    // Add image URL if file was uploaded
+    if (req.file) {
+      questionData.imageUrl = `/uploads/questions/${req.file.filename}`;
+    }
+
+    const question = await Question.create(questionData);
 
     // Update exam questionsCount
     const Exam = (await import("../models/Exam.js")).default;
@@ -151,6 +159,10 @@ export const createQuestion = async (req, res, next) => {
 
     res.status(201).json(question);
   } catch (error) {
+    // Delete uploaded file if question creation fails
+    if (req.file) {
+      deleteFile(req.file.filename);
+    }
     next(error);
   }
 };
@@ -251,9 +263,23 @@ export const updateQuestion = async (req, res, next) => {
     question.correctAnswer = correctAnswer || question.correctAnswer;
     question.marks = marks !== undefined ? marks : question.marks;
 
+    // Handle image upload
+    if (req.file) {
+      // Delete old image if exists
+      if (question.imageUrl) {
+        const oldFilename = question.imageUrl.split("/").pop();
+        deleteFile(oldFilename);
+      }
+      question.imageUrl = `/uploads/questions/${req.file.filename}`;
+    }
+
     const updatedQuestion = await question.save();
     res.json(updatedQuestion);
   } catch (error) {
+    // Delete uploaded file if update fails
+    if (req.file) {
+      deleteFile(req.file.filename);
+    }
     next(error);
   }
 };
@@ -282,6 +308,12 @@ export const deleteQuestion = async (req, res, next) => {
         res.status(403);
         throw new Error("Not authorized to delete this question");
       }
+    }
+
+    // Delete image file if exists
+    if (question.imageUrl) {
+      const filename = question.imageUrl.split("/").pop();
+      deleteFile(filename);
     }
 
     const examId = question.examId._id;
