@@ -1,21 +1,33 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router';
-import { useAuth } from '@/context/AuthContext';
-import { authApi } from '@/services/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { GraduationCap, Loader2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router";
+import { useAuth } from "@/context/AuthContext";
+import { authApi } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { GraduationCap, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export const Register = () => {
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    password: '',
-    role: 'student',
+    name: "",
+    email: "",
+    password: "",
+    role: "student",
   });
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
@@ -25,20 +37,20 @@ export const Register = () => {
   const validate = () => {
     const newErrors = {};
     if (!formData.name) {
-      newErrors.name = 'Name is required';
+      newErrors.name = "Name is required";
     }
     if (!formData.email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
     if (!formData.password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     }
     if (!formData.role) {
-      newErrors.role = 'Role is required';
+      newErrors.role = "Role is required";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -46,17 +58,25 @@ export const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validate()) return;
 
     setLoading(true);
     try {
       const response = await authApi.register(formData);
-      login(response.data.user);
-      toast.success('Registration successful!');
-      navigate('/dashboard');
+      const userData = response.data;
+
+      // Store token
+      localStorage.setItem("token", userData.token);
+
+      // Store user data (without token)
+      const { token, ...userWithoutToken } = userData;
+      login(userWithoutToken);
+
+      toast.success("Registration successful!");
+      navigate("/dashboard");
     } catch (error) {
-      toast.error(error.message || 'Registration failed');
+      toast.error(error.response?.data?.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -94,7 +114,7 @@ export const Register = () => {
                 placeholder="John Doe"
                 value={formData.name}
                 onChange={handleChange}
-                className={errors.name ? 'border-destructive' : ''}
+                className={errors.name ? "border-destructive" : ""}
               />
               {errors.name && (
                 <p className="text-sm text-destructive">{errors.name}</p>
@@ -110,7 +130,7 @@ export const Register = () => {
                 placeholder="your@email.com"
                 value={formData.email}
                 onChange={handleChange}
-                className={errors.email ? 'border-destructive' : ''}
+                className={errors.email ? "border-destructive" : ""}
               />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email}</p>
@@ -126,7 +146,7 @@ export const Register = () => {
                 placeholder="••••••••"
                 value={formData.password}
                 onChange={handleChange}
-                className={errors.password ? 'border-destructive' : ''}
+                className={errors.password ? "border-destructive" : ""}
               />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password}</p>
@@ -139,9 +159,9 @@ export const Register = () => {
                 value={formData.role}
                 onValueChange={(value) =>
                   setFormData({ ...formData, role: value })
-                }
-              >
-                <SelectTrigger className={errors.role ? 'border-destructive' : ''}>
+                }>
+                <SelectTrigger
+                  className={errors.role ? "border-destructive" : ""}>
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
@@ -161,13 +181,13 @@ export const Register = () => {
                   Creating account...
                 </>
               ) : (
-                'Create Account'
+                "Create Account"
               )}
             </Button>
           </form>
 
           <div className="mt-4 text-center text-sm">
-            Already have an account?{' '}
+            Already have an account?{" "}
             <Link to="/login" className="text-primary hover:underline">
               Sign in
             </Link>

@@ -1,17 +1,23 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router';
-import { useAuth } from '@/context/AuthContext';
-import { authApi } from '@/services/api';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { GraduationCap, Loader2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router";
+import { useAuth } from "@/context/AuthContext";
+import { authApi } from "@/services/api";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { GraduationCap, Loader2 } from "lucide-react";
+import toast from "react-hot-toast";
 
 export const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const { login } = useAuth();
@@ -20,14 +26,14 @@ export const Login = () => {
   const validate = () => {
     const newErrors = {};
     if (!email) {
-      newErrors.email = 'Email is required';
+      newErrors.email = "Email is required";
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = 'Email is invalid';
+      newErrors.email = "Email is invalid";
     }
     if (!password) {
-      newErrors.password = 'Password is required';
+      newErrors.password = "Password is required";
     } else if (password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+      newErrors.password = "Password must be at least 6 characters";
     }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -35,17 +41,25 @@ export const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validate()) return;
 
     setLoading(true);
     try {
       const response = await authApi.login(email, password);
-      login(response.data.user);
-      toast.success('Login successful!');
-      navigate('/dashboard');
+      const userData = response.data;
+
+      // Store token
+      localStorage.setItem("token", userData.token);
+
+      // Store user data (without token)
+      const { token, ...userWithoutToken } = userData;
+      login(userWithoutToken);
+
+      toast.success("Login successful!");
+      navigate("/dashboard");
     } catch (error) {
-      toast.error(error.message || 'Invalid credentials');
+      toast.error(error.response?.data?.message || "Invalid credentials");
     } finally {
       setLoading(false);
     }
@@ -53,17 +67,17 @@ export const Login = () => {
 
   const fillDemoCredentials = (role) => {
     switch (role) {
-      case 'admin':
-        setEmail('admin@exam.com');
-        setPassword('admin123');
+      case "admin":
+        setEmail("admin@exam.com");
+        setPassword("admin123");
         break;
-      case 'teacher':
-        setEmail('teacher@exam.com');
-        setPassword('teacher123');
+      case "teacher":
+        setEmail("teacher@exam.com");
+        setPassword("teacher123");
         break;
-      case 'student':
-        setEmail('student@exam.com');
-        setPassword('student123');
+      case "student":
+        setEmail("student@exam.com");
+        setPassword("student123");
         break;
     }
   };
@@ -78,9 +92,7 @@ export const Login = () => {
             </div>
           </div>
           <CardTitle className="text-2xl">Welcome Back</CardTitle>
-          <CardDescription>
-            Sign in to your account to continue
-          </CardDescription>
+          <CardDescription>Sign in to your account to continue</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -92,7 +104,7 @@ export const Login = () => {
                 placeholder="your@email.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={errors.email ? 'border-destructive' : ''}
+                className={errors.email ? "border-destructive" : ""}
               />
               {errors.email && (
                 <p className="text-sm text-destructive">{errors.email}</p>
@@ -107,7 +119,7 @@ export const Login = () => {
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={errors.password ? 'border-destructive' : ''}
+                className={errors.password ? "border-destructive" : ""}
               />
               {errors.password && (
                 <p className="text-sm text-destructive">{errors.password}</p>
@@ -121,7 +133,7 @@ export const Login = () => {
                   Signing in...
                 </>
               ) : (
-                'Sign In'
+                "Sign In"
               )}
             </Button>
           </form>
@@ -135,31 +147,28 @@ export const Login = () => {
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => fillDemoCredentials('admin')}
-              >
+                onClick={() => fillDemoCredentials("admin")}>
                 Admin
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => fillDemoCredentials('teacher')}
-              >
+                onClick={() => fillDemoCredentials("teacher")}>
                 Teacher
               </Button>
               <Button
                 type="button"
                 variant="outline"
                 size="sm"
-                onClick={() => fillDemoCredentials('student')}
-              >
+                onClick={() => fillDemoCredentials("student")}>
                 Student
               </Button>
             </div>
           </div>
 
           <div className="mt-4 text-center text-sm">
-            Don't have an account?{' '}
+            Don't have an account?{" "}
             <Link to="/register" className="text-primary hover:underline">
               Register
             </Link>
