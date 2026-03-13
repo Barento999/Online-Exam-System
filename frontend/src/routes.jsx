@@ -18,6 +18,7 @@ import { Exams } from "@/pages/Exams";
 import { Questions } from "@/pages/Questions";
 import { TakeExam } from "@/pages/TakeExam";
 import { Results } from "@/pages/Results";
+import { Enrollments } from "@/pages/Enrollments";
 import { Profile } from "@/pages/Profile";
 import { Settings } from "@/pages/Settings";
 
@@ -77,6 +78,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute allowedRoles={["admin", "teacher"]}>
         <Courses />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/enrollments",
+    element: (
+      <ProtectedRoute allowedRoles={["admin", "teacher"]}>
+        <Enrollments />
       </ProtectedRoute>
     ),
   },

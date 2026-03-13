@@ -190,6 +190,34 @@ export const resultsApi = {
   },
 };
 
+// Enrollments API
+export const enrollmentsApi = {
+  getAll: async (params) => {
+    const queryString = new URLSearchParams(params).toString();
+    return api.get(`/enrollments${queryString ? `?${queryString}` : ""}`);
+  },
+
+  getById: async (id) => {
+    return api.get(`/enrollments/${id}`);
+  },
+
+  enroll: async (studentId, courseId) => {
+    return api.post("/enrollments", { studentId, courseId });
+  },
+
+  update: async (id, data) => {
+    return api.put(`/enrollments/${id}`, data);
+  },
+
+  delete: async (id) => {
+    return api.delete(`/enrollments/${id}`);
+  },
+
+  getMyCourses: async () => {
+    return api.get("/enrollments/my-courses");
+  },
+};
+
 // Dashboard API
 export const dashboardApi = {
   getAdminStats: async () => {
