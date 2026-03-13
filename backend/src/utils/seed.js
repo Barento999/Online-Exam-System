@@ -6,6 +6,7 @@ import User from "../models/User.js";
 import Course from "../models/Course.js";
 import Exam from "../models/Exam.js";
 import Question from "../models/Question.js";
+import Enrollment from "../models/Enrollment.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -22,6 +23,7 @@ const seedData = async () => {
     await Course.deleteMany();
     await Exam.deleteMany();
     await Question.deleteMany();
+    await Enrollment.deleteMany();
 
     console.log("Cleared existing data");
 
@@ -179,6 +181,55 @@ const seedData = async () => {
 
     console.log("Questions created");
 
+    // Create enrollments
+    await Enrollment.create([
+      {
+        studentId: student1._id,
+        courseId: course1._id,
+        status: "active",
+      },
+      {
+        studentId: student1._id,
+        courseId: course2._id,
+        status: "active",
+      },
+      {
+        studentId: student2._id,
+        courseId: course1._id,
+        status: "active",
+      },
+      {
+        studentId: student2._id,
+        courseId: course3._id,
+        status: "active",
+      },
+    ]);
+
+    // Update course student counts
+    course1.studentsCount = await Enrollment.countDocuments({
+      courseId: course1._id,
+      status: "active",
+    });
+    course2.studentsCount = await Enrollment.countDocuments({
+      courseId: course2._id,
+      status: "active",
+    });
+    course3.studentsCount = await Enrollment.countDocuments({
+      courseId: course3._id,
+      status: "active",
+    });
+    await course1.save();
+    await course2.save();
+    await course3.save();
+
+    // Update exam question counts
+    exam1.questionsCount = await Question.countDocuments({ examId: exam1._id });
+    exam2.questionsCount = await Question.countDocuments({ examId: exam2._id });
+    await exam1.save();
+    await exam2.save();
+
+    console.log("Enrollments created");
+
     console.log("\n=== Seed Data Created Successfully ===\n");
     console.log("Admin Credentials:");
     console.log("Email: admin@exam.com");
@@ -189,6 +240,12 @@ const seedData = async () => {
     console.log("Student Credentials:");
     console.log("Email: student@exam.com");
     console.log("Password: student123\n");
+    console.log("Student 2 Credentials:");
+    console.log("Email: sarah@exam.com");
+    console.log("Password: student123\n");
+    console.log("Enrollments:");
+    console.log("- Jane Student: Mathematics 101, Physics Advanced");
+    console.log("- Sarah Smith: Mathematics 101, Computer Science\n");
 
     process.exit(0);
   } catch (error) {
