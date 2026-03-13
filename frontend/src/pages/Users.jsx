@@ -292,7 +292,7 @@ export const Users = () => {
                     </TableRow>
                   ) : (
                     filteredUsers.map((user) => (
-                      <TableRow key={user.id}>
+                      <TableRow key={user._id}>
                         <TableCell className="font-medium">
                           {user.name}
                         </TableCell>

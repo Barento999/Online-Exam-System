@@ -1,30 +1,45 @@
-import { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { ConfirmDialog } from '@/components/common/ConfirmDialog';
-import { Loader } from '@/components/common/Loader';
-import { coursesApi, usersApi } from '@/services/api';
-import { Plus, Pencil, Trash2, BookOpen, Users } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { useState, useEffect } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
+import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { Loader } from "@/components/common/Loader";
+import { coursesApi, usersApi } from "@/services/api";
+import { Plus, Pencil, Trash2, BookOpen, Users } from "lucide-react";
+import toast from "react-hot-toast";
 
 export const Courses = () => {
   const [courses, setCourses] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [deleteDialog, setDeleteDialog] = useState({ open: false, courseId: null });
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    courseId: null,
+  });
   const [editingCourse, setEditingCourse] = useState(null);
   const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    teacherId: '',
+    name: "",
+    description: "",
+    teacherId: "",
   });
 
   useEffect(() => {
@@ -37,10 +52,11 @@ export const Courses = () => {
         coursesApi.getAll(),
         usersApi.getAll(),
       ]);
-      setCourses(coursesRes.data);
-      setTeachers(usersRes.data.filter((u) => u.role === 'teacher'));
+      setCourses(coursesRes.data.courses || coursesRes.data);
+      const usersData = usersRes.data.users || usersRes.data;
+      setTeachers(usersData.filter((u) => u.role === "teacher"));
     } catch (error) {
-      toast.error('Failed to load data');
+      toast.error("Failed to load data");
     } finally {
       setLoading(false);
     }
@@ -51,16 +67,16 @@ export const Courses = () => {
     try {
       if (editingCourse) {
         await coursesApi.update(editingCourse.id, formData);
-        toast.success('Course updated successfully');
+        toast.success("Course updated successfully");
       } else {
         await coursesApi.create(formData);
-        toast.success('Course created successfully');
+        toast.success("Course created successfully");
       }
       setIsDialogOpen(false);
       resetForm();
       loadData();
     } catch (error) {
-      toast.error(error.message || 'Operation failed');
+      toast.error(error.message || "Operation failed");
     }
   };
 
@@ -77,19 +93,19 @@ export const Courses = () => {
   const handleDelete = async () => {
     try {
       await coursesApi.delete(deleteDialog.courseId);
-      toast.success('Course deleted successfully');
+      toast.success("Course deleted successfully");
       setDeleteDialog({ open: false, courseId: null });
       loadData();
     } catch (error) {
-      toast.error('Failed to delete course');
+      toast.error("Failed to delete course");
     }
   };
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      description: '',
-      teacherId: '',
+      name: "",
+      description: "",
+      teacherId: "",
     });
     setEditingCourse(null);
   };
@@ -117,7 +133,9 @@ export const Courses = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-semibold">Courses Management</h1>
-            <p className="text-muted-foreground">Manage all courses in the system</p>
+            <p className="text-muted-foreground">
+              Manage all courses in the system
+            </p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
@@ -128,7 +146,9 @@ export const Courses = () => {
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>{editingCourse ? 'Edit Course' : 'Add New Course'}</DialogTitle>
+                <DialogTitle>
+                  {editingCourse ? "Edit Course" : "Add New Course"}
+                </DialogTitle>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
@@ -136,7 +156,9 @@ export const Courses = () => {
                   <Input
                     id="name"
                     value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, name: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -145,19 +167,27 @@ export const Courses = () => {
                   <Textarea
                     id="description"
                     value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, description: e.target.value })
+                    }
                     required
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="teacher">Assigned Teacher</Label>
-                  <Select value={formData.teacherId} onValueChange={(value) => setFormData({ ...formData, teacherId: value })}>
+                  <Select
+                    value={formData.teacherId}
+                    onValueChange={(value) =>
+                      setFormData({ ...formData, teacherId: value })
+                    }>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a teacher" />
                     </SelectTrigger>
                     <SelectContent>
                       {teachers.map((teacher) => (
-                        <SelectItem key={teacher.id} value={teacher.id.toString()}>
+                        <SelectItem
+                          key={teacher.id}
+                          value={teacher.id.toString()}>
                           {teacher.name}
                         </SelectItem>
                       ))}
@@ -165,10 +195,15 @@ export const Courses = () => {
                   </Select>
                 </div>
                 <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={() => handleDialogClose(false)}>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => handleDialogClose(false)}>
                     Cancel
                   </Button>
-                  <Button type="submit">{editingCourse ? 'Update' : 'Create'}</Button>
+                  <Button type="submit">
+                    {editingCourse ? "Update" : "Create"}
+                  </Button>
                 </div>
               </form>
             </DialogContent>
@@ -196,14 +231,18 @@ export const Courses = () => {
                       </div>
                     </div>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => handleEdit(course)}>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEdit(course)}>
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => setDeleteDialog({ open: true, courseId: course.id })}
-                      >
+                        onClick={() =>
+                          setDeleteDialog({ open: true, courseId: course.id })
+                        }>
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
