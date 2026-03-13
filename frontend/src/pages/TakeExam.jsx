@@ -1,11 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
@@ -52,11 +47,11 @@ export const TakeExam = () => {
   const loadExamData = async () => {
     try {
       const [examRes, questionsRes] = await Promise.all([
-        examsApi.getById(parseInt(examId)),
-        questionsApi.getAll(parseInt(examId)),
+        examsApi.getById(examId),
+        questionsApi.getAll(examId),
       ]);
       setExam(examRes.data);
-      setQuestions(questionsRes.data);
+      setQuestions(questionsRes.data.questions || questionsRes.data);
       setTimeRemaining(examRes.data.duration * 60); // Convert to seconds
     } catch (error) {
       toast.error("Failed to load exam");
@@ -74,7 +69,7 @@ export const TakeExam = () => {
   const handleSubmitExam = async () => {
     setSubmitting(true);
     try {
-      const response = await examsApi.submit(parseInt(examId), answers);
+      const response = await examsApi.submit(examId, answers);
       toast.success("Exam submitted successfully!");
       navigate("/results", { state: { result: response.data } });
     } catch (error) {
@@ -162,12 +157,12 @@ export const TakeExam = () => {
                 <div className="grid grid-cols-5 md:grid-cols-6 lg:grid-cols-4 gap-2">
                   {questions.map((q, index) => (
                     <button
-                      key={q.id}
+                      key={q._id || index}
                       onClick={() => setCurrentQuestionIndex(index)}
                       className={`h-10 w-10 rounded-lg border transition-colors ${
                         currentQuestionIndex === index
                           ? "bg-primary text-primary-foreground border-primary"
-                          : answers[q.id]
+                          : answers[q._id]
                             ? "bg-green-100 dark:bg-green-900/20 border-green-500 text-green-700 dark:text-green-400"
                             : "bg-muted hover:bg-accent border-border"
                       }`}>
@@ -216,16 +211,16 @@ export const TakeExam = () => {
               </CardHeader>
               <CardContent>
                 <RadioGroup
-                  value={answers[currentQuestion?.id] || ""}
+                  value={answers[currentQuestion?._id] || ""}
                   onValueChange={(value) =>
-                    handleAnswerChange(currentQuestion?.id, value)
+                    handleAnswerChange(currentQuestion?._id, value)
                   }>
                   <div className="space-y-3">
                     {["A", "B", "C", "D"].map((option) => (
                       <div
                         key={option}
                         className={`flex items-center space-x-3 p-4 rounded-lg border transition-colors ${
-                          answers[currentQuestion?.id] === option
+                          answers[currentQuestion?._id] === option
                             ? "border-primary bg-primary/5"
                             : "border-border hover:bg-accent"
                         }`}>

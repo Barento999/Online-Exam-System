@@ -82,7 +82,6 @@ export const Exams = () => {
     try {
       const examData = {
         ...formData,
-        courseId: parseInt(formData.courseId),
         duration: parseInt(formData.duration),
         totalMarks: parseInt(formData.totalMarks),
         passingMarks: parseInt(formData.passingMarks),
