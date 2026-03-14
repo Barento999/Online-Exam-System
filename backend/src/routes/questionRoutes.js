@@ -33,20 +33,30 @@ const fileUpload = multer({
     fileSize: 10 * 1024 * 1024, // 10MB
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = /csv|xlsx|xls/;
-    const extname = allowedTypes.test(
-      file.originalname.toLowerCase().split(".").pop(),
-    );
-    const mimetype =
-      file.mimetype === "text/csv" ||
-      file.mimetype ===
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
-      file.mimetype === "application/vnd.ms-excel";
+    console.log("File filter - mimetype:", file.mimetype);
+    console.log("File filter - originalname:", file.originalname);
 
-    if (extname && mimetype) {
+    const ext = file.originalname.toLowerCase().split(".").pop();
+    const allowedExts = ["csv", "xlsx", "xls"];
+    const allowedMimes = [
+      "text/csv",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      "application/vnd.ms-excel",
+      "application/csv",
+      "text/x-csv",
+      "application/x-csv",
+      "text/comma-separated-values",
+      "text/x-comma-separated-values",
+    ];
+
+    if (allowedExts.includes(ext) || allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Only CSV and Excel files are allowed"));
+      cb(
+        new Error(
+          `Only CSV and Excel files are allowed. Got: ${file.mimetype}`,
+        ),
+      );
     }
   },
 });
@@ -104,7 +114,41 @@ router.post(
 router.post(
   "/upload",
   authorize("admin", "teacher"),
-  fileUpload.single("file"),
+  (req, res, next) => {
+    console.log("=== Upload route hit (before multer) ===");
+    console.log("Content-Type:", req.headers["content-type"]);
+    console.log("Body before multer:", req.body);
+
+    fileUpload.single("file")(req, res, (err) => {
+      if (err) {
+        console.error("=== Multer error ===");
+        console.error("Error:", err);
+        console.error("Error message:", err.message);
+        if (err instanceof multer.MulterError) {
+          if (err.code === "LIMIT_FILE_SIZE") {
+            return res
+              .status(400)
+              .json({ message: "File size exceeds 10MB limit" });
+          }
+          return res
+            .status(400)
+            .json({ message: `Upload error: ${err.message}` });
+        }
+        return res.status(400).json({ message: err.message });
+      }
+      console.log("=== Multer processed successfully ===");
+      console.log("File received:", req.file ? "YES" : "NO");
+      console.log("Body after multer:", req.body);
+      if (req.file) {
+        console.log("File details:", {
+          originalname: req.file.originalname,
+          mimetype: req.file.mimetype,
+          size: req.file.size,
+        });
+      }
+      next();
+    });
+  },
   uploadQuestionsFile,
 );
 
