@@ -225,7 +225,13 @@ export const bulkCreateQuestions = async (req, res, next) => {
 // @access  Private/Admin/Teacher
 export const uploadQuestionsFile = async (req, res, next) => {
   try {
+    console.log("=== Upload request received ===");
+    console.log("File:", req.file);
+    console.log("Body:", req.body);
+    console.log("User:", req.user?.email, req.user?.role);
+
     if (!req.file) {
+      console.error("No file uploaded");
       res.status(400);
       throw new Error("Please upload a file");
     }
@@ -233,9 +239,12 @@ export const uploadQuestionsFile = async (req, res, next) => {
     const { examId } = req.body;
 
     if (!examId) {
+      console.error("No examId provided");
       res.status(400);
       throw new Error("Exam ID is required");
     }
+
+    console.log("Processing file:", req.file.originalname);
 
     // Teachers can only create questions for their exams
     if (req.user.role === "teacher") {
