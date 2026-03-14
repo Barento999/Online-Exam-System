@@ -2,7 +2,15 @@ import { useExamMonitoring } from "@/hooks/useExamMonitoring";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Activity, CheckCircle, XCircle, Clock, Users } from "lucide-react";
+import {
+  Activity,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Users,
+  Shield,
+  AlertTriangle,
+} from "lucide-react";
 
 export const LiveExamMonitor = ({ examId, totalQuestions }) => {
   const { activeStudents, events, connected } = useExamMonitoring(examId);
@@ -89,6 +97,17 @@ export const LiveExamMonitor = ({ examId, totalQuestions }) => {
                       </div>
                     </div>
 
+                    {/* Violation Warning */}
+                    {student.violationCount > 0 && (
+                      <div className="flex items-center gap-2 p-2 bg-destructive/10 border border-destructive/20 rounded">
+                        <AlertTriangle className="w-4 h-4 text-destructive" />
+                        <span className="text-sm text-destructive font-medium">
+                          {student.violationCount} violation
+                          {student.violationCount > 1 ? "s" : ""} detected
+                        </span>
+                      </div>
+                    )}
+
                     {student.status === "active" && (
                       <div className="w-full bg-secondary rounded-full h-2">
                         <div
@@ -126,8 +145,15 @@ export const LiveExamMonitor = ({ examId, totalQuestions }) => {
                 {events.map((event, index) => (
                   <div
                     key={index}
-                    className="p-3 border-l-2 border-primary bg-secondary/50 rounded">
-                    <p className="text-sm">{event.message}</p>
+                    className={`p-3 border-l-2 rounded ${
+                      event.type === "violation"
+                        ? "border-destructive bg-destructive/10"
+                        : "border-primary bg-secondary/50"
+                    }`}>
+                    <p
+                      className={`text-sm ${event.type === "violation" ? "text-destructive font-medium" : ""}`}>
+                      {event.message}
+                    </p>
                     <p className="text-xs text-muted-foreground mt-1">
                       {formatTime(event.timestamp)}
                     </p>

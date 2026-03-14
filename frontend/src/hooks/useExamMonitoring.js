@@ -103,6 +103,33 @@ export const useExamMonitoring = (examId) => {
       );
     });
 
+    // Listen for violations
+    socket.on("student-violation", (data) => {
+      setEvents((prev) => [
+        {
+          type: "violation",
+          message: `⚠️ ${data.studentName}: ${data.violation.message}`,
+          timestamp: data.timestamp,
+          severity: "warning",
+        },
+        ...prev,
+      ]);
+
+      setActiveStudents((prev) =>
+        prev.map((student) =>
+          student.studentId === data.studentId
+            ? {
+                ...student,
+                violations: data.violation
+                  ? [...(student.violations || []), data.violation]
+                  : student.violations,
+                violationCount: data.totalViolations,
+              }
+            : student,
+        ),
+      );
+    });
+
     return () => {
       socket.off("active-students");
       socket.off("student-joined");
@@ -110,6 +137,7 @@ export const useExamMonitoring = (examId) => {
       socket.off("student-submitted");
       socket.off("student-left");
       socket.off("student-disconnected");
+      socket.off("student-violation");
     };
   }, [socket, connected, examId]);
 

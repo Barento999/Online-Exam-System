@@ -59,6 +59,8 @@ export const initializeSocket = (server) => {
         status: "active",
         currentQuestion: 0,
         answeredCount: 0,
+        violations: [],
+        violationCount: 0,
       });
 
       // Notify teachers/admins
@@ -77,6 +79,8 @@ export const initializeSocket = (server) => {
         joinedAt: s.joinedAt,
         currentQuestion: s.currentQuestion,
         answeredCount: s.answeredCount,
+        violations: s.violations || [],
+        violationCount: s.violationCount || 0,
       }));
 
       socket.emit("active-students", activeStudents);
@@ -100,6 +104,8 @@ export const initializeSocket = (server) => {
             joinedAt: data.joinedAt,
             currentQuestion: data.currentQuestion,
             answeredCount: data.answeredCount,
+            violations: data.violations || [],
+            violationCount: data.violationCount || 0,
           }),
         );
 
@@ -154,6 +160,38 @@ export const initializeSocket = (server) => {
         });
 
         console.log(`Student ${session.studentName} submitted exam ${examId}`);
+      }
+    });
+
+    // Anti-cheat violation detected
+    socket.on("violation-detected", ({ examId, studentId, violation }) => {
+      const roomName = `exam-${examId}`;
+      const examSessions = activeExamSessions.get(examId);
+
+      if (examSessions && examSessions.has(studentId)) {
+        const session = examSessions.get(studentId);
+
+        // Initialize violations array if not exists
+        if (!session.violations) {
+          session.violations = [];
+        }
+
+        session.violations.push(violation);
+        session.violationCount = session.violations.length;
+
+        // Notify monitors in real-time
+        io.to(roomName).emit("student-violation", {
+          examId,
+          studentId,
+          studentName: session.studentName,
+          violation,
+          totalViolations: session.violationCount,
+          timestamp: new Date(),
+        });
+
+        console.log(
+          `Violation detected: ${session.studentName} - ${violation.type}`,
+        );
       }
     });
 

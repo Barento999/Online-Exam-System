@@ -38,6 +38,7 @@ export const TakeExam = () => {
   const {
     updateProgress,
     submitExam: notifySubmit,
+    reportViolation,
     connected,
   } = useExamSession(examId, user._id);
 
@@ -50,8 +51,8 @@ export const TakeExam = () => {
     exitFullscreen,
     getViolationSummary,
   } = useAntiCheat(examId, (violation) => {
-    console.log("Suspicious activity detected:", violation);
-    // Could send to backend for logging
+    // Send violation to monitoring teachers via WebSocket
+    reportViolation(violation);
   });
 
   useEffect(() => {

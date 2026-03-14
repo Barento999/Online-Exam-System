@@ -33,5 +33,15 @@ export const useExamSession = (examId, studentId) => {
     }
   };
 
-  return { updateProgress, submitExam, connected };
+  const reportViolation = (violation) => {
+    if (socket && connected) {
+      socket.emit("violation-detected", {
+        examId,
+        studentId,
+        violation,
+      });
+    }
+  };
+
+  return { updateProgress, submitExam, reportViolation, connected };
 };
