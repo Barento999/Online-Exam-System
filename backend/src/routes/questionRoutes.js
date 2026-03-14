@@ -5,12 +5,39 @@ import {
   getQuestionById,
   createQuestion,
   bulkCreateQuestions,
+  uploadQuestionsFile,
   updateQuestion,
   deleteQuestion,
 } from "../controllers/questionController.js";
 import { protect, authorize } from "../middlewares/authMiddleware.js";
 import { validateRequest } from "../middlewares/validateRequest.js";
 import { upload } from "../config/upload.js";
+import multer from "multer";
+
+// Configure multer for file uploads (CSV/Excel)
+const fileUpload = multer({
+  dest: "uploads/temp/",
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB
+  },
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = /csv|xlsx|xls/;
+    const extname = allowedTypes.test(
+      file.originalname.toLowerCase().split(".").pop(),
+    );
+    const mimetype =
+      file.mimetype === "text/csv" ||
+      file.mimetype ===
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ||
+      file.mimetype === "application/vnd.ms-excel";
+
+    if (extname && mimetype) {
+      cb(null, true);
+    } else {
+      cb(new Error("Only CSV and Excel files are allowed"));
+    }
+  },
+});
 
 const router = express.Router();
 
@@ -59,6 +86,13 @@ router.post(
   bulkQuestionValidation,
   validateRequest,
   bulkCreateQuestions,
+);
+
+router.post(
+  "/upload",
+  authorize("admin", "teacher"),
+  fileUpload.single("file"),
+  uploadQuestionsFile,
 );
 
 router

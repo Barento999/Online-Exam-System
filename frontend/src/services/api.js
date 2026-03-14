@@ -177,6 +177,14 @@ export const questionsApi = {
   bulkCreate: async (examId, questions) => {
     return api.post(`/questions/bulk`, { examId, questions });
   },
+
+  uploadFile: async (formData) => {
+    return api.post("/questions/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+  },
 };
 
 // Results API

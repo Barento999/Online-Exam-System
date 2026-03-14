@@ -1,5 +1,6 @@
 import Question from "../models/Question.js";
 import { deleteFile } from "../config/upload.js";
+import xlsx from "xlsx";
 
 // @desc    Get all questions
 // @route   GET /api/questions
@@ -215,6 +216,135 @@ export const bulkCreateQuestions = async (req, res, next) => {
       questions: createdQuestions,
     });
   } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Upload questions from file (CSV/Excel)
+// @route   POST /api/questions/upload
+// @access  Private/Admin/Teacher
+export const uploadQuestionsFile = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      res.status(400);
+      throw new Error("Please upload a file");
+    }
+
+    const { examId } = req.body;
+
+    if (!examId) {
+      res.status(400);
+      throw new Error("Exam ID is required");
+    }
+
+    // Teachers can only create questions for their exams
+    if (req.user.role === "teacher") {
+      const Exam = (await import("../models/Exam.js")).default;
+      const exam = await Exam.findById(examId).populate("courseId");
+
+      if (!exam) {
+        res.status(404);
+        throw new Error("Exam not found");
+      }
+
+      if (exam.courseId.teacherId.toString() !== req.user._id.toString()) {
+        res.status(403);
+        throw new Error("Not authorized to create questions for this exam");
+      }
+    }
+
+    // Read the uploaded file
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const worksheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(worksheet);
+
+    // Validate and transform data
+    const questions = [];
+    const errors = [];
+
+    data.forEach((row, index) => {
+      const rowNum = index + 2; // Excel rows start at 1, header is row 1
+
+      // Validate required fields
+      if (
+        !row.questionText ||
+        !row.optionA ||
+        !row.optionB ||
+        !row.optionC ||
+        !row.optionD ||
+        !row.correctAnswer ||
+        !row.marks
+      ) {
+        errors.push(`Row ${rowNum}: Missing required fields`);
+        return;
+      }
+
+      // Validate correct answer
+      if (!["A", "B", "C", "D"].includes(row.correctAnswer.toUpperCase())) {
+        errors.push(`Row ${rowNum}: Correct answer must be A, B, C, or D`);
+        return;
+      }
+
+      // Validate marks
+      const marks = parseInt(row.marks);
+      if (isNaN(marks) || marks < 1) {
+        errors.push(`Row ${rowNum}: Marks must be a positive number`);
+        return;
+      }
+
+      questions.push({
+        examId,
+        questionText: row.questionText.toString().trim(),
+        optionA: row.optionA.toString().trim(),
+        optionB: row.optionB.toString().trim(),
+        optionC: row.optionC.toString().trim(),
+        optionD: row.optionD.toString().trim(),
+        correctAnswer: row.correctAnswer.toString().toUpperCase().trim(),
+        marks: marks,
+      });
+    });
+
+    // Delete the uploaded file
+    const fs = await import("fs");
+    fs.unlinkSync(req.file.path);
+
+    if (errors.length > 0) {
+      res.status(400);
+      throw new Error(`Validation errors:\n${errors.join("\n")}`);
+    }
+
+    if (questions.length === 0) {
+      res.status(400);
+      throw new Error("No valid questions found in file");
+    }
+
+    // Insert questions
+    const createdQuestions = await Question.insertMany(questions);
+
+    // Update exam questionsCount
+    const Exam = (await import("../models/Exam.js")).default;
+    const exam = await Exam.findById(examId);
+    if (exam) {
+      exam.questionsCount = await Question.countDocuments({ examId });
+      await exam.save();
+    }
+
+    res.status(201).json({
+      message: `${createdQuestions.length} questions uploaded successfully`,
+      count: createdQuestions.length,
+      questions: createdQuestions,
+    });
+  } catch (error) {
+    // Delete uploaded file if it exists
+    if (req.file) {
+      const fs = await import("fs");
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (e) {
+        // File already deleted or doesn't exist
+      }
+    }
     next(error);
   }
 };

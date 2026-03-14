@@ -23,7 +23,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { questionsApi, examsApi } from "@/services/api";
-import { Plus, Pencil, Trash2, Filter } from "lucide-react";
+import { Plus, Pencil, Trash2, Filter, Upload, Download } from "lucide-react";
 import toast from "react-hot-toast";
 
 export const Questions = () => {
@@ -49,6 +49,10 @@ export const Questions = () => {
   });
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [uploadDialog, setUploadDialog] = useState(false);
+  const [uploadFile, setUploadFile] = useState(null);
+  const [uploadExamId, setUploadExamId] = useState("");
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -165,6 +169,49 @@ export const Questions = () => {
     setImagePreview(null);
   };
 
+  const handleBulkUpload = async () => {
+    if (!uploadFile || !uploadExamId) {
+      toast.error("Please select a file and exam");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", uploadFile);
+      formData.append("examId", uploadExamId);
+
+      const response = await questionsApi.uploadFile(formData);
+      toast.success(response.data.message);
+      setUploadDialog(false);
+      setUploadFile(null);
+      setUploadExamId("");
+      loadData();
+    } catch (error) {
+      toast.error(error.response?.data?.message || "Failed to upload file");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const downloadTemplate = () => {
+    // Create CSV template
+    const template = `questionText,optionA,optionB,optionC,optionD,correctAnswer,marks
+"What is 2+2?","3","4","5","6","B","1"
+"What is the capital of France?","London","Berlin","Paris","Madrid","C","1"
+"Which planet is closest to the sun?","Venus","Mercury","Earth","Mars","B","1"`;
+
+    const blob = new Blob([template], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "questions_template.csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  };
+
   const handleDialogClose = (open) => {
     setIsDialogOpen(open);
     if (!open) {
@@ -195,176 +242,260 @@ export const Questions = () => {
             <h1 className="text-3xl font-semibold">Question Bank</h1>
             <p className="text-muted-foreground">Manage exam questions</p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="mr-2 h-4 w-4" />
-                Add Question
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingQuestion ? "Edit Question" : "Add New Question"}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="exam">Exam</Label>
-                  <Select
-                    value={formData.examId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, examId: value })
-                    }>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select an exam" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {exams.map((exam) => (
-                        <SelectItem key={exam._id} value={exam._id.toString()}>
-                          {exam.title}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="questionText">Question Text</Label>
-                  <Textarea
-                    id="questionText"
-                    value={formData.questionText}
-                    onChange={(e) =>
-                      setFormData({ ...formData, questionText: e.target.value })
-                    }
-                    required
-                    rows={3}
-                  />
-                </div>
-
-                {/* Image Upload */}
-                <div className="space-y-2">
-                  <Label htmlFor="image">Question Image (Optional)</Label>
-                  <Input
-                    id="image"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    className="cursor-pointer"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Max size: 5MB. Supported: JPG, PNG, GIF, WebP
-                  </p>
-                  {imagePreview && (
-                    <div className="relative mt-2">
-                      <img
-                        src={imagePreview}
-                        alt="Preview"
-                        className="max-w-full h-auto max-h-48 rounded border"
-                      />
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        className="absolute top-2 right-2"
-                        onClick={removeImage}>
-                        Remove
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
+          <div className="flex gap-2">
+            <Dialog open={uploadDialog} onOpenChange={setUploadDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline">
+                  <Upload className="mr-2 h-4 w-4" />
+                  Bulk Upload
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Upload Questions from File</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="optionA">Option A</Label>
-                    <Input
-                      id="optionA"
-                      value={formData.optionA}
-                      onChange={(e) =>
-                        setFormData({ ...formData, optionA: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="optionB">Option B</Label>
-                    <Input
-                      id="optionB"
-                      value={formData.optionB}
-                      onChange={(e) =>
-                        setFormData({ ...formData, optionB: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="optionC">Option C</Label>
-                    <Input
-                      id="optionC"
-                      value={formData.optionC}
-                      onChange={(e) =>
-                        setFormData({ ...formData, optionC: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="optionD">Option D</Label>
-                    <Input
-                      id="optionD"
-                      value={formData.optionD}
-                      onChange={(e) =>
-                        setFormData({ ...formData, optionD: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="correctAnswer">Correct Answer</Label>
+                    <Label>Select Exam</Label>
                     <Select
-                      value={formData.correctAnswer}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, correctAnswer: value })
-                      }>
+                      value={uploadExamId}
+                      onValueChange={setUploadExamId}>
                       <SelectTrigger>
-                        <SelectValue />
+                        <SelectValue placeholder="Select an exam" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="A">A</SelectItem>
-                        <SelectItem value="B">B</SelectItem>
-                        <SelectItem value="C">C</SelectItem>
-                        <SelectItem value="D">D</SelectItem>
+                        {exams.map((exam) => (
+                          <SelectItem
+                            key={exam._id}
+                            value={exam._id.toString()}>
+                            {exam.title}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="marks">Marks</Label>
+                    <Label>Upload File (CSV or Excel)</Label>
                     <Input
-                      id="marks"
-                      type="number"
-                      value={formData.marks}
-                      onChange={(e) =>
-                        setFormData({ ...formData, marks: e.target.value })
-                      }
-                      required
+                      type="file"
+                      accept=".csv,.xlsx,.xls"
+                      onChange={(e) => setUploadFile(e.target.files[0])}
                     />
+                    <p className="text-xs text-muted-foreground">
+                      Supported formats: CSV, XLSX, XLS (Max 10MB)
+                    </p>
+                  </div>
+                  <div className="bg-muted p-4 rounded">
+                    <p className="text-sm font-medium mb-2">File Format:</p>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      Your file should have these columns:
+                    </p>
+                    <code className="text-xs block bg-background p-2 rounded">
+                      questionText, optionA, optionB, optionC, optionD,
+                      correctAnswer, marks
+                    </code>
+                    <Button
+                      type="button"
+                      variant="link"
+                      size="sm"
+                      className="mt-2 p-0 h-auto"
+                      onClick={downloadTemplate}>
+                      <Download className="mr-1 h-3 w-3" />
+                      Download Template
+                    </Button>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setUploadDialog(false)}>
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={handleBulkUpload}
+                      disabled={uploading || !uploadFile || !uploadExamId}>
+                      {uploading ? "Uploading..." : "Upload"}
+                    </Button>
                   </div>
                 </div>
-                <div className="flex justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleDialogClose(false)}>
-                    Cancel
-                  </Button>
-                  <Button type="submit">
-                    {editingQuestion ? "Update" : "Create"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+              </DialogContent>
+            </Dialog>
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+              <DialogTrigger asChild>
+                <Button>
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Question
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingQuestion ? "Edit Question" : "Add New Question"}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="exam">Exam</Label>
+                    <Select
+                      value={formData.examId}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, examId: value })
+                      }>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select an exam" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {exams.map((exam) => (
+                          <SelectItem
+                            key={exam._id}
+                            value={exam._id.toString()}>
+                            {exam.title}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="questionText">Question Text</Label>
+                    <Textarea
+                      id="questionText"
+                      value={formData.questionText}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          questionText: e.target.value,
+                        })
+                      }
+                      required
+                      rows={3}
+                    />
+                  </div>
+
+                  {/* Image Upload */}
+                  <div className="space-y-2">
+                    <Label htmlFor="image">Question Image (Optional)</Label>
+                    <Input
+                      id="image"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                      className="cursor-pointer"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Max size: 5MB. Supported: JPG, PNG, GIF, WebP
+                    </p>
+                    {imagePreview && (
+                      <div className="relative mt-2">
+                        <img
+                          src={imagePreview}
+                          alt="Preview"
+                          className="max-w-full h-auto max-h-48 rounded border"
+                        />
+                        <Button
+                          type="button"
+                          variant="destructive"
+                          size="sm"
+                          className="absolute top-2 right-2"
+                          onClick={removeImage}>
+                          Remove
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="optionA">Option A</Label>
+                      <Input
+                        id="optionA"
+                        value={formData.optionA}
+                        onChange={(e) =>
+                          setFormData({ ...formData, optionA: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="optionB">Option B</Label>
+                      <Input
+                        id="optionB"
+                        value={formData.optionB}
+                        onChange={(e) =>
+                          setFormData({ ...formData, optionB: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="optionC">Option C</Label>
+                      <Input
+                        id="optionC"
+                        value={formData.optionC}
+                        onChange={(e) =>
+                          setFormData({ ...formData, optionC: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="optionD">Option D</Label>
+                      <Input
+                        id="optionD"
+                        value={formData.optionD}
+                        onChange={(e) =>
+                          setFormData({ ...formData, optionD: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="correctAnswer">Correct Answer</Label>
+                      <Select
+                        value={formData.correctAnswer}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, correctAnswer: value })
+                        }>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="A">A</SelectItem>
+                          <SelectItem value="B">B</SelectItem>
+                          <SelectItem value="C">C</SelectItem>
+                          <SelectItem value="D">D</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="marks">Marks</Label>
+                      <Input
+                        id="marks"
+                        type="number"
+                        value={formData.marks}
+                        onChange={(e) =>
+                          setFormData({ ...formData, marks: e.target.value })
+                        }
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleDialogClose(false)}>
+                      Cancel
+                    </Button>
+                    <Button type="submit">
+                      {editingQuestion ? "Update" : "Create"}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <Card>

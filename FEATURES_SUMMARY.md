@@ -328,3 +328,16 @@ The Online Exam System is now feature-complete with:
 **Last Updated**: March 14, 2026
 **Version**: 2.0.0
 **Status**: Production Ready
+
+### 4. Bulk Question Upload (NEW)
+
+- ✅ Upload questions from CSV/Excel files
+- ✅ Support CSV, XLSX, XLS formats
+- ✅ Template download
+- ✅ Data validation
+- ✅ Error reporting
+- ✅ Batch import (1000+ questions)
+
+**Documentation:**
+
+- [BULK_UPLOAD_FEATURE.md](BULK_UPLOAD_FEATURE.md) - Complete guide
