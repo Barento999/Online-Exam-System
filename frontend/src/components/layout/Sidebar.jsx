@@ -15,6 +15,7 @@ import {
   Menu,
   X,
   UserPlus,
+  TrendingUp,
 } from "lucide-react";
 
 export const Sidebar = () => {
@@ -30,6 +31,7 @@ export const Sidebar = () => {
     { icon: FileText, label: "Exams", path: "/exams" },
     { icon: ClipboardList, label: "Questions", path: "/questions" },
     { icon: BarChart, label: "Results", path: "/results" },
+    { icon: TrendingUp, label: "Analytics", path: "/analytics" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
 
@@ -40,6 +42,7 @@ export const Sidebar = () => {
     { icon: PlusCircle, label: "Create Exam", path: "/exams/create" },
     { icon: ClipboardList, label: "Question Bank", path: "/questions" },
     { icon: BarChart, label: "Student Results", path: "/results" },
+    { icon: TrendingUp, label: "Analytics", path: "/analytics" },
     { icon: UserCircle, label: "Profile", path: "/profile" },
   ];
 

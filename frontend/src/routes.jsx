@@ -22,6 +22,7 @@ import { Results } from "@/pages/Results";
 import { Enrollments } from "@/pages/Enrollments";
 import { Profile } from "@/pages/Profile";
 import { Settings } from "@/pages/Settings";
+import { Analytics } from "@/pages/Analytics";
 
 // Dashboard Router Component
 const DashboardRouter = () => {
@@ -135,6 +136,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Results />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/analytics",
+    element: (
+      <ProtectedRoute allowedRoles={["admin", "teacher"]}>
+        <Analytics />
       </ProtectedRoute>
     ),
   },
