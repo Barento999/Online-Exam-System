@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { examsApi, coursesApi } from "@/services/api";
@@ -54,6 +55,7 @@ export const Exams = () => {
     startTime: "",
     endTime: "",
     status: "draft",
+    randomizeQuestions: false,
   });
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -117,6 +119,7 @@ export const Exams = () => {
       startTime: exam.startTime.slice(0, 16),
       endTime: exam.endTime.slice(0, 16),
       status: exam.status,
+      randomizeQuestions: exam.randomizeQuestions || false,
     });
     setIsDialogOpen(true);
   };
@@ -142,6 +145,7 @@ export const Exams = () => {
       startTime: "",
       endTime: "",
       status: "draft",
+      randomizeQuestions: false,
     });
     setEditingExam(null);
   };
@@ -319,6 +323,27 @@ export const Exams = () => {
                         }
                         required
                       />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <div className="space-y-0.5">
+                          <Label htmlFor="randomize">Randomize Questions</Label>
+                          <p className="text-sm text-muted-foreground">
+                            Shuffle questions for each student to prevent
+                            cheating
+                          </p>
+                        </div>
+                        <Switch
+                          id="randomize"
+                          checked={formData.randomizeQuestions}
+                          onCheckedChange={(checked) =>
+                            setFormData({
+                              ...formData,
+                              randomizeQuestions: checked,
+                            })
+                          }
+                        />
+                      </div>
                     </div>
                   </div>
                   <div className="flex justify-end gap-2">

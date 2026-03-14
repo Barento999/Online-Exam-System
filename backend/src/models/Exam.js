@@ -44,6 +44,10 @@ const examSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    randomizeQuestions: {
+      type: Boolean,
+      default: false,
+    },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

@@ -53,22 +53,41 @@ export const getQuestions = async (req, res, next) => {
     }
 
     const questions = await Question.find(query)
-      .populate("examId", "title")
+      .populate("examId", "title randomizeQuestions")
       .limit(limit)
       .skip(skip)
       .sort({ createdAt: -1 });
 
     const total = await Question.countDocuments(query);
 
+    // Shuffle questions for students if randomization is enabled
+    let finalQuestions = questions;
+    if (req.user.role === "student" && req.query.examId) {
+      const Exam = (await import("../models/Exam.js")).default;
+      const exam = await Exam.findById(req.query.examId);
+
+      if (exam && exam.randomizeQuestions) {
+        // Fisher-Yates shuffle algorithm
+        finalQuestions = [...questions];
+        for (let i = finalQuestions.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [finalQuestions[i], finalQuestions[j]] = [
+            finalQuestions[j],
+            finalQuestions[i],
+          ];
+        }
+      }
+    }
+
     // Hide correct answers for students
     if (req.user.role === "student") {
-      questions.forEach((q) => {
+      finalQuestions.forEach((q) => {
         q.correctAnswer = undefined;
       });
     }
 
     res.json({
-      questions,
+      questions: finalQuestions,
       page,
       pages: Math.ceil(total / limit),
       total,
