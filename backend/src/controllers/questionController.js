@@ -266,7 +266,17 @@ export const uploadQuestionsFile = async (req, res, next) => {
     const workbook = xlsx.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
-    const data = xlsx.utils.sheet_to_json(worksheet);
+    const data = xlsx.utils.sheet_to_json(worksheet, {
+      raw: false, // Convert all values to strings
+      defval: "", // Default value for empty cells
+    });
+
+    console.log("Parsed data from file:");
+    console.log("Number of rows:", data.length);
+    if (data.length > 0) {
+      console.log("Column names found:", Object.keys(data[0]));
+      console.log("First row sample:", JSON.stringify(data[0], null, 2));
+    }
 
     // Validate and transform data
     const questions = [];
@@ -275,42 +285,60 @@ export const uploadQuestionsFile = async (req, res, next) => {
     data.forEach((row, index) => {
       const rowNum = index + 2; // Excel rows start at 1, header is row 1
 
+      console.log(`Validating row ${rowNum}:`, JSON.stringify(row, null, 2));
+
+      // Trim all values and check for required fields
+      const questionText = row.questionText?.toString().trim() || "";
+      const optionA = row.optionA?.toString().trim() || "";
+      const optionB = row.optionB?.toString().trim() || "";
+      const optionC = row.optionC?.toString().trim() || "";
+      const optionD = row.optionD?.toString().trim() || "";
+      const correctAnswer = row.correctAnswer?.toString().trim() || "";
+      const marksStr = row.marks?.toString().trim() || "";
+
       // Validate required fields
-      if (
-        !row.questionText ||
-        !row.optionA ||
-        !row.optionB ||
-        !row.optionC ||
-        !row.optionD ||
-        !row.correctAnswer ||
-        !row.marks
-      ) {
-        errors.push(`Row ${rowNum}: Missing required fields`);
+      const missingFields = [];
+      if (!questionText) missingFields.push("questionText");
+      if (!optionA) missingFields.push("optionA");
+      if (!optionB) missingFields.push("optionB");
+      if (!optionC) missingFields.push("optionC");
+      if (!optionD) missingFields.push("optionD");
+      if (!correctAnswer) missingFields.push("correctAnswer");
+      if (!marksStr) missingFields.push("marks");
+
+      if (missingFields.length > 0) {
+        errors.push(
+          `Row ${rowNum}: Missing required fields: ${missingFields.join(", ")}`,
+        );
         return;
       }
 
       // Validate correct answer
-      if (!["A", "B", "C", "D"].includes(row.correctAnswer.toUpperCase())) {
-        errors.push(`Row ${rowNum}: Correct answer must be A, B, C, or D`);
+      if (!["A", "B", "C", "D"].includes(correctAnswer.toUpperCase())) {
+        errors.push(
+          `Row ${rowNum}: Correct answer must be A, B, C, or D (got: "${correctAnswer}")`,
+        );
         return;
       }
 
       // Validate marks
-      const marks = parseInt(row.marks);
+      const marks = parseInt(marksStr);
       if (isNaN(marks) || marks < 1) {
-        errors.push(`Row ${rowNum}: Marks must be a positive number`);
+        errors.push(
+          `Row ${rowNum}: Marks must be a positive number (got: "${marksStr}")`,
+        );
         return;
       }
 
       questions.push({
         examId,
-        questionText: row.questionText.toString().trim(),
-        optionA: row.optionA.toString().trim(),
-        optionB: row.optionB.toString().trim(),
-        optionC: row.optionC.toString().trim(),
-        optionD: row.optionD.toString().trim(),
-        correctAnswer: row.correctAnswer.toString().toUpperCase().trim(),
-        marks: marks,
+        questionText,
+        optionA,
+        optionB,
+        optionC,
+        optionD,
+        correctAnswer: correctAnswer.toUpperCase(),
+        marks,
       });
     });
 
