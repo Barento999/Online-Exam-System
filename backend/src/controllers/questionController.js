@@ -66,7 +66,15 @@ export const getQuestions = async (req, res, next) => {
       const Exam = (await import("../models/Exam.js")).default;
       const exam = await Exam.findById(req.query.examId);
 
+      console.log("=== Randomization Check ===");
+      console.log("User role:", req.user.role);
+      console.log("Exam ID:", req.query.examId);
+      console.log("Exam found:", !!exam);
+      console.log("Randomization enabled:", exam?.randomizeQuestions);
+      console.log("Questions count:", questions.length);
+
       if (exam && exam.randomizeQuestions) {
+        console.log("Shuffling questions...");
         // Fisher-Yates shuffle algorithm
         finalQuestions = [...questions];
         for (let i = finalQuestions.length - 1; i > 0; i--) {
@@ -76,6 +84,12 @@ export const getQuestions = async (req, res, next) => {
             finalQuestions[i],
           ];
         }
+        console.log("Questions shuffled successfully");
+      } else {
+        console.log("Randomization not applied:", {
+          examExists: !!exam,
+          randomizeEnabled: exam?.randomizeQuestions,
+        });
       }
     }
 
