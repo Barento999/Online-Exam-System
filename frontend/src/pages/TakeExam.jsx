@@ -52,6 +52,19 @@ export const TakeExam = () => {
           handleAutoSubmit();
           return 0;
         }
+
+        // Warning notifications
+        if (prev === 300) {
+          // 5 minutes remaining
+          toast.warning("⏰ 5 minutes remaining!", { duration: 5000 });
+        } else if (prev === 60) {
+          // 1 minute remaining
+          toast.error("⏰ Only 1 minute left!", { duration: 5000 });
+        } else if (prev === 30) {
+          // 30 seconds remaining
+          toast.error("⏰ 30 seconds left! Hurry up!", { duration: 5000 });
+        }
+
         return prev - 1;
       });
     }, 1000);
@@ -164,21 +177,60 @@ export const TakeExam = () => {
               </div>
               <div className="text-center">
                 <div className="flex items-center gap-2 mb-1">
-                  <Clock className="h-5 w-5 text-primary" />
+                  <Clock
+                    className={`h-5 w-5 ${timeRemaining < 300 ? "text-destructive animate-pulse" : "text-primary"}`}
+                  />
                   <p className="text-sm text-muted-foreground">
                     Time Remaining
                   </p>
                 </div>
                 <p
-                  className={`text-2xl font-semibold ${timeRemaining < 300 ? "text-destructive" : "text-primary"}`}>
+                  className={`text-2xl font-semibold ${
+                    timeRemaining < 60
+                      ? "text-destructive animate-pulse"
+                      : timeRemaining < 300
+                        ? "text-orange-500"
+                        : "text-primary"
+                  }`}>
                   {formatTime(timeRemaining)}
                 </p>
+                {timeRemaining < 300 && (
+                  <p className="text-xs text-destructive mt-1">
+                    {timeRemaining < 60
+                      ? "⚠️ Time almost up!"
+                      : "⚠️ Less than 5 min"}
+                  </p>
+                )}
               </div>
             </div>
           </div>
           <Progress value={progress} className="mt-4" />
         </div>
       </div>
+
+      {/* Time Warning Banner */}
+      {timeRemaining > 0 && timeRemaining < 300 && (
+        <div
+          className={`${
+            timeRemaining < 60
+              ? "bg-destructive/10 border-destructive"
+              : "bg-orange-500/10 border-orange-500"
+          } border-b`}>
+          <div className="container mx-auto px-4 py-3">
+            <div className="flex items-center justify-center gap-2">
+              <Clock
+                className={`h-5 w-5 ${timeRemaining < 60 ? "text-destructive" : "text-orange-500"} animate-pulse`}
+              />
+              <p
+                className={`font-medium ${timeRemaining < 60 ? "text-destructive" : "text-orange-500"}`}>
+                {timeRemaining < 60
+                  ? "⚠️ Less than 1 minute remaining! Exam will auto-submit soon."
+                  : `⚠️ ${Math.floor(timeRemaining / 60)} minutes remaining. Please complete your answers.`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="container mx-auto px-4 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">

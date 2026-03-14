@@ -121,6 +121,7 @@ export const createExam = async (req, res, next) => {
       startTime,
       endTime,
       status,
+      randomizeQuestions,
     } = req.body;
 
     // Teachers can only create exams for their own courses
@@ -148,6 +149,7 @@ export const createExam = async (req, res, next) => {
       startTime,
       endTime,
       status,
+      randomizeQuestions: randomizeQuestions || false,
       createdBy: req.user._id,
     });
 
@@ -186,6 +188,7 @@ export const updateExam = async (req, res, next) => {
       startTime,
       endTime,
       status,
+      randomizeQuestions,
     } = req.body;
 
     exam.title = title || exam.title;
@@ -196,6 +199,9 @@ export const updateExam = async (req, res, next) => {
     exam.startTime = startTime || exam.startTime;
     exam.endTime = endTime || exam.endTime;
     exam.status = status || exam.status;
+    if (randomizeQuestions !== undefined) {
+      exam.randomizeQuestions = randomizeQuestions;
+    }
 
     const updatedExam = await exam.save();
     res.json(updatedExam);
