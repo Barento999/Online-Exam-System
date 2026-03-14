@@ -9,6 +9,7 @@ import { Loader } from "@/components/common/Loader";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { examsApi, questionsApi } from "@/services/api";
 import { useExamSession } from "@/hooks/useExamSession";
+import { useAntiCheat } from "@/hooks/useAntiCheat";
 import {
   Clock,
   ChevronLeft,
@@ -16,6 +17,8 @@ import {
   Flag,
   Wifi,
   WifiOff,
+  Shield,
+  AlertTriangle,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -38,8 +41,28 @@ export const TakeExam = () => {
     connected,
   } = useExamSession(examId, user._id);
 
+  // Anti-cheat monitoring
+  const {
+    violations,
+    tabSwitchCount,
+    isFullscreen,
+    requestFullscreen,
+    exitFullscreen,
+    getViolationSummary,
+  } = useAntiCheat(examId, (violation) => {
+    console.log("Suspicious activity detected:", violation);
+    // Could send to backend for logging
+  });
+
   useEffect(() => {
     loadExamData();
+
+    // Cleanup: exit fullscreen when component unmounts
+    return () => {
+      if (document.fullscreenElement) {
+        exitFullscreen();
+      }
+    };
   }, [examId]);
 
   useEffect(() => {
@@ -81,6 +104,38 @@ export const TakeExam = () => {
       setExam(examRes.data);
       setQuestions(questionsRes.data.questions || questionsRes.data);
       setTimeRemaining(examRes.data.duration * 60); // Convert to seconds
+
+      // Prompt for fullscreen
+      setTimeout(() => {
+        if (!document.fullscreenElement) {
+          toast(
+            (t) => (
+              <div className="flex flex-col gap-2">
+                <p className="font-medium">Enable Fullscreen Mode?</p>
+                <p className="text-sm text-muted-foreground">
+                  Fullscreen mode helps prevent distractions and cheating
+                </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      requestFullscreen();
+                      toast.dismiss(t.id);
+                    }}
+                    className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm">
+                    Enable
+                  </button>
+                  <button
+                    onClick={() => toast.dismiss(t.id)}
+                    className="px-3 py-1 bg-muted rounded text-sm">
+                    Skip
+                  </button>
+                </div>
+              </div>
+            ),
+            { duration: 10000 },
+          );
+        }
+      }, 1000);
     } catch (error) {
       toast.error("Failed to load exam");
       navigate("/exams");
@@ -166,6 +221,18 @@ export const TakeExam = () => {
                 <span className="text-xs text-muted-foreground">
                   {connected ? "Live" : "Offline"}
                 </span>
+              </div>
+              <div className="text-center">
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield
+                    className={`h-4 w-4 ${tabSwitchCount > 0 ? "text-destructive" : "text-green-500"}`}
+                  />
+                  <p className="text-sm text-muted-foreground">Anti-Cheat</p>
+                </div>
+                <p
+                  className={`text-xl font-semibold ${tabSwitchCount > 0 ? "text-destructive" : "text-green-600"}`}>
+                  {tabSwitchCount > 0 ? `${tabSwitchCount} warnings` : "Active"}
+                </p>
               </div>
               <div className="text-center">
                 <p className="text-sm text-muted-foreground">
