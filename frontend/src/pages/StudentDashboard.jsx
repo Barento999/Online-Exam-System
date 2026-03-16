@@ -1,70 +1,161 @@
-import { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Loader } from '@/components/common/Loader';
-import { dashboardApi } from '@/services/api';
-import { BookOpen, FileText, CheckCircle, TrendingUp, Clock } from 'lucide-react';
-import { useNavigate } from 'react-router';
+import { useState, useEffect } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
+import {
+  ExamCardSkeleton,
+  ResultCardSkeleton,
+} from "@/components/skeletons/ExamCardSkeleton";
+import { StatsGridSkeleton } from "@/components/skeletons/StatsCardSkeleton";
+import { StatsCard } from "@/components/dashboard/StatsCard";
+import { QuickActions } from "@/components/dashboard/QuickActions";
+import { dashboardApi } from "@/services/api";
+import {
+  BookOpen,
+  CheckCircle,
+  TrendingUp,
+  Clock,
+  Calendar,
+  Award,
+} from "lucide-react";
+import { useNavigate } from "react-router";
 
 export const StudentDashboard = () => {
   const [stats, setStats] = useState(null);
+  const [exams, setExams] = useState(null);
+  const [results, setResults] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [examsLoading, setExamsLoading] = useState(true);
+  const [resultsLoading, setResultsLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
-    loadStats();
+    loadDashboardData();
   }, []);
+
+  const loadDashboardData = async () => {
+    // Load stats first
+    loadStats();
+
+    // Load exams and results in parallel
+    Promise.all([loadAvailableExams(), loadRecentResults()]);
+  };
 
   const loadStats = async () => {
     try {
       const response = await dashboardApi.getStudentStats();
       setStats(response.data);
     } catch (error) {
-      console.error('Error loading stats:', error);
+      console.error("Error loading stats:", error);
     } finally {
       setLoading(false);
     }
   };
 
+  const loadAvailableExams = async () => {
+    try {
+      // Simulate API call - replace with actual API
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      setExams([
+        {
+          id: 1,
+          title: "Mathematics Midterm",
+          course: "Mathematics 101",
+          duration: 90,
+          totalMarks: 100,
+          status: "available",
+          dueDate: "2026-03-25",
+        },
+        {
+          id: 2,
+          title: "Physics Quiz 1",
+          course: "Physics Advanced",
+          duration: 45,
+          totalMarks: 50,
+          status: "available",
+          dueDate: "2026-03-22",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error loading exams:", error);
+    } finally {
+      setExamsLoading(false);
+    }
+  };
+
+  const loadRecentResults = async () => {
+    try {
+      // Simulate API call - replace with actual API
+      await new Promise((resolve) => setTimeout(resolve, 1200));
+      setResults([
+        {
+          id: 1,
+          title: "Mathematics Midterm",
+          submittedDate: "Mar 15, 2026",
+          score: 85,
+          status: "passed",
+        },
+        {
+          id: 2,
+          title: "Physics Quiz 1",
+          submittedDate: "Mar 20, 2026",
+          score: 84,
+          status: "passed",
+        },
+      ]);
+    } catch (error) {
+      console.error("Error loading results:", error);
+    } finally {
+      setResultsLoading(false);
+    }
+  };
+
+  // Show full skeleton loader initially
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader size="lg" />
-        </div>
+        <DashboardSkeleton />
       </Layout>
     );
   }
 
   const statCards = [
     {
-      title: 'Enrolled Courses',
+      title: "Enrolled Courses",
       value: stats?.enrolledCourses || 0,
       icon: BookOpen,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/20',
+      color: "text-blue-600",
+      bgColor: "bg-blue-100 dark:bg-blue-900/20",
+      trend: "up",
+      trendValue: "+2 this month",
     },
     {
-      title: 'Completed Exams',
+      title: "Completed Exams",
       value: stats?.completedExams || 0,
       icon: CheckCircle,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100 dark:bg-green-900/20',
+      color: "text-green-600",
+      bgColor: "bg-green-100 dark:bg-green-900/20",
+      trend: "up",
+      trendValue: "+3 this week",
     },
     {
-      title: 'Upcoming Exams',
+      title: "Upcoming Exams",
       value: stats?.upcomingExams || 0,
       icon: Clock,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100 dark:bg-orange-900/20',
+      color: "text-orange-600",
+      bgColor: "bg-orange-100 dark:bg-orange-900/20",
+      trend: "neutral",
+      trendValue: "2 this week",
     },
     {
-      title: 'Average Score',
+      title: "Average Score",
       value: `${stats?.avgScore || 0}%`,
       icon: TrendingUp,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100 dark:bg-purple-900/20',
+      color: "text-purple-600",
+      bgColor: "bg-purple-100 dark:bg-purple-900/20",
+      trend: "up",
+      trendValue: "+5% improvement",
     },
   ];
 
@@ -79,108 +170,145 @@ export const StudentDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statCards.map((stat) => {
-            const Icon = stat.icon;
-            return (
-              <Card key={stat.title}>
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-muted-foreground">{stat.title}</p>
-                      <p className="text-3xl font-semibold mt-2">{stat.value}</p>
-                    </div>
-                    <div className={`h-12 w-12 rounded-full ${stat.bgColor} flex items-center justify-center`}>
-                      <Icon className={`h-6 w-6 ${stat.color}`} />
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
+          {statCards.map((stat) => (
+            <StatsCard
+              key={stat.title}
+              title={stat.title}
+              value={stat.value}
+              icon={stat.icon}
+              color={stat.color}
+              bgColor={stat.bgColor}
+              trend={stat.trend}
+              trendValue={stat.trendValue}
+              onClick={() => {
+                // Add navigation logic based on stat type
+                if (stat.title === "Upcoming Exams") {
+                  navigate("/exams");
+                } else if (stat.title === "Completed Exams") {
+                  navigate("/results");
+                }
+              }}
+            />
+          ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <Card>
             <CardHeader>
-              <CardTitle>Available Exams</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Calendar className="h-5 w-5" />
+                Available Exams
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                <div className="p-4 rounded-lg border border-border">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="font-medium">Mathematics Midterm</h3>
-                      <p className="text-sm text-muted-foreground">Mathematics 101</p>
+                {examsLoading ? (
+                  <>
+                    <ExamCardSkeleton />
+                    <ExamCardSkeleton />
+                  </>
+                ) : exams && exams.length > 0 ? (
+                  exams.map((exam) => (
+                    <div
+                      key={exam.id}
+                      className="p-4 rounded-lg border border-border hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-2">
+                        <div>
+                          <h3 className="font-medium">{exam.title}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            {exam.course}
+                          </p>
+                        </div>
+                        <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 text-xs rounded">
+                          {exam.status === "available"
+                            ? "Available"
+                            : exam.status}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <div className="text-sm text-muted-foreground">
+                          <p>Duration: {exam.duration} minutes</p>
+                          <p>Total Marks: {exam.totalMarks}</p>
+                          <p className="text-xs mt-1">Due: {exam.dueDate}</p>
+                        </div>
+                        <Button
+                          size="sm"
+                          onClick={() => navigate(`/exams/${exam.id}/take`)}
+                          className="hover:scale-105 transition-transform">
+                          Start Exam
+                        </Button>
+                      </div>
                     </div>
-                    <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 text-xs rounded">
-                      Available
-                    </span>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No exams available at the moment</p>
                   </div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      <p>Duration: 90 minutes</p>
-                      <p>Total Marks: 100</p>
-                    </div>
-                    <Button size="sm" onClick={() => navigate('/exams/1/take')}>
-                      Start Exam
-                    </Button>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-lg border border-border">
-                  <div className="flex items-start justify-between mb-2">
-                    <div>
-                      <h3 className="font-medium">Physics Quiz 1</h3>
-                      <p className="text-sm text-muted-foreground">Physics Advanced</p>
-                    </div>
-                    <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 text-xs rounded">
-                      Available
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-muted-foreground">
-                      <p>Duration: 45 minutes</p>
-                      <p>Total Marks: 50</p>
-                    </div>
-                    <Button size="sm" onClick={() => navigate('/exams/2/take')}>
-                      Start Exam
-                    </Button>
-                  </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
 
           <Card>
             <CardHeader>
-              <CardTitle>Recent Results</CardTitle>
+              <CardTitle className="flex items-center gap-2">
+                <Award className="h-5 w-5" />
+                Recent Results
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-4 rounded-lg bg-accent">
-                  <div>
-                    <h3 className="font-medium">Mathematics Midterm</h3>
-                    <p className="text-sm text-muted-foreground">Submitted: Mar 15, 2026</p>
+                {resultsLoading ? (
+                  <>
+                    <ResultCardSkeleton />
+                    <ResultCardSkeleton />
+                  </>
+                ) : results && results.length > 0 ? (
+                  results.map((result) => (
+                    <div
+                      key={result.id}
+                      className="flex items-center justify-between p-4 rounded-lg bg-accent hover:bg-accent/80 transition-colors">
+                      <div>
+                        <h3 className="font-medium">{result.title}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Submitted: {result.submittedDate}
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <p
+                          className={`text-2xl font-semibold ${
+                            result.score >= 70
+                              ? "text-green-600"
+                              : result.score >= 50
+                                ? "text-yellow-600"
+                                : "text-red-600"
+                          }`}>
+                          {result.score}%
+                        </p>
+                        <p className="text-xs text-muted-foreground capitalize">
+                          {result.status}
+                        </p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <Award className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>No results available yet</p>
                   </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-semibold text-green-600">85%</p>
-                    <p className="text-xs text-muted-foreground">Passed</p>
-                  </div>
-                </div>
-                
-                <div className="flex items-center justify-between p-4 rounded-lg bg-accent">
-                  <div>
-                    <h3 className="font-medium">Physics Quiz 1</h3>
-                    <p className="text-sm text-muted-foreground">Submitted: Mar 20, 2026</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-semibold text-green-600">84%</p>
-                    <p className="text-xs text-muted-foreground">Passed</p>
-                  </div>
-                </div>
+                )}
               </div>
             </CardContent>
           </Card>
+        </div>
+
+        {/* Quick Actions Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2">
+            {/* This space can be used for additional widgets in the future */}
+          </div>
+          <QuickActions />
         </div>
       </div>
     </Layout>
