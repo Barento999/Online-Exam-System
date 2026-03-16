@@ -71,13 +71,19 @@ export const DonutChart = ({
           height={size}
           className="transform -rotate-90"
           viewBox={`0 0 ${size} ${size}`}>
-          {data.map((item, index) => {
+          {validData.map((item, index) => {
             const percentage =
               total > 0 ? (animatedData[index] / total) * 100 : 0;
             const strokeDasharray = circumference;
             const strokeDashoffset =
               circumference - (percentage / 100) * circumference;
             const rotation = (cumulativePercentage / 100) * 360;
+
+            // Ensure all values are finite numbers
+            const safeStrokeDashoffset = isFinite(strokeDashoffset)
+              ? strokeDashoffset
+              : circumference;
+            const safeRotation = isFinite(rotation) ? rotation : 0;
 
             cumulativePercentage += percentage;
 
@@ -91,13 +97,13 @@ export const DonutChart = ({
                 strokeWidth={strokeWidth}
                 strokeLinecap="round"
                 strokeDasharray={strokeDasharray}
-                strokeDashoffset={strokeDashoffset}
+                strokeDashoffset={safeStrokeDashoffset}
                 className={cn(
                   item.color || defaultColors[index % defaultColors.length],
                   "transition-all duration-1000 ease-out hover:stroke-[24px]",
                 )}
                 style={{
-                  transform: `rotate(${rotation}deg)`,
+                  transform: `rotate(${safeRotation}deg)`,
                   transformOrigin: `${size / 2}px ${size / 2}px`,
                   transitionDelay: `${index * 200}ms`,
                   filter: "drop-shadow(0 0 4px currentColor)",
@@ -118,7 +124,7 @@ export const DonutChart = ({
       {/* Legend */}
       {showLegend && (
         <div className="space-y-2">
-          {data.map((item, index) => {
+          {validData.map((item, index) => {
             const percentage = total > 0 ? (item.value / total) * 100 : 0;
             const colorClass =
               item.color || defaultColors[index % defaultColors.length];
@@ -137,7 +143,7 @@ export const DonutChart = ({
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {percentage.toFixed(1)}%
+                    {isFinite(percentage) ? percentage.toFixed(1) : "0.0"}%
                   </div>
                 </div>
               </div>

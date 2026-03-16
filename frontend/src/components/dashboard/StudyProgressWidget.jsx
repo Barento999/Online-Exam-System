@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 
 export const StudyProgressWidget = ({ data, loading, className }) => {
   const studyData = data?.studyData || [
-    { label: "Completed", value: 65, color: "stroke-green-600" },
-    { label: "In Progress", value: 25, color: "stroke-blue-600" },
-    { label: "Pending", value: 10, color: "stroke-orange-600" },
+    { label: "Completed", value: 2, color: "stroke-green-600" },
+    { label: "In Progress", value: 3, color: "stroke-blue-600" },
+    { label: "Pending", value: 1, color: "stroke-orange-600" },
   ];
 
   const weeklyGoals = data?.weeklyGoals || [
@@ -80,12 +80,16 @@ export const StudyProgressWidget = ({ data, loading, className }) => {
         <div className="grid grid-cols-3 gap-4 text-center">
           {studyData.map((item, index) => {
             const bgColor = item.color.replace("stroke-", "bg-");
+            const total = studyData.reduce((sum, d) => sum + d.value, 0);
+            const percentage =
+              total > 0 ? ((item.value / total) * 100).toFixed(1) : "0.0";
+
             return (
               <div key={item.label} className="space-y-1">
                 <div className={cn("w-3 h-3 rounded-full mx-auto", bgColor)} />
                 <div className="text-xs font-medium">{item.label}</div>
                 <div className="text-xs text-muted-foreground">
-                  {item.value}%
+                  {percentage}%
                 </div>
               </div>
             );
