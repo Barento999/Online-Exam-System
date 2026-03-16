@@ -10,7 +10,9 @@ import {
 import { StatsGridSkeleton } from "@/components/skeletons/StatsCardSkeleton";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
+import { FloatingActionButton } from "@/components/dashboard/FloatingActionButton";
 import { dashboardApi } from "@/services/api";
+import { cn } from "@/lib/utils";
 import {
   BookOpen,
   CheckCircle,
@@ -170,7 +172,7 @@ export const StudentDashboard = () => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statCards.map((stat) => (
+          {statCards.map((stat, index) => (
             <StatsCard
               key={stat.title}
               title={stat.title}
@@ -180,6 +182,7 @@ export const StudentDashboard = () => {
               bgColor={stat.bgColor}
               trend={stat.trend}
               trendValue={stat.trendValue}
+              animationDelay={index * 100}
               onClick={() => {
                 // Add navigation logic based on stat type
                 if (stat.title === "Upcoming Exams") {
@@ -208,24 +211,51 @@ export const StudentDashboard = () => {
                     <ExamCardSkeleton />
                   </>
                 ) : exams && exams.length > 0 ? (
-                  exams.map((exam) => (
+                  exams.map((exam, index) => (
                     <div
                       key={exam.id}
-                      className="p-4 rounded-lg border border-border hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between mb-2">
+                      className={cn(
+                        "p-4 rounded-lg border border-border group relative overflow-hidden",
+                        "hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-white/5",
+                        "hover:-translate-y-1 transition-all duration-300 ease-out",
+                        "hover:border-primary/30 cursor-pointer",
+                        "animate-in fade-in slide-in-from-left-4",
+                      )}
+                      style={{
+                        animationDelay: `${800 + index * 100}ms`,
+                        animationDuration: "500ms",
+                        animationFillMode: "both",
+                      }}>
+                      {/* Shimmer effect */}
+                      <div
+                        className={cn(
+                          "absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000",
+                          "bg-gradient-to-r from-transparent via-white/10 to-transparent",
+                          "skew-x-12",
+                        )}
+                      />
+
+                      <div className="flex items-start justify-between mb-2 relative z-10">
                         <div>
-                          <h3 className="font-medium">{exam.title}</h3>
+                          <h3 className="font-medium group-hover:text-primary transition-colors duration-200">
+                            {exam.title}
+                          </h3>
                           <p className="text-sm text-muted-foreground">
                             {exam.course}
                           </p>
                         </div>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400 text-xs rounded">
+                        <span
+                          className={cn(
+                            "px-2 py-1 text-xs rounded transition-all duration-200",
+                            "bg-green-100 text-green-700 dark:bg-green-900/20 dark:text-green-400",
+                            "group-hover:bg-green-200 dark:group-hover:bg-green-900/30 group-hover:scale-105",
+                          )}>
                           {exam.status === "available"
                             ? "Available"
                             : exam.status}
                         </span>
                       </div>
-                      <div className="flex items-center justify-between">
+                      <div className="flex items-center justify-between relative z-10">
                         <div className="text-sm text-muted-foreground">
                           <p>Duration: {exam.duration} minutes</p>
                           <p>Total Marks: {exam.totalMarks}</p>
@@ -234,7 +264,10 @@ export const StudentDashboard = () => {
                         <Button
                           size="sm"
                           onClick={() => navigate(`/exams/${exam.id}/take`)}
-                          className="hover:scale-105 transition-transform">
+                          className={cn(
+                            "hover:scale-110 transition-all duration-200",
+                            "hover:shadow-md group-hover:bg-primary group-hover:text-primary-foreground",
+                          )}>
                           Start Exam
                         </Button>
                       </div>
@@ -265,25 +298,38 @@ export const StudentDashboard = () => {
                     <ResultCardSkeleton />
                   </>
                 ) : results && results.length > 0 ? (
-                  results.map((result) => (
+                  results.map((result, index) => (
                     <div
                       key={result.id}
-                      className="flex items-center justify-between p-4 rounded-lg bg-accent hover:bg-accent/80 transition-colors">
+                      className={cn(
+                        "flex items-center justify-between p-4 rounded-lg bg-accent group",
+                        "hover:bg-accent/80 transition-all duration-300 ease-out",
+                        "hover:shadow-md hover:-translate-y-0.5 cursor-pointer",
+                        "animate-in fade-in slide-in-from-right-4",
+                      )}
+                      style={{
+                        animationDelay: `${800 + index * 100}ms`,
+                        animationDuration: "500ms",
+                        animationFillMode: "both",
+                      }}>
                       <div>
-                        <h3 className="font-medium">{result.title}</h3>
+                        <h3 className="font-medium group-hover:text-primary transition-colors duration-200">
+                          {result.title}
+                        </h3>
                         <p className="text-sm text-muted-foreground">
                           Submitted: {result.submittedDate}
                         </p>
                       </div>
                       <div className="text-right">
                         <p
-                          className={`text-2xl font-semibold ${
+                          className={cn(
+                            "text-2xl font-semibold transition-all duration-300 group-hover:scale-110",
                             result.score >= 70
                               ? "text-green-600"
                               : result.score >= 50
                                 ? "text-yellow-600"
-                                : "text-red-600"
-                          }`}>
+                                : "text-red-600",
+                          )}>
                           {result.score}%
                         </p>
                         <p className="text-xs text-muted-foreground capitalize">
@@ -311,6 +357,9 @@ export const StudentDashboard = () => {
           <QuickActions />
         </div>
       </div>
+
+      {/* Floating Action Button */}
+      <FloatingActionButton />
     </Layout>
   );
 };
