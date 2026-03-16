@@ -194,8 +194,8 @@ export const StudentDashboard = () => {
               <div className="space-y-3">
                 {!dashboardData ? (
                   <>
-                    <ExamCardSkeleton />
-                    <ExamCardSkeleton />
+                    <ExamCardSkeleton key="exam-skeleton-1" />
+                    <ExamCardSkeleton key="exam-skeleton-2" />
                   </>
                 ) : dashboardData.availableExams &&
                   dashboardData.availableExams.length > 0 ? (
@@ -289,14 +289,14 @@ export const StudentDashboard = () => {
               <div className="space-y-4">
                 {!dashboardData ? (
                   <>
-                    <ResultCardSkeleton />
-                    <ResultCardSkeleton />
+                    <ResultCardSkeleton key="result-skeleton-1" />
+                    <ResultCardSkeleton key="result-skeleton-2" />
                   </>
                 ) : dashboardData.stats?.recentResults &&
                   dashboardData.stats.recentResults.length > 0 ? (
                   dashboardData.stats.recentResults.map((result, index) => (
                     <div
-                      key={result.id}
+                      key={result.id || `result-${index}`}
                       className={cn(
                         "flex items-center justify-between p-4 rounded-lg bg-accent group",
                         "hover:bg-accent/80 transition-all duration-300 ease-out",
