@@ -1,11 +1,21 @@
 import { dashboardApi, resultsApi, examsApi, enrollmentsApi } from "./api";
 import { mockDataService } from "./mockDataService";
 
-// Check if user is authenticated
+// Check if user is authenticated and get user data safely
 const isAuthenticated = () => {
   const token = localStorage.getItem("token");
   const user = localStorage.getItem("user");
   return !!(token && user);
+};
+
+const getUserData = () => {
+  try {
+    const userStr = localStorage.getItem("user");
+    return userStr ? JSON.parse(userStr) : null;
+  } catch (error) {
+    console.warn("Failed to parse user data from localStorage:", error);
+    return null;
+  }
 };
 
 // Enhanced student data service with realistic data structure
@@ -27,7 +37,13 @@ export const studentDataService = {
         ]);
 
       // Get recent results
-      const resultsResponse = await resultsApi.getAll();
+      const user = getUserData();
+      if (!user || !user._id) {
+        console.warn("No valid user data found, using mock data");
+        return mockDataService.getDashboardData();
+      }
+      const studentId = user._id;
+      const resultsResponse = await resultsApi.getByStudent(studentId);
 
       // Transform API data to match expected format
       const dashboardData = {
@@ -62,7 +78,16 @@ export const studentDataService = {
     }
 
     try {
-      const resultsResponse = await resultsApi.getAll();
+      // Get user info to get student ID
+      const user = getUserData();
+      if (!user || !user._id) {
+        console.warn("No valid user data found, using mock data");
+        return mockDataService.getPerformanceData();
+      }
+      const studentId = user._id;
+
+      // Use student-specific results endpoint
+      const resultsResponse = await resultsApi.getByStudent(studentId);
       const results = resultsResponse.data || [];
 
       if (results.length === 0) {
@@ -116,7 +141,16 @@ export const studentDataService = {
     }
 
     try {
-      const resultsResponse = await resultsApi.getAll();
+      // Get user info to get student ID
+      const user = getUserData();
+      if (!user || !user._id) {
+        console.warn("No valid user data found, using mock data");
+        return mockDataService.getExamTrendsData();
+      }
+      const studentId = user._id;
+
+      // Use student-specific results endpoint
+      const resultsResponse = await resultsApi.getByStudent(studentId);
       const results = resultsResponse.data || [];
 
       if (results.length === 0) {
