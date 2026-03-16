@@ -28,6 +28,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import { usePageNotifications } from "@/hooks/usePageNotifications";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { examsApi, coursesApi } from "@/services/api";
@@ -37,6 +38,9 @@ import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 
 export const Exams = () => {
+  // Clear notifications when user visits this page
+  usePageNotifications("/exams");
+
   const [exams, setExams] = useState([]);
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);

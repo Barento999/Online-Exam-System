@@ -2,7 +2,7 @@ import { RouterProvider } from "react-router";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { SocketProvider } from "./context/SocketContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
-import { NotificationExample } from "./components/layout/NotificationExample.jsx";
+import { NotificationLoader } from "./components/layout/NotificationExample.jsx";
 import { Toaster } from "react-hot-toast";
 import { router } from "./routes.jsx";
 
@@ -11,7 +11,7 @@ export default function App() {
     <AuthProvider>
       <SocketProvider>
         <NotificationProvider>
-          <NotificationExample />
+          <NotificationLoader />
           <RouterProvider router={router} />
           <Toaster
             position="top-right"

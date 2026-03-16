@@ -30,10 +30,14 @@ import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { usersApi } from "@/services/api";
+import { usePageNotifications } from "@/hooks/usePageNotifications";
 import { Plus, Pencil, Trash2, Search, Upload, Download } from "lucide-react";
 import toast from "react-hot-toast";
 
 export const Users = () => {
+  // Clear notifications when user visits this page
+  usePageNotifications("/users");
+
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
