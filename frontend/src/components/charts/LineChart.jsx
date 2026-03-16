@@ -74,17 +74,35 @@ export const LineChart = ({
   });
 
   const pathData = points.reduce((path, point, index) => {
+    // Ensure point coordinates are valid
+    if (!point || !isFinite(point.x) || !isFinite(point.y)) {
+      return path;
+    }
+
     if (index === 0) {
       return `M ${point.x} ${point.y}`;
     }
 
     if (smooth && index > 0) {
       const prevPoint = points[index - 1];
+      if (!prevPoint || !isFinite(prevPoint.x) || !isFinite(prevPoint.y)) {
+        return `${path} L ${point.x} ${point.y}`;
+      }
+
       const cpx1 = prevPoint.x + (point.x - prevPoint.x) / 3;
       const cpy1 = prevPoint.y;
       const cpx2 = point.x - (point.x - prevPoint.x) / 3;
       const cpy2 = point.y;
-      return `${path} C ${cpx1} ${cpy1}, ${cpx2} ${cpy2}, ${point.x} ${point.y}`;
+
+      // Ensure control points are valid
+      if (
+        isFinite(cpx1) &&
+        isFinite(cpy1) &&
+        isFinite(cpx2) &&
+        isFinite(cpy2)
+      ) {
+        return `${path} C ${cpx1} ${cpy1}, ${cpx2} ${cpy2}, ${point.x} ${point.y}`;
+      }
     }
 
     return `${path} L ${point.x} ${point.y}`;
@@ -122,14 +140,19 @@ export const LineChart = ({
             })}
 
             {/* Vertical grid lines */}
-            {data.map((_, i) => {
-              const x = padding + (i / (data.length - 1)) * chartWidth;
+            {validData.map((_, i) => {
+              const x =
+                padding +
+                (validData.length > 1
+                  ? (i / (validData.length - 1)) * chartWidth
+                  : chartWidth / 2);
+              const safeX = isFinite(x) ? x : padding;
               return (
                 <line
                   key={`v-${i}`}
-                  x1={x}
+                  x1={safeX}
                   y1={padding}
-                  x2={x}
+                  x2={safeX}
                   y2={height - padding}
                   stroke="currentColor"
                   strokeWidth="1"
@@ -148,7 +171,7 @@ export const LineChart = ({
         </defs>
 
         <path
-          d={`${pathData} L ${points[points.length - 1]?.x || 0} ${height - padding} L ${padding} ${height - padding} Z`}
+          d={`${pathData} L ${points[points.length - 1]?.x && isFinite(points[points.length - 1]?.x) ? points[points.length - 1].x : padding} ${height - padding} L ${padding} ${height - padding} Z`}
           fill="url(#areaGradient)"
           className={colorClasses[color] || "stroke-primary"}
         />
@@ -216,12 +239,13 @@ export const LineChart = ({
           ))}
 
         {/* Labels */}
-        {data.map((item, index) => {
+        {validData.map((item, index) => {
           const point = points[index];
+          const safeX = point?.x && isFinite(point.x) ? point.x : padding;
           return (
             <text
               key={index}
-              x={point?.x || 0}
+              x={safeX}
               y={height - 10}
               textAnchor="middle"
               fontSize="12"
