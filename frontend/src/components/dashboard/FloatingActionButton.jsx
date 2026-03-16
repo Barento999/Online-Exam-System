@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Plus, X, FileText, Award, BookOpen, BarChart3 } from "lucide-react";
+import {
+  Plus,
+  X,
+  FileText,
+  Award,
+  BookOpen,
+  BarChart3,
+  Calendar,
+  MessageSquare,
+} from "lucide-react";
 import { useNavigate } from "react-router";
 
 export const FloatingActionButton = () => {
@@ -12,7 +21,7 @@ export const FloatingActionButton = () => {
     {
       label: "Take Exam",
       icon: FileText,
-      color: "bg-blue-500 hover:bg-blue-600",
+      color: "bg-blue-600 hover:bg-blue-700",
       onClick: () => {
         navigate("/exams");
         setIsOpen(false);
@@ -21,7 +30,7 @@ export const FloatingActionButton = () => {
     {
       label: "View Results",
       icon: Award,
-      color: "bg-green-500 hover:bg-green-600",
+      color: "bg-green-600 hover:bg-green-700",
       onClick: () => {
         navigate("/results");
         setIsOpen(false);
@@ -30,16 +39,35 @@ export const FloatingActionButton = () => {
     {
       label: "Study Materials",
       icon: BookOpen,
-      color: "bg-purple-500 hover:bg-purple-600",
+      color: "bg-purple-600 hover:bg-purple-700",
       onClick: () => {
         navigate("/materials");
         setIsOpen(false);
       },
     },
     {
+      label: "Schedule",
+      icon: Calendar,
+      color: "bg-pink-600 hover:bg-pink-700",
+      onClick: () => {
+        navigate("/schedule");
+        setIsOpen(false);
+      },
+    },
+    {
+      label: "Messages",
+      icon: MessageSquare,
+      color: "bg-cyan-600 hover:bg-cyan-700",
+      onClick: () => {
+        navigate("/messages");
+        setIsOpen(false);
+      },
+      badge: 3,
+    },
+    {
       label: "Analytics",
       icon: BarChart3,
-      color: "bg-orange-500 hover:bg-orange-600",
+      color: "bg-orange-600 hover:bg-orange-700",
       onClick: () => {
         navigate("/analytics");
         setIsOpen(false);
@@ -63,23 +91,41 @@ export const FloatingActionButton = () => {
             <div
               key={action.label}
               className={cn(
-                "flex items-center gap-3 transition-all duration-300",
-                isOpen ? "translate-x-0" : "translate-x-16",
+                "flex items-center gap-3 transition-all duration-300 animate-in slide-in-from-right-4 fade-in",
               )}
-              style={{ transitionDelay: `${index * 50}ms` }}>
-              <span className="bg-black/80 text-white px-3 py-1 rounded-lg text-sm whitespace-nowrap">
+              style={{
+                transitionDelay: `${index * 50}ms`,
+                animationDelay: `${index * 50}ms`,
+                animationDuration: "200ms",
+                animationFillMode: "both",
+              }}>
+              {/* Label tooltip */}
+              <span className="bg-background border shadow-lg px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
                 {action.label}
               </span>
-              <Button
-                size="sm"
-                className={cn(
-                  "h-12 w-12 rounded-full shadow-lg transition-all duration-200",
-                  "hover:scale-110 hover:shadow-xl",
-                  action.color,
+
+              {/* Action button */}
+              <div className="relative">
+                <Button
+                  size="icon"
+                  className={cn(
+                    "h-12 w-12 rounded-full shadow-lg transition-all duration-200",
+                    "hover:scale-110 hover:shadow-xl",
+                    action.color,
+                  )}
+                  onClick={action.onClick}>
+                  <Icon className="h-5 w-5 text-white" />
+                </Button>
+
+                {/* Badge for notifications */}
+                {action.badge && (
+                  <div className="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full flex items-center justify-center animate-pulse">
+                    <span className="text-[10px] font-bold text-white">
+                      {action.badge}
+                    </span>
+                  </div>
                 )}
-                onClick={action.onClick}>
-                <Icon className="h-5 w-5" />
-              </Button>
+              </div>
             </div>
           );
         })}
@@ -91,8 +137,9 @@ export const FloatingActionButton = () => {
         className={cn(
           "h-14 w-14 rounded-full shadow-lg transition-all duration-300",
           "hover:scale-110 hover:shadow-xl",
-          "bg-primary hover:bg-primary/90",
-          isOpen && "rotate-45",
+          isOpen
+            ? "bg-red-600 hover:bg-red-700 rotate-45"
+            : "bg-primary hover:bg-primary/90",
         )}
         onClick={() => setIsOpen(!isOpen)}>
         {isOpen ? <X className="h-6 w-6" /> : <Plus className="h-6 w-6" />}
@@ -101,7 +148,7 @@ export const FloatingActionButton = () => {
       {/* Backdrop */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/20 -z-10"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm -z-10 animate-in fade-in duration-200"
           onClick={() => setIsOpen(false)}
         />
       )}
