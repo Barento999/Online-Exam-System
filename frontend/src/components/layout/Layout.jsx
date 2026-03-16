@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { Navbar } from "./Navbar";
+import { Breadcrumbs } from "@/components/common/Breadcrumbs";
 import { cn } from "@/lib/utils";
 
 export const Layout = ({ children }) => {
@@ -30,7 +31,10 @@ export const Layout = ({ children }) => {
         )}>
         <Navbar />
         <main className="pt-16">
-          <div className="p-4 md:p-6">{children}</div>
+          <div className="p-4 md:p-6">
+            <Breadcrumbs />
+            {children}
+          </div>
         </main>
       </div>
     </div>
