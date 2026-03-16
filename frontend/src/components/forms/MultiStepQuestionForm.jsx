@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import {
   Select,
   SelectContent,
@@ -139,20 +140,20 @@ const QuestionDetailsStep = ({
 
       <div className="space-y-2">
         <Label htmlFor="questionText">Question Text *</Label>
-        <Textarea
-          id="questionText"
+        <MarkdownEditor
           value={data.questionText || ""}
-          onChange={(e) => updateData({ questionText: e.target.value })}
-          placeholder="Enter your question here..."
-          rows={4}
-          className={hasFieldError("questionText") ? "border-red-500" : ""}
+          onChange={(value) => updateData({ questionText: value })}
+          placeholder="Enter your question here... (Markdown supported for formatting)"
+          minHeight="150px"
+          maxHeight="250px"
+          label=""
+          required={true}
+          error={
+            hasFieldError("questionText") ? getFieldError("questionText") : null
+          }
+          showPreview={true}
+          showHelp={true}
         />
-        {getFieldError("questionText") && (
-          <p className="text-sm text-red-600 flex items-center gap-1">
-            <AlertCircle className="h-3 w-3" />
-            {getFieldError("questionText")}
-          </p>
-        )}
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -295,12 +296,15 @@ const MediaStep = ({ data, updateData }) => {
 
       <div className="space-y-2">
         <Label htmlFor="hint">Hint (Optional)</Label>
-        <Textarea
-          id="hint"
+        <MarkdownEditor
           value={data.hint || ""}
-          onChange={(e) => updateData({ hint: e.target.value })}
-          placeholder="Provide a helpful hint for students..."
-          rows={2}
+          onChange={(value) => updateData({ hint: value })}
+          placeholder="Provide a helpful hint for students... (Markdown supported)"
+          minHeight="100px"
+          maxHeight="150px"
+          label=""
+          showPreview={true}
+          showHelp={false}
         />
         <p className="text-xs text-muted-foreground">
           This hint can be shown to students if enabled in exam settings
@@ -309,12 +313,15 @@ const MediaStep = ({ data, updateData }) => {
 
       <div className="space-y-2">
         <Label htmlFor="explanation">Explanation (Optional)</Label>
-        <Textarea
-          id="explanation"
+        <MarkdownEditor
           value={data.explanation || ""}
-          onChange={(e) => updateData({ explanation: e.target.value })}
-          placeholder="Explain the correct answer and reasoning..."
-          rows={3}
+          onChange={(value) => updateData({ explanation: value })}
+          placeholder="Explain the correct answer and reasoning... (Markdown supported)"
+          minHeight="120px"
+          maxHeight="180px"
+          label=""
+          showPreview={true}
+          showHelp={false}
         />
         <p className="text-xs text-muted-foreground">
           This explanation will be shown after the question is answered

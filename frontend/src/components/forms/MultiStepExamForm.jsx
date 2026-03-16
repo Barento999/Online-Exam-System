@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import {
   Select,
   SelectContent,
@@ -101,12 +102,15 @@ const BasicInfoStep = ({
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
-        <Textarea
-          id="description"
+        <MarkdownEditor
           value={data.description || ""}
-          onChange={(e) => updateData({ description: e.target.value })}
-          placeholder="Enter exam description and instructions"
-          rows={4}
+          onChange={(value) => updateData({ description: value })}
+          placeholder="Enter exam description and instructions (Markdown supported)"
+          minHeight="120px"
+          maxHeight="200px"
+          label=""
+          showPreview={true}
+          showHelp={true}
         />
       </div>
 
