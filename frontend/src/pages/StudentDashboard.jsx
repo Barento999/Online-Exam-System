@@ -201,7 +201,7 @@ export const StudentDashboard = () => {
                   dashboardData.availableExams.length > 0 ? (
                   dashboardData.availableExams.map((exam, index) => (
                     <div
-                      key={exam.id}
+                      key={exam.id || `exam-${index}`}
                       className={cn(
                         "p-4 rounded-lg border border-border group relative overflow-hidden",
                         "hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-white/5",
@@ -229,7 +229,9 @@ export const StudentDashboard = () => {
                             {exam.title}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            {exam.course}
+                            {exam.courseId?.name ||
+                              exam.course ||
+                              "Unknown Course"}
                           </p>
                         </div>
                         <span
@@ -247,7 +249,12 @@ export const StudentDashboard = () => {
                         <div className="text-sm text-muted-foreground">
                           <p>Duration: {exam.duration} minutes</p>
                           <p>Total Marks: {exam.totalMarks}</p>
-                          <p className="text-xs mt-1">Due: {exam.dueDate}</p>
+                          <p className="text-xs mt-1">
+                            Due:{" "}
+                            {exam.endTime
+                              ? new Date(exam.endTime).toLocaleDateString()
+                              : exam.dueDate || "TBD"}
+                          </p>
                         </div>
                         <Button
                           size="sm"
@@ -303,23 +310,28 @@ export const StudentDashboard = () => {
                       }}>
                       <div>
                         <h3 className="font-medium group-hover:text-primary transition-colors duration-200">
-                          {result.title}
+                          {result.examId?.title ||
+                            result.title ||
+                            "Unknown Exam"}
                         </h3>
                         <p className="text-sm text-muted-foreground">
-                          Submitted: {result.submittedDate}
+                          Submitted:{" "}
+                          {result.submittedAt
+                            ? new Date(result.submittedAt).toLocaleDateString()
+                            : result.submittedDate || "Unknown"}
                         </p>
                       </div>
                       <div className="text-right">
                         <p
                           className={cn(
                             "text-2xl font-semibold transition-all duration-300 group-hover:scale-110",
-                            result.score >= 70
+                            (result.percentage || result.score || 0) >= 70
                               ? "text-green-600"
-                              : result.score >= 50
+                              : (result.percentage || result.score || 0) >= 50
                                 ? "text-yellow-600"
                                 : "text-red-600",
                           )}>
-                          {result.score}%
+                          {result.percentage || result.score || 0}%
                         </p>
                         <p className="text-xs text-muted-foreground capitalize">
                           {result.status}
