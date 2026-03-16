@@ -20,9 +20,11 @@ import {
   ChevronRight,
   Eye,
   Plus,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
 
-export const Sidebar = () => {
+export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const { user } = useAuth();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
@@ -134,9 +136,10 @@ export const Sidebar = () => {
       {/* Sidebar */}
       <div
         className={cn(
-          "h-screen w-64 bg-sidebar text-sidebar-foreground flex flex-col",
+          "h-screen bg-sidebar text-sidebar-foreground flex flex-col",
           "fixed left-0 top-0 border-r border-sidebar-border z-40",
           "transition-all duration-300 ease-in-out",
+          isCollapsed ? "w-20" : "w-64",
           isOpen
             ? "translate-x-0 shadow-2xl"
             : "-translate-x-full lg:translate-x-0",
@@ -145,19 +148,48 @@ export const Sidebar = () => {
         <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3 group">
             <div className="relative">
-              <GraduationCap className="h-8 w-8 text-sidebar-primary transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12" />
+              <GraduationCap
+                className={cn(
+                  "text-sidebar-primary transition-all duration-300",
+                  "group-hover:scale-110 group-hover:rotate-12",
+                  isCollapsed ? "h-6 w-6" : "h-8 w-8",
+                )}
+              />
               <div className="absolute inset-0 bg-sidebar-primary/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
-            <div>
-              <h1 className="text-xl font-semibold transition-colors duration-200 group-hover:text-sidebar-primary">
-                Exam System
-              </h1>
-              <p className="text-xs text-sidebar-foreground/60 capitalize">
-                {user?.role} Panel
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="animate-in fade-in slide-in-from-left-2 duration-200">
+                <h1 className="text-xl font-semibold transition-colors duration-200 group-hover:text-sidebar-primary">
+                  Exam System
+                </h1>
+                <p className="text-xs text-sidebar-foreground/60 capitalize">
+                  {user?.role} Panel
+                </p>
+              </div>
+            )}
           </div>
         </div>
+
+        {/* Desktop Collapse Toggle Button */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className={cn(
+            "hidden lg:flex items-center justify-center",
+            "mx-2 mt-2 p-2 rounded-lg",
+            "bg-sidebar-accent/50 hover:bg-sidebar-accent",
+            "text-sidebar-foreground transition-all duration-200",
+            "hover:scale-105 active:scale-95 group",
+          )}
+          title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}>
+          {isCollapsed ? (
+            <PanelLeft className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+          ) : (
+            <>
+              <PanelLeftClose className="h-5 w-5 transition-transform duration-200 group-hover:scale-110" />
+              <span className="ml-2 text-sm font-medium">Collapse</span>
+            </>
+          )}
+        </button>
 
         {/* Navigation */}
         <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
@@ -178,17 +210,23 @@ export const Sidebar = () => {
                     animationFillMode: "both",
                   }}>
                   {/* Parent Item */}
-                  <div className="relative">
+                  <div className="relative group/item">
                     {hasChildren ? (
                       <button
-                        onClick={() => toggleExpanded(item.path)}
+                        onClick={() =>
+                          !isCollapsed && toggleExpanded(item.path)
+                        }
                         className={cn(
-                          "w-full flex items-center gap-3 px-4 py-3 rounded-lg",
+                          "w-full flex items-center rounded-lg",
                           "transition-all duration-200 ease-out group relative overflow-hidden",
+                          isCollapsed
+                            ? "justify-center p-3"
+                            : "gap-3 px-4 py-3",
                           isActive
                             ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md"
                             : "text-sidebar-foreground hover:bg-sidebar-accent hover:translate-x-1",
-                        )}>
+                        )}
+                        title={isCollapsed ? item.label : undefined}>
                         {/* Active indicator bar */}
                         {isActive && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-sidebar-primary-foreground rounded-r-full animate-in slide-in-from-left-2 duration-300" />
@@ -205,33 +243,41 @@ export const Sidebar = () => {
 
                         <Icon
                           className={cn(
-                            "h-5 w-5 transition-all duration-200",
+                            "h-5 w-5 transition-all duration-200 flex-shrink-0",
                             isActive
                               ? "scale-110"
                               : "group-hover:scale-110 group-hover:rotate-12",
                           )}
                         />
-                        <span className="flex-1 text-left font-medium">
-                          {item.label}
-                        </span>
-                        {hasChildren &&
-                          (isExpanded ? (
-                            <ChevronDown className="h-4 w-4 transition-transform duration-200" />
-                          ) : (
-                            <ChevronRight className="h-4 w-4 transition-transform duration-200" />
-                          ))}
+                        {!isCollapsed && (
+                          <>
+                            <span className="flex-1 text-left font-medium">
+                              {item.label}
+                            </span>
+                            {hasChildren &&
+                              (isExpanded ? (
+                                <ChevronDown className="h-4 w-4 transition-transform duration-200" />
+                              ) : (
+                                <ChevronRight className="h-4 w-4 transition-transform duration-200" />
+                              ))}
+                          </>
+                        )}
                       </button>
                     ) : (
                       <Link
                         to={item.path}
                         onClick={() => setIsOpen(false)}
                         className={cn(
-                          "flex items-center gap-3 px-4 py-3 rounded-lg",
+                          "flex items-center rounded-lg",
                           "transition-all duration-200 ease-out group relative overflow-hidden",
+                          isCollapsed
+                            ? "justify-center p-3"
+                            : "gap-3 px-4 py-3",
                           isActive
                             ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-md"
                             : "text-sidebar-foreground hover:bg-sidebar-accent hover:translate-x-1",
-                        )}>
+                        )}
+                        title={isCollapsed ? item.label : undefined}>
                         {/* Active indicator bar */}
                         {isActive && (
                           <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-sidebar-primary-foreground rounded-r-full animate-in slide-in-from-left-2 duration-300" />
@@ -248,19 +294,29 @@ export const Sidebar = () => {
 
                         <Icon
                           className={cn(
-                            "h-5 w-5 transition-all duration-200",
+                            "h-5 w-5 transition-all duration-200 flex-shrink-0",
                             isActive
                               ? "scale-110"
                               : "group-hover:scale-110 group-hover:rotate-12",
                           )}
                         />
-                        <span className="font-medium">{item.label}</span>
+                        {!isCollapsed && (
+                          <span className="font-medium">{item.label}</span>
+                        )}
                       </Link>
+                    )}
+
+                    {/* Tooltip for collapsed state */}
+                    {isCollapsed && (
+                      <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-2 bg-sidebar-primary text-sidebar-primary-foreground text-sm font-medium rounded-lg shadow-lg opacity-0 invisible group-hover/item:opacity-100 group-hover/item:visible transition-all duration-200 whitespace-nowrap z-50">
+                        {item.label}
+                        <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-sidebar-primary" />
+                      </div>
                     )}
                   </div>
 
                   {/* Children Items */}
-                  {hasChildren && (
+                  {hasChildren && !isCollapsed && (
                     <div
                       className={cn(
                         "overflow-hidden transition-all duration-300 ease-in-out",
@@ -322,21 +378,32 @@ export const Sidebar = () => {
 
         {/* User Profile Footer */}
         <div className="p-4 border-t border-sidebar-border">
-          <div className="flex items-center gap-3 px-4 py-3 rounded-lg hover:bg-sidebar-accent transition-all duration-200 group cursor-pointer">
+          <div
+            className={cn(
+              "flex items-center rounded-lg hover:bg-sidebar-accent transition-all duration-200 group cursor-pointer",
+              isCollapsed ? "justify-center p-3" : "gap-3 px-4 py-3",
+            )}
+            title={isCollapsed ? user?.name : undefined}>
             <div className="relative">
-              <div className="h-10 w-10 rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-semibold transition-transform duration-200 group-hover:scale-110">
+              <div
+                className={cn(
+                  "rounded-full bg-sidebar-primary flex items-center justify-center text-sidebar-primary-foreground font-semibold transition-transform duration-200 group-hover:scale-110",
+                  isCollapsed ? "h-8 w-8 text-sm" : "h-10 w-10",
+                )}>
                 {user?.name?.charAt(0).toUpperCase()}
               </div>
               <div className="absolute inset-0 rounded-full bg-sidebar-primary/30 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate group-hover:text-sidebar-primary transition-colors duration-200">
-                {user?.name}
-              </p>
-              <p className="text-xs text-sidebar-foreground/60 truncate">
-                {user?.email}
-              </p>
-            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0 animate-in fade-in slide-in-from-left-2 duration-200">
+                <p className="text-sm font-medium truncate group-hover:text-sidebar-primary transition-colors duration-200">
+                  {user?.name}
+                </p>
+                <p className="text-xs text-sidebar-foreground/60 truncate">
+                  {user?.email}
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
