@@ -27,7 +27,13 @@ import {
 import { cn } from "@/lib/utils";
 
 // Step 1: Question Details
-const QuestionDetailsStep = ({ data, updateData, errors }) => {
+const QuestionDetailsStep = ({
+  data,
+  updateData,
+  errors,
+  fieldErrors,
+  validationAttempted,
+}) => {
   const [questionTypes] = useState([
     {
       value: "multiple-choice",
@@ -51,6 +57,19 @@ const QuestionDetailsStep = ({ data, updateData, errors }) => {
     },
   ]);
 
+  const getFieldError = (fieldName) => {
+    return fieldErrors?.[fieldName] || null;
+  };
+
+  const hasFieldError = (fieldName) => {
+    return (
+      validationAttempted &&
+      (fieldErrors?.[fieldName] ||
+        (!data[fieldName] &&
+          ["examId", "type", "questionText", "marks"].includes(fieldName)))
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -58,7 +77,8 @@ const QuestionDetailsStep = ({ data, updateData, errors }) => {
         <Select
           value={data.examId || ""}
           onValueChange={(value) => updateData({ examId: value })}>
-          <SelectTrigger className={errors ? "border-red-500" : ""}>
+          <SelectTrigger
+            className={hasFieldError("examId") ? "border-red-500" : ""}>
             <SelectValue placeholder="Choose an exam" />
           </SelectTrigger>
           <SelectContent>
@@ -68,6 +88,12 @@ const QuestionDetailsStep = ({ data, updateData, errors }) => {
             <SelectItem value="exam3">Chemistry Quiz</SelectItem>
           </SelectContent>
         </Select>
+        {getFieldError("examId") && (
+          <p className="text-sm text-red-600 flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" />
+            {getFieldError("examId")}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -117,8 +143,14 @@ const QuestionDetailsStep = ({ data, updateData, errors }) => {
           onChange={(e) => updateData({ questionText: e.target.value })}
           placeholder="Enter your question here..."
           rows={4}
-          className={errors ? "border-red-500" : ""}
+          className={hasFieldError("questionText") ? "border-red-500" : ""}
         />
+        {getFieldError("questionText") && (
+          <p className="text-sm text-red-600 flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" />
+            {getFieldError("questionText")}
+          </p>
+        )}
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -148,8 +180,14 @@ const QuestionDetailsStep = ({ data, updateData, errors }) => {
             placeholder="1"
             min="1"
             max="20"
-            className={errors ? "border-red-500" : ""}
+            className={hasFieldError("marks") ? "border-red-500" : ""}
           />
+          {getFieldError("marks") && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {getFieldError("marks")}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -307,7 +345,13 @@ const MediaStep = ({ data, updateData }) => {
 };
 
 // Step 3: Answer Options (for multiple choice questions)
-const AnswerOptionsStep = ({ data, updateData, errors }) => {
+const AnswerOptionsStep = ({
+  data,
+  updateData,
+  errors,
+  fieldErrors,
+  validationAttempted,
+}) => {
   const questionType = data.type || "multiple-choice";
 
   const updateOption = (index, value) => {
@@ -318,6 +362,14 @@ const AnswerOptionsStep = ({ data, updateData, errors }) => {
 
   const setCorrectAnswer = (index) => {
     updateData({ correctAnswer: index });
+  };
+
+  const getFieldError = (fieldName) => {
+    return fieldErrors?.[fieldName] || null;
+  };
+
+  const hasFieldError = (fieldName) => {
+    return validationAttempted && fieldErrors?.[fieldName];
   };
 
   if (questionType === "multiple-choice") {
@@ -349,23 +401,27 @@ const AnswerOptionsStep = ({ data, updateData, errors }) => {
                   value={option}
                   onChange={(e) => updateOption(index, e.target.value)}
                   placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                  className={errors && !option ? "border-red-500" : ""}
+                  className={
+                    hasFieldError("options") && !option ? "border-red-500" : ""
+                  }
                 />
               </div>
             </div>
           ))}
         </div>
 
-        {data.correctAnswer === undefined && (
-          <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+        {(hasFieldError("options") || hasFieldError("correctAnswer")) && (
+          <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
+              <AlertCircle className="h-5 w-5 text-red-600 mt-0.5" />
               <div>
-                <h4 className="font-medium text-yellow-800 dark:text-yellow-200">
-                  Select Correct Answer
+                <h4 className="font-medium text-red-800 dark:text-red-200">
+                  Answer Configuration Required
                 </h4>
-                <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
-                  Please check the box next to the correct answer option.
+                <p className="text-sm text-red-700 dark:text-red-300 mt-1">
+                  {getFieldError("options") ||
+                    getFieldError("correctAnswer") ||
+                    "Please complete all answer options and select the correct answer."}
                 </p>
               </div>
             </div>
@@ -679,14 +735,76 @@ export const MultiStepQuestionForm = ({
   onCancel,
   initialData = {},
 }) => {
+  const validateQuestionDetails = (data) => {
+    const errors = {};
+    let isValid = true;
+
+    // Exam ID validation
+    if (!data.examId) {
+      errors.examId = "Please select an exam";
+      isValid = false;
+    }
+
+    // Question type validation
+    if (!data.type) {
+      errors.type = "Please select a question type";
+      isValid = false;
+    }
+
+    // Question text validation
+    if (!data.questionText || data.questionText.trim().length < 10) {
+      errors.questionText = "Question text must be at least 10 characters long";
+      isValid = false;
+    }
+
+    // Marks validation
+    if (!data.marks || data.marks < 1 || data.marks > 20) {
+      errors.marks = "Marks must be between 1 and 20";
+      isValid = false;
+    }
+
+    return {
+      isValid,
+      fieldErrors: errors,
+      message: isValid ? null : "Please fix the errors above to continue",
+    };
+  };
+
+  const validateAnswerOptions = (data) => {
+    const errors = {};
+    let isValid = true;
+
+    if (data.type === "multiple-choice") {
+      // Check if all options are filled
+      if (!data.options || data.options.some((opt) => !opt.trim())) {
+        errors.options = "All answer options must be filled";
+        isValid = false;
+      }
+      // Check if correct answer is selected
+      if (data.correctAnswer === undefined) {
+        errors.correctAnswer = "Please select the correct answer";
+        isValid = false;
+      }
+    } else if (data.type === "true-false") {
+      if (data.correctAnswer === undefined) {
+        errors.correctAnswer = "Please select True or False";
+        isValid = false;
+      }
+    }
+
+    return {
+      isValid,
+      fieldErrors: errors,
+      message: isValid ? null : "Please complete the answer configuration",
+    };
+  };
+
   const steps = [
     {
       title: "Question Details",
       description: "Set up the basic question information and type",
       component: QuestionDetailsStep,
-      validate: (data) => {
-        return data.examId && data.type && data.questionText && data.marks;
-      },
+      validate: validateQuestionDetails,
     },
     {
       title: "Media & Resources",
@@ -698,19 +816,7 @@ export const MultiStepQuestionForm = ({
       title: "Answer Options",
       description: "Configure the correct answers and options",
       component: AnswerOptionsStep,
-      validate: (data) => {
-        if (data.type === "multiple-choice") {
-          return (
-            data.options &&
-            data.options.every((opt) => opt.trim()) &&
-            data.correctAnswer !== undefined
-          );
-        }
-        if (data.type === "true-false") {
-          return data.correctAnswer !== undefined;
-        }
-        return true;
-      },
+      validate: validateAnswerOptions,
     },
     {
       title: "Review & Create",

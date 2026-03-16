@@ -33,7 +33,7 @@ import {
 import { cn } from "@/lib/utils";
 
 // Step 1: Basic Information
-const BasicInfoStep = ({ data, updateData, errors }) => {
+const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttempted }) => {
   const [titleSuggestions] = useState([
     "Final Assessment",
     "Midterm Examination",
@@ -41,6 +41,14 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
     "Quiz",
     "Practice Test",
   ]);
+
+  const getFieldError = (fieldName) => {
+    return fieldErrors?.[fieldName] || null;
+  };
+
+  const hasFieldError = (fieldName) => {
+    return validationAttempted && (fieldErrors?.[fieldName] || (!data[fieldName] && ['title', 'subject', 'duration', 'totalMarks', 'passingMarks'].includes(fieldName)));
+  };
 
   return (
     <div className="space-y-6">
@@ -51,8 +59,14 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
           value={data.title || ""}
           onChange={(e) => updateData({ title: e.target.value })}
           placeholder="Enter exam title"
-          className={errors ? "border-red-500" : ""}
+          className={hasFieldError('title') ? "border-red-500" : ""}
         />
+        {getFieldError('title') && (
+          <p className="text-sm text-red-600 flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" />
+            {getFieldError('title')}
+          </p>
+        )}
         <div className="flex flex-wrap gap-1 mt-2">
           {titleSuggestions.map((suggestion) => (
             <Button
@@ -85,7 +99,7 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
           <Select
             value={data.subject || ""}
             onValueChange={(value) => updateData({ subject: value })}>
-            <SelectTrigger className={errors ? "border-red-500" : ""}>
+            <SelectTrigger className={hasFieldError('subject') ? "border-red-500" : ""}>
               <SelectValue placeholder="Select subject" />
             </SelectTrigger>
             <SelectContent>
@@ -98,6 +112,109 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
               <SelectItem value="history">History</SelectItem>
               <SelectItem value="geography">Geography</SelectItem>
               <SelectItem value="other">Other</SelectItem>
+            </SelectContent>
+          </Select>
+          {getFieldError('subject') && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {getFieldError('subject')}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="difficulty">Difficulty Level</Label>
+          <Select
+            value={data.difficulty || "medium"}
+            onValueChange={(value) => updateData({ difficulty: value })}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="easy">Easy</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="hard">Hard</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="duration">Duration (minutes) *</Label>
+          <Input
+            id="duration"
+            type="number"
+            value={data.duration || ""}
+            onChange={(e) => updateData({ duration: parseInt(e.target.value) })}
+            placeholder="60"
+            min="1"
+            max="480"
+            className={hasFieldError('duration') ? "border-red-500" : ""}
+          />
+          {getFieldError('duration') && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {getFieldError('duration')}
+            </p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="totalMarks">Total Marks *</Label>
+          <Input
+            id="totalMarks"
+            type="number"
+            value={data.totalMarks || ""}
+            onChange={(e) => updateData({ totalMarks: parseInt(e.target.value) })}
+            placeholder="100"
+            min="1"
+            className={hasFieldError('totalMarks') ? "border-red-500" : ""}
+          />
+          {getFieldError('totalMarks') && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {getFieldError('totalMarks')}
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="passingMarks">Passing Marks *</Label>
+          <Input
+            id="passingMarks"
+            type="number"
+            value={data.passingMarks || ""}
+            onChange={(e) => updateData({ passingMarks: parseInt(e.target.value) })}
+            placeholder="40"
+            min="1"
+            max={data.totalMarks || 100}
+            className={hasFieldError('passingMarks') ? "border-red-500" : ""}
+          />
+          {getFieldError('passingMarks') && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {getFieldError('passingMarks')}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {data.passingMarks && data.totalMarks && (
+        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Target className="h-4 w-4 text-primary" />
+            <span className="font-medium">Passing Percentage</span>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Students need to score {data.passingMarks} out of {data.totalMarks} marks 
+            ({Math.round((data.passingMarks / data.totalMarks) * 100)}%) to pass this exam.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};
             </SelectContent>
           </Select>
         </div>
@@ -184,7 +301,7 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
 };
 
 // Step 2: Schedule and Availability
-const ScheduleStep = ({ data, updateData }) => {
+const ScheduleStep = ({ data, updateData, errors, fieldErrors, validationAttempted }) => {
   const [scheduleType, setScheduleType] = useState(
     data.scheduleType || "immediate",
   );
@@ -209,6 +326,14 @@ const ScheduleStep = ({ data, updateData }) => {
       return "Available immediately after publishing";
     }
     return "Schedule not set";
+  };
+
+  const getFieldError = (fieldName) => {
+    return fieldErrors?.[fieldName] || null;
+  };
+
+  const hasFieldError = (fieldName) => {
+    return validationAttempted && fieldErrors?.[fieldName];
   };
 
   return (
@@ -291,7 +416,14 @@ const ScheduleStep = ({ data, updateData }) => {
               value={data.startTime || ""}
               min={new Date().toISOString().slice(0, 16)}
               onChange={(e) => updateData({ startTime: e.target.value })}
+              className={hasFieldError('startTime') ? "border-red-500" : ""}
             />
+            {getFieldError('startTime') && (
+              <p className="text-sm text-red-600 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {getFieldError('startTime')}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -302,7 +434,14 @@ const ScheduleStep = ({ data, updateData }) => {
               value={data.endTime || ""}
               min={data.startTime || new Date().toISOString().slice(0, 16)}
               onChange={(e) => updateData({ endTime: e.target.value })}
+              className={hasFieldError('endTime') ? "border-red-500" : ""}
             />
+            {getFieldError('endTime') && (
+              <p className="text-sm text-red-600 flex items-center gap-1">
+                <AlertCircle className="h-3 w-3" />
+                {getFieldError('endTime')}
+              </p>
+            )}
           </div>
         </div>
       )}
@@ -796,31 +935,88 @@ const ReviewStep = ({ data }) => {
 };
 
 export const MultiStepExamForm = ({ onSubmit, onCancel, initialData = {} }) => {
+  const validateBasicInfo = (data) => {
+    const errors = {};
+    let isValid = true;
+
+    // Title validation
+    if (!data.title || data.title.trim().length < 3) {
+      errors.title = "Exam title must be at least 3 characters long";
+      isValid = false;
+    }
+
+    // Subject validation
+    if (!data.subject) {
+      errors.subject = "Please select a subject";
+      isValid = false;
+    }
+
+    // Duration validation
+    if (!data.duration || data.duration < 1 || data.duration > 480) {
+      errors.duration = "Duration must be between 1 and 480 minutes";
+      isValid = false;
+    }
+
+    // Total marks validation
+    if (!data.totalMarks || data.totalMarks < 1) {
+      errors.totalMarks = "Total marks must be at least 1";
+      isValid = false;
+    }
+
+    // Passing marks validation
+    if (!data.passingMarks || data.passingMarks < 1) {
+      errors.passingMarks = "Passing marks must be at least 1";
+      isValid = false;
+    } else if (data.totalMarks && data.passingMarks > data.totalMarks) {
+      errors.passingMarks = "Passing marks cannot exceed total marks";
+      isValid = false;
+    }
+
+    return {
+      isValid,
+      fieldErrors: errors,
+      message: isValid ? null : "Please fix the errors above to continue"
+    };
+  };
+
+  const validateScheduleSettings = (data) => {
+    const errors = {};
+    let isValid = true;
+
+    if (data.scheduleType === "scheduled") {
+      if (!data.startTime) {
+        errors.startTime = "Start time is required for scheduled exams";
+        isValid = false;
+      }
+      if (!data.endTime) {
+        errors.endTime = "End time is required for scheduled exams";
+        isValid = false;
+      }
+      if (data.startTime && data.endTime && new Date(data.startTime) >= new Date(data.endTime)) {
+        errors.endTime = "End time must be after start time";
+        isValid = false;
+      }
+    }
+
+    return {
+      isValid,
+      fieldErrors: errors,
+      message: isValid ? null : "Please fix the schedule settings to continue"
+    };
+  };
+
   const steps = [
     {
       title: "Basic Information",
       description: "Set up the exam title, subject, and basic parameters",
       component: BasicInfoStep,
-      validate: (data) => {
-        return (
-          data.title &&
-          data.subject &&
-          data.duration &&
-          data.totalMarks &&
-          data.passingMarks
-        );
-      },
+      validate: validateBasicInfo,
     },
     {
       title: "Schedule & Settings",
       description: "Configure exam timing and behavior settings",
       component: ScheduleStep,
-      validate: (data) => {
-        if (data.scheduleType === "scheduled") {
-          return data.startTime && data.endTime;
-        }
-        return true;
-      },
+      validate: validateScheduleSettings,
     },
     {
       title: "Questions",

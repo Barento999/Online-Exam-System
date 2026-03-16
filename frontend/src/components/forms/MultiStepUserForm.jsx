@@ -30,7 +30,13 @@ import {
 import { cn } from "@/lib/utils";
 
 // Step 1: Basic Information
-const BasicInfoStep = ({ data, updateData, errors }) => {
+const BasicInfoStep = ({
+  data,
+  updateData,
+  errors,
+  fieldErrors,
+  validationAttempted,
+}) => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -62,6 +68,17 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
     return "Strong";
   };
 
+  const getFieldError = (fieldName) => {
+    return fieldErrors?.[fieldName] || null;
+  };
+
+  const hasFieldError = (fieldName) => {
+    return (
+      validationAttempted &&
+      (fieldErrors?.[fieldName] || (!data[fieldName] && fieldName !== "phone"))
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid md:grid-cols-2 gap-6">
@@ -72,8 +89,14 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
             value={data.firstName || ""}
             onChange={(e) => updateData({ firstName: e.target.value })}
             placeholder="Enter first name"
-            className={errors ? "border-red-500" : ""}
+            className={hasFieldError("firstName") ? "border-red-500" : ""}
           />
+          {getFieldError("firstName") && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {getFieldError("firstName")}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -83,8 +106,14 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
             value={data.lastName || ""}
             onChange={(e) => updateData({ lastName: e.target.value })}
             placeholder="Enter last name"
-            className={errors ? "border-red-500" : ""}
+            className={hasFieldError("lastName") ? "border-red-500" : ""}
           />
+          {getFieldError("lastName") && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {getFieldError("lastName")}
+            </p>
+          )}
         </div>
       </div>
 
@@ -98,9 +127,18 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
             value={data.email || ""}
             onChange={(e) => updateData({ email: e.target.value })}
             placeholder="Enter email address"
-            className={cn("pl-10", errors ? "border-red-500" : "")}
+            className={cn(
+              "pl-10",
+              hasFieldError("email") ? "border-red-500" : "",
+            )}
           />
         </div>
+        {getFieldError("email") && (
+          <p className="text-sm text-red-600 flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" />
+            {getFieldError("email")}
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -113,7 +151,10 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
             value={data.password || ""}
             onChange={(e) => handlePasswordChange(e.target.value)}
             placeholder="Enter password"
-            className={cn("pl-10 pr-10", errors ? "border-red-500" : "")}
+            className={cn(
+              "pl-10 pr-10",
+              hasFieldError("password") ? "border-red-500" : "",
+            )}
           />
           <Button
             type="button"
@@ -128,6 +169,13 @@ const BasicInfoStep = ({ data, updateData, errors }) => {
             )}
           </Button>
         </div>
+
+        {getFieldError("password") && (
+          <p className="text-sm text-red-600 flex items-center gap-1">
+            <AlertCircle className="h-3 w-3" />
+            {getFieldError("password")}
+          </p>
+        )}
 
         {data.password && (
           <div className="space-y-2">
@@ -588,22 +636,79 @@ const ReviewStep = ({ data }) => {
 };
 
 export const MultiStepUserForm = ({ onSubmit, onCancel, initialData = {} }) => {
+  const validateBasicInfo = (data) => {
+    const errors = {};
+    let isValid = true;
+
+    // First Name validation
+    if (!data.firstName || data.firstName.trim().length < 2) {
+      errors.firstName = "First name must be at least 2 characters long";
+      isValid = false;
+    }
+
+    // Last Name validation
+    if (!data.lastName || data.lastName.trim().length < 2) {
+      errors.lastName = "Last name must be at least 2 characters long";
+      isValid = false;
+    }
+
+    // Email validation
+    if (!data.email) {
+      errors.email = "Email address is required";
+      isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      errors.email = "Please enter a valid email address";
+      isValid = false;
+    }
+
+    // Password validation
+    if (!data.password) {
+      errors.password = "Password is required";
+      isValid = false;
+    } else if (data.password.length < 8) {
+      errors.password = "Password must be at least 8 characters long";
+      isValid = false;
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(data.password)) {
+      errors.password =
+        "Password must contain uppercase, lowercase, and numbers";
+      isValid = false;
+    }
+
+    return {
+      isValid,
+      fieldErrors: errors,
+      message: isValid ? null : "Please fix the errors above to continue",
+    };
+  };
+
+  const validateRolePermissions = (data) => {
+    const errors = {};
+    let isValid = true;
+
+    if (!data.role) {
+      errors.role = "Please select a user role";
+      isValid = false;
+    }
+
+    return {
+      isValid,
+      fieldErrors: errors,
+      message: isValid ? null : "Please select a role to continue",
+    };
+  };
+
   const steps = [
     {
       title: "Basic Information",
       description: "Enter the user's basic details and credentials",
       component: BasicInfoStep,
-      validate: (data) => {
-        return data.firstName && data.lastName && data.email && data.password;
-      },
+      validate: validateBasicInfo,
     },
     {
       title: "Role & Permissions",
       description: "Set user role and account permissions",
       component: RolePermissionsStep,
-      validate: (data) => {
-        return data.role;
-      },
+      validate: validateRolePermissions,
     },
     {
       title: "Profile Information",
