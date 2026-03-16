@@ -95,6 +95,17 @@ export const studentDataService = {
       }
 
       const processedData = processPerformanceData(results);
+
+      // Validate the processed data to prevent NaN values
+      if (
+        !processedData ||
+        !processedData.performanceData ||
+        processedData.performanceData.length === 0
+      ) {
+        console.warn("Processed performance data is invalid, using mock data");
+        return mockDataService.getPerformanceData();
+      }
+
       console.log("Successfully loaded real performance data");
       return processedData;
     } catch (error) {
@@ -122,6 +133,19 @@ export const studentDataService = {
       }
 
       const processedData = processStudyProgressData(enrollments);
+
+      // Validate the processed data
+      if (
+        !processedData ||
+        !processedData.studyData ||
+        processedData.studyData.length === 0
+      ) {
+        console.warn(
+          "Processed study progress data is invalid, using mock data",
+        );
+        return mockDataService.getStudyProgressData();
+      }
+
       console.log("Successfully loaded real study progress data");
       return processedData;
     } catch (error) {
@@ -158,6 +182,17 @@ export const studentDataService = {
       }
 
       const processedData = processExamTrendsData(results);
+
+      // Validate the processed data
+      if (
+        !processedData ||
+        !processedData.examTrends ||
+        processedData.examTrends.length === 0
+      ) {
+        console.warn("Processed exam trends data is invalid, using mock data");
+        return mockDataService.getExamTrendsData();
+      }
+
       console.log("Successfully loaded real exam trends data");
       return processedData;
     } catch (error) {
@@ -172,26 +207,41 @@ export const studentDataService = {
 
 // Process performance data from API response
 const processPerformanceData = (results) => {
+  if (!results || results.length === 0) {
+    return mockDataService.getPerformanceData();
+  }
+
   const subjectScores = {};
   let totalScore = 0;
   let examCount = 0;
 
   results.forEach((result) => {
+    // Safely extract score value
+    const score = parseFloat(result.percentage || result.score || 0);
+    if (isNaN(score)) return; // Skip invalid scores
+
     const subject =
       result.examId?.courseId?.name || result.examId?.title || "Unknown";
+
     if (!subjectScores[subject]) {
       subjectScores[subject] = { total: 0, count: 0 };
     }
-    subjectScores[subject].total += result.percentage || result.score || 0;
+
+    subjectScores[subject].total += score;
     subjectScores[subject].count += 1;
-    totalScore += result.percentage || result.score || 0;
+    totalScore += score;
     examCount += 1;
   });
+
+  // If no valid data was processed, return mock data
+  if (examCount === 0) {
+    return mockDataService.getPerformanceData();
+  }
 
   const performanceData = Object.entries(subjectScores).map(
     ([subject, data]) => ({
       label: subject,
-      value: Math.round(data.total / data.count),
+      value: data.count > 0 ? Math.round(data.total / data.count) : 0,
     }),
   );
 
@@ -205,12 +255,21 @@ const processPerformanceData = (results) => {
 
 // Process study progress data
 const processStudyProgressData = (enrollments) => {
+  if (!enrollments || enrollments.length === 0) {
+    return mockDataService.getStudyProgressData();
+  }
+
   const totalCourses = enrollments.length;
-  const completedCourses = enrollments.filter((e) => e.progress >= 100).length;
-  const inProgressCourses = enrollments.filter(
-    (e) => e.progress > 0 && e.progress < 100,
+  const completedCourses = enrollments.filter(
+    (e) => (e.progress || 0) >= 100,
   ).length;
-  const pendingCourses = totalCourses - completedCourses - inProgressCourses;
+  const inProgressCourses = enrollments.filter(
+    (e) => (e.progress || 0) > 0 && (e.progress || 0) < 100,
+  ).length;
+  const pendingCourses = Math.max(
+    0,
+    totalCourses - completedCourses - inProgressCourses,
+  );
 
   const studyData = [
     { label: "Completed", value: completedCourses, color: "stroke-green-600" },
@@ -223,14 +282,14 @@ const processStudyProgressData = (enrollments) => {
   ];
 
   const totalStudyHours = enrollments.reduce(
-    (sum, e) => sum + (e.studyHours || 0),
+    (sum, e) => sum + (parseFloat(e.studyHours) || 0),
     0,
   );
   const thisWeekHours = 28; // This would come from time tracking
 
   return {
     studyData,
-    totalStudyHours,
+    totalStudyHours: Math.round(totalStudyHours),
     thisWeekHours,
     weeklyGoals: [
       { label: "Study Hours", current: thisWeekHours, target: 35 },
@@ -242,26 +301,46 @@ const processStudyProgressData = (enrollments) => {
 
 // Process exam trends data
 const processExamTrendsData = (results) => {
+  if (!results || results.length === 0) {
+    return mockDataService.getExamTrendsData();
+  }
+
   // Group results by month
   const monthlyScores = {};
   results.forEach((result) => {
-    const date = new Date(result.submittedAt || result.createdAt);
+    const score = parseFloat(result.percentage || result.score || 0);
+    if (isNaN(score)) return; // Skip invalid scores
+
+    const dateStr = result.submittedAt || result.createdAt;
+    if (!dateStr) return; // Skip if no date
+
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return; // Skip invalid dates
+
     const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
     if (!monthlyScores[monthKey]) {
       monthlyScores[monthKey] = {
         total: 0,
         count: 0,
         month: date.toLocaleDateString("en", { month: "short" }),
+        year: date.getFullYear(),
+        monthNum: date.getMonth(),
       };
     }
-    monthlyScores[monthKey].total += result.percentage || result.score || 0;
+    monthlyScores[monthKey].total += score;
     monthlyScores[monthKey].count += 1;
   });
 
+  // If no valid data was processed, return mock data
+  if (Object.keys(monthlyScores).length === 0) {
+    return mockDataService.getExamTrendsData();
+  }
+
   const examTrends = Object.values(monthlyScores)
+    .sort((a, b) => a.year - b.year || a.monthNum - b.monthNum) // Sort by date
     .map((data) => ({
       label: data.month,
-      value: Math.round(data.total / data.count),
+      value: data.count > 0 ? Math.round(data.total / data.count) : 0,
     }))
     .slice(-6); // Last 6 months
 

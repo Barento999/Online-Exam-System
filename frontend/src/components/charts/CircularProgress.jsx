@@ -13,21 +13,35 @@ export const CircularProgress = ({
   animated = true,
   className,
 }) => {
+  // Validate and sanitize input values
+  const safeValue = typeof value === "number" && isFinite(value) ? value : 0;
+  const safeMax =
+    typeof max === "number" && isFinite(max) && max > 0 ? max : 100;
+  const safeSize =
+    typeof size === "number" && isFinite(size) && size > 0 ? size : 120;
+  const safeStrokeWidth =
+    typeof strokeWidth === "number" && isFinite(strokeWidth) && strokeWidth > 0
+      ? strokeWidth
+      : 8;
+
   const [animatedValue, setAnimatedValue] = useState(0);
 
   useEffect(() => {
     if (animated) {
       const timer = setTimeout(() => {
-        setAnimatedValue(value);
+        setAnimatedValue(safeValue);
       }, 100);
       return () => clearTimeout(timer);
     } else {
-      setAnimatedValue(value);
+      setAnimatedValue(safeValue);
     }
-  }, [value, animated]);
+  }, [safeValue, animated]);
 
-  const percentage = Math.min(Math.max((animatedValue / max) * 100, 0), 100);
-  const radius = (size - strokeWidth) / 2;
+  const percentage = Math.min(
+    Math.max((animatedValue / safeMax) * 100, 0),
+    100,
+  );
+  const radius = (safeSize - safeStrokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const strokeDasharray = circumference;
   const strokeDashoffset = circumference - (percentage / 100) * circumference;
@@ -53,17 +67,17 @@ export const CircularProgress = ({
         className,
       )}>
       <svg
-        width={size}
-        height={size}
+        width={safeSize}
+        height={safeSize}
         className="transform -rotate-90"
-        viewBox={`0 0 ${size} ${size}`}>
+        viewBox={`0 0 ${safeSize} ${safeSize}`}>
         {/* Background circle */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx={safeSize / 2}
+          cy={safeSize / 2}
           r={radius}
           fill="none"
-          strokeWidth={strokeWidth}
+          strokeWidth={safeStrokeWidth}
           className={
             bgColorClasses[backgroundColor] || "stroke-muted-foreground/20"
           }
@@ -71,11 +85,11 @@ export const CircularProgress = ({
 
         {/* Progress circle */}
         <circle
-          cx={size / 2}
-          cy={size / 2}
+          cx={safeSize / 2}
+          cy={safeSize / 2}
           r={radius}
           fill="none"
-          strokeWidth={strokeWidth}
+          strokeWidth={safeStrokeWidth}
           strokeLinecap="round"
           strokeDasharray={strokeDasharray}
           strokeDashoffset={strokeDashoffset}
@@ -94,7 +108,7 @@ export const CircularProgress = ({
         {showValue && (
           <span className="text-2xl font-bold">
             {Math.round(animatedValue)}
-            <span className="text-sm text-muted-foreground">/{max}</span>
+            <span className="text-sm text-muted-foreground">/{safeMax}</span>
           </span>
         )}
         {label && (

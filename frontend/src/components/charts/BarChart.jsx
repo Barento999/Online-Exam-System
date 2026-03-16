@@ -10,20 +10,42 @@ export const BarChart = ({
   showGrid = true,
   className,
 }) => {
-  const [animatedData, setAnimatedData] = useState(data.map(() => 0));
+  // Validate and sanitize data
+  const validData = data.filter(
+    (item) =>
+      item &&
+      typeof item.value === "number" &&
+      !isNaN(item.value) &&
+      isFinite(item.value) &&
+      item.label,
+  );
+
+  // If no valid data, show empty state
+  if (validData.length === 0) {
+    return (
+      <div
+        className={cn("flex items-center justify-center", className)}
+        style={{ height }}>
+        <p className="text-muted-foreground text-sm">No data available</p>
+      </div>
+    );
+  }
+
+  const [animatedData, setAnimatedData] = useState(validData.map(() => 0));
 
   useEffect(() => {
     if (animated) {
       const timer = setTimeout(() => {
-        setAnimatedData(data.map((item) => item.value));
+        setAnimatedData(validData.map((item) => item.value));
       }, 200);
       return () => clearTimeout(timer);
     } else {
-      setAnimatedData(data.map((item) => item.value));
+      setAnimatedData(validData.map((item) => item.value));
     }
-  }, [data, animated]);
+  }, [validData, animated]);
 
-  const maxValue = Math.max(...data.map((item) => item.value), 1);
+  const values = validData.map((item) => item.value);
+  const maxValue = Math.max(...values, 1);
 
   const colorClasses = {
     "bg-primary": "bg-primary hover:bg-primary/80",
@@ -49,8 +71,11 @@ export const BarChart = ({
         )}
 
         {/* Bars */}
-        {data.map((item, index) => {
-          const barHeight = (animatedData[index] / maxValue) * (height - 40);
+        {validData.map((item, index) => {
+          const barHeight = Math.max(
+            0,
+            (animatedData[index] / maxValue) * (height - 40),
+          );
           return (
             <div
               key={item.label || index}

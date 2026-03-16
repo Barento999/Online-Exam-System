@@ -10,20 +10,42 @@ export const DonutChart = ({
   centerContent,
   className,
 }) => {
-  const [animatedData, setAnimatedData] = useState(data.map(() => 0));
+  // Validate and sanitize data
+  const validData = data.filter(
+    (item) =>
+      item &&
+      typeof item.value === "number" &&
+      !isNaN(item.value) &&
+      isFinite(item.value) &&
+      item.value > 0 && // Only positive values for donut chart
+      item.label,
+  );
+
+  // If no valid data, show empty state
+  if (validData.length === 0) {
+    return (
+      <div
+        className={cn("flex items-center justify-center", className)}
+        style={{ width: size, height: size }}>
+        <p className="text-muted-foreground text-sm">No data available</p>
+      </div>
+    );
+  }
+
+  const [animatedData, setAnimatedData] = useState(validData.map(() => 0));
 
   useEffect(() => {
     if (animated) {
       const timer = setTimeout(() => {
-        setAnimatedData(data.map((item) => item.value));
+        setAnimatedData(validData.map((item) => item.value));
       }, 200);
       return () => clearTimeout(timer);
     } else {
-      setAnimatedData(data.map((item) => item.value));
+      setAnimatedData(validData.map((item) => item.value));
     }
-  }, [data, animated]);
+  }, [validData, animated]);
 
-  const total = data.reduce((sum, item) => sum + item.value, 0);
+  const total = validData.reduce((sum, item) => sum + item.value, 0);
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
 

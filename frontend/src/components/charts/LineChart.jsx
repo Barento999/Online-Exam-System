@@ -12,32 +12,65 @@ export const LineChart = ({
   smooth = true,
   className,
 }) => {
-  const [animatedData, setAnimatedData] = useState(data.map(() => 0));
+  // Validate and sanitize data
+  const validData = data.filter(
+    (item) =>
+      item &&
+      typeof item.value === "number" &&
+      !isNaN(item.value) &&
+      isFinite(item.value) &&
+      item.label,
+  );
+
+  // If no valid data, show empty state
+  if (validData.length === 0) {
+    return (
+      <div
+        className={cn("flex items-center justify-center", className)}
+        style={{ width, height }}>
+        <p className="text-muted-foreground text-sm">No data available</p>
+      </div>
+    );
+  }
+
+  const [animatedData, setAnimatedData] = useState(validData.map(() => 0));
 
   useEffect(() => {
     if (animated) {
       const timer = setTimeout(() => {
-        setAnimatedData(data.map((item) => item.value));
+        setAnimatedData(validData.map((item) => item.value));
       }, 200);
       return () => clearTimeout(timer);
     } else {
-      setAnimatedData(data.map((item) => item.value));
+      setAnimatedData(validData.map((item) => item.value));
     }
-  }, [data, animated]);
+  }, [validData, animated]);
 
   const padding = 40;
   const chartWidth = width - padding * 2;
   const chartHeight = height - padding * 2;
 
-  const maxValue = Math.max(...data.map((item) => item.value), 1);
-  const minValue = Math.min(...data.map((item) => item.value), 0);
+  const values = validData.map((item) => item.value);
+  const maxValue = Math.max(...values, 1);
+  const minValue = Math.min(...values, 0);
   const valueRange = maxValue - minValue || 1;
 
   const points = animatedData.map((value, index) => {
-    const x = padding + (index / (data.length - 1)) * chartWidth;
+    const x =
+      padding +
+      (validData.length > 1
+        ? (index / (validData.length - 1)) * chartWidth
+        : chartWidth / 2);
     const y =
       padding + chartHeight - ((value - minValue) / valueRange) * chartHeight;
-    return { x, y, value: data[index].value, label: data[index].label };
+
+    // Ensure coordinates are valid numbers
+    return {
+      x: isFinite(x) ? x : padding,
+      y: isFinite(y) ? y : padding + chartHeight,
+      value: validData[index].value,
+      label: validData[index].label,
+    };
   });
 
   const pathData = points.reduce((path, point, index) => {
