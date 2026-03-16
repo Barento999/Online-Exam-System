@@ -25,9 +25,28 @@ export const DonutChart = ({
   if (validData.length === 0) {
     return (
       <div
-        className={cn("flex items-center justify-center", className)}
+        className={cn(
+          "flex flex-col items-center justify-center p-8",
+          className,
+        )}
         style={{ width: size, height: size }}>
-        <p className="text-muted-foreground text-sm">No data available</p>
+        <svg
+          className="w-24 h-24 mb-4 text-muted-foreground/20"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <circle
+            cx="50"
+            cy="50"
+            r="35"
+            stroke="currentColor"
+            strokeWidth="8"
+            fill="none"
+            opacity="0.3"
+          />
+          <circle cx="50" cy="50" r="20" fill="currentColor" opacity="0.1" />
+        </svg>
+        <p className="text-sm text-muted-foreground">No data available</p>
       </div>
     );
   }

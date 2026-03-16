@@ -25,6 +25,7 @@ import {
   Award,
 } from "lucide-react";
 import { useNavigate } from "react-router";
+import { EmptyState } from "@/components/common/EmptyState";
 
 export const StudentDashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -269,10 +270,13 @@ export const StudentDashboard = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No exams available at the moment</p>
-                  </div>
+                  <EmptyState
+                    illustration="exams"
+                    title="No Exams Available"
+                    description="There are no exams scheduled at the moment. Check back later or contact your instructor."
+                    action={() => navigate("/exams")}
+                    actionLabel="View All Exams"
+                  />
                 )}
               </div>
             </CardContent>
@@ -340,10 +344,13 @@ export const StudentDashboard = () => {
                     </div>
                   ))
                 ) : (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <Award className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>No results available yet</p>
-                  </div>
+                  <EmptyState
+                    illustration="results"
+                    title="No Results Yet"
+                    description="You haven't completed any exams yet. Start taking exams to see your results here."
+                    action={() => navigate("/exams")}
+                    actionLabel="Take an Exam"
+                  />
                 )}
               </div>
             </CardContent>

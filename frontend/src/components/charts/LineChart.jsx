@@ -26,9 +26,32 @@ export const LineChart = ({
   if (validData.length === 0) {
     return (
       <div
-        className={cn("flex items-center justify-center", className)}
+        className={cn(
+          "flex flex-col items-center justify-center p-8",
+          className,
+        )}
         style={{ width, height }}>
-        <p className="text-muted-foreground text-sm">No data available</p>
+        <svg
+          className="w-24 h-24 mb-4 text-muted-foreground/20"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M20 80 L35 60 L50 70 L65 40 L80 50"
+            stroke="currentColor"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            fill="none"
+            opacity="0.3"
+          />
+          <circle cx="20" cy="80" r="4" fill="currentColor" opacity="0.3" />
+          <circle cx="35" cy="60" r="4" fill="currentColor" opacity="0.3" />
+          <circle cx="50" cy="70" r="4" fill="currentColor" opacity="0.3" />
+          <circle cx="65" cy="40" r="4" fill="currentColor" opacity="0.3" />
+          <circle cx="80" cy="50" r="4" fill="currentColor" opacity="0.3" />
+        </svg>
+        <p className="text-sm text-muted-foreground">No data available</p>
       </div>
     );
   }

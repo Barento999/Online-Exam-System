@@ -24,9 +24,54 @@ export const BarChart = ({
   if (validData.length === 0) {
     return (
       <div
-        className={cn("flex items-center justify-center", className)}
+        className={cn(
+          "flex flex-col items-center justify-center p-8",
+          className,
+        )}
         style={{ height }}>
-        <p className="text-muted-foreground text-sm">No data available</p>
+        <svg
+          className="w-24 h-24 mb-4 text-muted-foreground/20"
+          viewBox="0 0 100 100"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg">
+          <rect
+            x="15"
+            y="60"
+            width="15"
+            height="30"
+            rx="2"
+            fill="currentColor"
+            opacity="0.3"
+          />
+          <rect
+            x="35"
+            y="40"
+            width="15"
+            height="50"
+            rx="2"
+            fill="currentColor"
+            opacity="0.3"
+          />
+          <rect
+            x="55"
+            y="50"
+            width="15"
+            height="40"
+            rx="2"
+            fill="currentColor"
+            opacity="0.3"
+          />
+          <rect
+            x="75"
+            y="30"
+            width="15"
+            height="60"
+            rx="2"
+            fill="currentColor"
+            opacity="0.3"
+          />
+        </svg>
+        <p className="text-sm text-muted-foreground">No data available</p>
       </div>
     );
   }
