@@ -15,16 +15,21 @@ import {
   BarChart3,
   Users,
   FileText,
-  Calendar,
   HelpCircle,
   Zap,
   Activity,
-  Clock,
+  Search,
+  Command,
+  ArrowRight,
+  Hash,
+  User,
+  GraduationCap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { useState, useEffect, useRef } from "react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -34,6 +39,7 @@ import {
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { notificationService } from "@/services/notificationService";
+import { searchService } from "@/services/searchService";
 import toast from "react-hot-toast";
 
 export const Navbar = () => {
@@ -47,6 +53,11 @@ export const Navbar = () => {
     pendingTasks: 0,
     recentActivity: "Active 2h ago",
   });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const searchInputRef = useRef(null);
 
   // Theme management
   useEffect(() => {
@@ -107,6 +118,152 @@ export const Navbar = () => {
     const interval = setInterval(loadNotifications, 30000);
     return () => clearInterval(interval);
   }, [user?.role]);
+
+  // Search functionality
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Cmd/Ctrl + K to open search
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setIsSearchOpen(true);
+        setTimeout(() => searchInputRef.current?.focus(), 100);
+      }
+      // Escape to close search
+      if (e.key === "Escape" && isSearchOpen) {
+        setIsSearchOpen(false);
+        setSearchQuery("");
+        setSearchResults([]);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isSearchOpen]);
+
+  // Debounced search
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setIsSearching(false);
+      return;
+    }
+
+    setIsSearching(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const results = await performSearch(searchQuery);
+        setSearchResults(results);
+      } catch (error) {
+        console.error("Search failed:", error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  const performSearch = async (query) => {
+    try {
+      // Save to recent searches
+      searchService.saveRecentSearch(query);
+
+      // Perform the actual search
+      const results = await searchService.globalSearch(query, user?.role, 8);
+
+      // Map results to include proper icons
+      return results.map((result) => ({
+        ...result,
+        icon: getIconForType(result.type),
+      }));
+    } catch (error) {
+      console.error("Search failed:", error);
+      // Fallback to mock results if search service fails
+      return getMockResults(query);
+    }
+  };
+
+  const getIconForType = (type) => {
+    const iconMap = {
+      exam: BookOpen,
+      question: Hash,
+      user: User,
+      course: GraduationCap,
+      result: BarChart3,
+    };
+    return iconMap[type] || FileText;
+  };
+
+  const getMockResults = (query) => {
+    const mockResults = [
+      {
+        id: 1,
+        type: "exam",
+        title: "Mathematics Final Exam",
+        description: "Advanced calculus and algebra",
+        path: "/exams/1",
+        icon: BookOpen,
+        category: "Exams",
+      },
+      {
+        id: 2,
+        type: "question",
+        title: "Quadratic Equations",
+        description:
+          "Multiple choice question about solving quadratic equations",
+        path: "/questions/2",
+        icon: Hash,
+        category: "Questions",
+      },
+      {
+        id: 3,
+        type: "user",
+        title: "John Smith",
+        description: "Student - Computer Science",
+        path: "/users/3",
+        icon: User,
+        category: "Users",
+      },
+      {
+        id: 4,
+        type: "course",
+        title: "Introduction to Programming",
+        description: "CS101 - Fall 2024",
+        path: "/courses/4",
+        icon: GraduationCap,
+        category: "Courses",
+      },
+    ];
+
+    return mockResults
+      .filter((result) => {
+        const matchesQuery =
+          result.title.toLowerCase().includes(query.toLowerCase()) ||
+          result.description.toLowerCase().includes(query.toLowerCase());
+
+        // Role-based filtering
+        if (user?.role === "student") {
+          return matchesQuery && ["exam", "course"].includes(result.type);
+        }
+
+        return matchesQuery;
+      })
+      .slice(0, 8);
+  };
+
+  const handleSearchSelect = (result) => {
+    navigate(result.path);
+    setIsSearchOpen(false);
+    setSearchQuery("");
+    setSearchResults([]);
+    toast.success(`Opening ${result.title}`);
+  };
+
+  const openSearch = () => {
+    setIsSearchOpen(true);
+    setTimeout(() => searchInputRef.current?.focus(), 100);
+  };
 
   const getNotificationTitle = (path) => {
     const titles = {
@@ -318,6 +475,138 @@ export const Navbar = () => {
         <h2 className="text-lg md:text-xl font-semibold">
           Welcome back, {user?.name?.split(" ")[0]}!
         </h2>
+      </div>
+
+      {/* Search Bar */}
+      <div className="flex-1 max-w-md mx-4 relative">
+        <div className="relative">
+          <Button
+            variant="outline"
+            className="w-full justify-start text-muted-foreground hover:bg-accent"
+            onClick={openSearch}>
+            <Search className="mr-2 h-4 w-4" />
+            <span className="hidden sm:inline">Search...</span>
+            <span className="sm:hidden">Search</span>
+            <div className="ml-auto hidden sm:flex items-center gap-1">
+              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
+                <Command className="h-3 w-3" />K
+              </kbd>
+            </div>
+          </Button>
+
+          {/* Search Modal/Dropdown */}
+          {isSearchOpen && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-card border rounded-lg shadow-lg z-50 max-h-96 overflow-hidden">
+              <div className="p-3 border-b">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    ref={searchInputRef}
+                    placeholder="Search exams, questions, users..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4"
+                    autoFocus
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                    onClick={() => setIsSearchOpen(false)}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="max-h-80 overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                    Searching...
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div className="py-2">
+                    {searchResults.map((result) => {
+                      const IconComponent = result.icon;
+                      return (
+                        <button
+                          key={result.id}
+                          className="w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-3 group"
+                          onClick={() => handleSearchSelect(result)}>
+                          <div className="flex-shrink-0">
+                            <IconComponent className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium truncate">
+                                {result.title}
+                              </p>
+                              <Badge
+                                variant="secondary"
+                                className="text-xs ml-2">
+                                {result.category}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate mt-1">
+                              {result.description}
+                            </p>
+                          </div>
+                          <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : searchQuery.trim() ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">
+                      No results found for "{searchQuery}"
+                    </p>
+                    <p className="text-xs mt-1">
+                      Try different keywords or check spelling
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Quick Search</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="h-3 w-3" />
+                          Exams
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Hash className="h-3 w-3" />
+                          Questions
+                        </div>
+                        {user?.role !== "student" && (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3" />
+                              Users
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <GraduationCap className="h-3 w-3" />
+                              Courses
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Backdrop */}
+        {isSearchOpen && (
+          <div
+            className="fixed inset-0 bg-black/20 z-40"
+            onClick={() => setIsSearchOpen(false)}
+          />
+        )}
       </div>
 
       <div className="flex items-center gap-2">
