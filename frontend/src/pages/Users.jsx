@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DragDropUpload } from "@/components/ui/drag-drop-upload";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import {
   Select,
   SelectContent,
@@ -40,6 +42,7 @@ import {
   Upload,
   Download,
   UserPlus,
+  FileSpreadsheet,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -66,8 +69,16 @@ export const Users = () => {
     status: "active",
   });
   const [importDialog, setImportDialog] = useState(false);
-  const [importFile, setImportFile] = useState(null);
   const [importing, setImporting] = useState(false);
+  const {
+    files: importFiles,
+    addFiles: addImportFiles,
+    removeFile: removeImportFile,
+    clearFiles: clearImportFiles,
+    uploadProgress,
+    error: uploadError,
+    uploadSingleFile,
+  } = useFileUpload();
 
   useEffect(() => {
     loadUsers();
@@ -211,36 +222,25 @@ export const Users = () => {
   };
 
   const handleImport = async () => {
-    if (!importFile) {
+    if (importFiles.length === 0) {
       toast.error("Please select a file");
       return;
     }
 
     setImporting(true);
     try {
-      const formData = new FormData();
-      formData.append("file", importFile);
-
-      const response = await fetch(
+      const file = importFiles[0];
+      const result = await uploadSingleFile(
+        file,
         `${import.meta.env.VITE_API_URL}/users/import/csv`,
         {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-          body: formData,
+          fileFieldName: "file",
         },
       );
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Import failed");
-      }
-
-      toast.success(data.message);
+      toast.success(result.message || "Users imported successfully");
       setImportDialog(false);
-      setImportFile(null);
+      clearImportFiles();
       loadUsers();
     } catch (error) {
       toast.error(error.message || "Failed to import users");
@@ -296,21 +296,33 @@ Admin User,admin@example.com,password123,admin,active`;
                   Import CSV
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>Import Users from CSV</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
-                  <div className="space-y-2">
+                <div className="space-y-6">
+                  <div className="space-y-4">
                     <Label>Upload CSV File</Label>
-                    <Input
-                      type="file"
+                    <DragDropUpload
+                      onFileSelect={addImportFiles}
+                      onFileRemove={removeImportFile}
                       accept=".csv,.xlsx,.xls"
-                      onChange={(e) => setImportFile(e.target.files[0])}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Supported formats: CSV, XLSX, XLS (Max 5MB)
-                    </p>
+                      maxSize={5 * 1024 * 1024} // 5MB
+                      maxFiles={1}
+                      files={importFiles}
+                      uploadProgress={uploadProgress}
+                      error={uploadError}
+                      helperText="Drag & drop your CSV file here or click to browse">
+                      <FileSpreadsheet className="h-12 w-12 mb-4 text-muted-foreground" />
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">
+                          Drop your CSV file here
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Supported formats: CSV, XLSX, XLS (Max 5MB)
+                        </p>
+                      </div>
+                    </DragDropUpload>
                   </div>
                   <div className="bg-muted p-4 rounded">
                     <p className="text-sm font-medium mb-2">
@@ -343,7 +355,7 @@ Admin User,admin@example.com,password123,admin,active`;
                     </Button>
                     <Button
                       onClick={handleImport}
-                      disabled={importing || !importFile}>
+                      disabled={importing || importFiles.length === 0}>
                       {importing ? "Importing..." : "Import"}
                     </Button>
                   </div>

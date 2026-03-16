@@ -24,6 +24,7 @@ import { Analytics } from "@/pages/Analytics";
 import { Profile } from "@/pages/Profile";
 import { Settings } from "@/pages/Settings";
 import { BreadcrumbsDemo } from "@/components/common/BreadcrumbsDemo";
+import { DragDropDemo } from "@/pages/DragDropDemo";
 
 // Dashboard Router Component
 const DashboardRouter = () => {
@@ -169,6 +170,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <BreadcrumbsDemo />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/drag-drop-demo",
+    element: (
+      <ProtectedRoute>
+        <DragDropDemo />
       </ProtectedRoute>
     ),
   },

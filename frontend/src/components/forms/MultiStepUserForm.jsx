@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import {
   Select,
   SelectContent,
@@ -26,6 +27,7 @@ import {
   EyeOff,
   AlertCircle,
   Check,
+  Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -366,14 +368,16 @@ const RolePermissionsStep = ({ data, updateData }) => {
 const ProfileInfoStep = ({ data, updateData }) => {
   const [avatarPreview, setAvatarPreview] = useState(null);
 
-  const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      updateData({ avatar: file });
-      const reader = new FileReader();
-      reader.onload = (e) => setAvatarPreview(e.target.result);
-      reader.readAsDataURL(file);
-    }
+  const handleAvatarSelect = (file) => {
+    updateData({ avatar: file });
+    const reader = new FileReader();
+    reader.onload = (e) => setAvatarPreview(e.target.result);
+    reader.readAsDataURL(file);
+  };
+
+  const handleAvatarRemove = () => {
+    updateData({ avatar: null });
+    setAvatarPreview(null);
   };
 
   const getInitials = (firstName, lastName) => {
@@ -382,37 +386,41 @@ const ProfileInfoStep = ({ data, updateData }) => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-6">
-        <div className="relative">
-          <Avatar className="h-24 w-24">
-            <AvatarImage src={avatarPreview} />
-            <AvatarFallback className="text-lg">
-              {getInitials(data.firstName, data.lastName)}
-            </AvatarFallback>
-          </Avatar>
-          <Button
-            type="button"
-            size="sm"
-            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
-            onClick={() => document.getElementById("avatar-upload").click()}>
-            <Upload className="h-4 w-4" />
-          </Button>
-          <input
-            id="avatar-upload"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={handleAvatarChange}
-          />
-        </div>
-        <div>
-          <h4 className="font-medium">Profile Picture</h4>
-          <p className="text-sm text-muted-foreground">
-            Upload a profile picture for the user
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            Recommended: Square image, max 2MB
-          </p>
+      {/* Avatar Upload Section */}
+      <div className="space-y-4">
+        <Label>Profile Picture</Label>
+        <div className="flex items-start gap-6">
+          <div className="flex-shrink-0">
+            <Avatar className="h-24 w-24">
+              <AvatarImage src={avatarPreview} />
+              <AvatarFallback className="text-lg">
+                {getInitials(data.firstName, data.lastName)}
+              </AvatarFallback>
+            </Avatar>
+          </div>
+
+          <div className="flex-1">
+            <DragDropUpload
+              onFileSelect={handleAvatarSelect}
+              onFileRemove={handleAvatarRemove}
+              accept="image/*"
+              maxSize={5 * 1024 * 1024} // 5MB
+              maxFiles={1}
+              files={data.avatar ? [data.avatar] : []}
+              showPreview={false}
+              helperText="Upload a profile picture (JPG, PNG, GIF, WebP)"
+              className="min-h-[120px]">
+              <Camera className="h-8 w-8 mb-3 text-muted-foreground" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">
+                  Drag & drop a profile picture here
+                </p>
+                <p className="text-xs text-muted-foreground">
+                  Recommended: Square image, max 5MB
+                </p>
+              </div>
+            </DragDropUpload>
+          </div>
         </div>
       </div>
 

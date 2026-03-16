@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { DragDropUpload } from "@/components/ui/drag-drop-upload";
+import { useFileUpload } from "@/hooks/useFileUpload";
 import {
   Select,
   SelectContent,
@@ -33,6 +35,7 @@ import {
   Upload,
   Download,
   HelpCircle,
+  FileSpreadsheet,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -64,9 +67,16 @@ export const Questions = () => {
   const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploadDialog, setUploadDialog] = useState(false);
-  const [uploadFile, setUploadFile] = useState(null);
   const [uploadExamId, setUploadExamId] = useState("");
-  const [uploading, setUploading] = useState(false);
+  const {
+    files: uploadFiles,
+    addFiles: addUploadFiles,
+    removeFile: removeUploadFile,
+    clearFiles: clearUploadFiles,
+    uploadProgress,
+    error: uploadError,
+    uploadSingleFile,
+  } = useFileUpload();
 
   useEffect(() => {
     loadData();
@@ -236,27 +246,31 @@ export const Questions = () => {
   };
 
   const handleBulkUpload = async () => {
-    if (!uploadFile || !uploadExamId) {
+    if (uploadFiles.length === 0 || !uploadExamId) {
       toast.error("Please select a file and exam");
       return;
     }
 
-    setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", uploadFile);
-      formData.append("examId", uploadExamId);
+      const file = uploadFiles[0];
+      const result = await uploadSingleFile(
+        file,
+        `${import.meta.env.VITE_API_URL}/questions/upload`,
+        {
+          fileFieldName: "file",
+          additionalFields: {
+            examId: uploadExamId,
+          },
+        },
+      );
 
-      const response = await questionsApi.uploadFile(formData);
-      toast.success(response.data.message);
+      toast.success(result.message || "Questions uploaded successfully");
       setUploadDialog(false);
-      setUploadFile(null);
+      clearUploadFiles();
       setUploadExamId("");
       loadData();
     } catch (error) {
-      toast.error(error.response?.data?.message || "Failed to upload file");
-    } finally {
-      setUploading(false);
+      toast.error(error.message || "Failed to upload file");
     }
   };
 
@@ -316,11 +330,11 @@ export const Questions = () => {
                   Bulk Upload
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-2xl">
                 <DialogHeader>
                   <DialogTitle>Upload Questions from File</DialogTitle>
                 </DialogHeader>
-                <div className="space-y-4">
+                <div className="space-y-6">
                   <div className="space-y-2">
                     <Label>Select Exam</Label>
                     <Select
@@ -340,16 +354,29 @@ export const Questions = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
+
+                  <div className="space-y-4">
                     <Label>Upload File (CSV or Excel)</Label>
-                    <Input
-                      type="file"
+                    <DragDropUpload
+                      onFileSelect={addUploadFiles}
+                      onFileRemove={removeUploadFile}
                       accept=".csv,.xlsx,.xls"
-                      onChange={(e) => setUploadFile(e.target.files[0])}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Supported formats: CSV, XLSX, XLS (Max 10MB)
-                    </p>
+                      maxSize={10 * 1024 * 1024} // 10MB
+                      maxFiles={1}
+                      files={uploadFiles}
+                      uploadProgress={uploadProgress}
+                      error={uploadError}
+                      helperText="Drag & drop your questions file here or click to browse">
+                      <FileSpreadsheet className="h-12 w-12 mb-4 text-muted-foreground" />
+                      <div className="space-y-2">
+                        <p className="text-sm font-medium">
+                          Drop your questions file here
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          Supported formats: CSV, XLSX, XLS (Max 10MB)
+                        </p>
+                      </div>
+                    </DragDropUpload>
                   </div>
                   <div className="bg-muted p-4 rounded">
                     <p className="text-sm font-medium mb-2">File Format:</p>
@@ -379,8 +406,8 @@ export const Questions = () => {
                     </Button>
                     <Button
                       onClick={handleBulkUpload}
-                      disabled={uploading || !uploadFile || !uploadExamId}>
-                      {uploading ? "Uploading..." : "Upload"}
+                      disabled={uploadFiles.length === 0 || !uploadExamId}>
+                      Upload
                     </Button>
                   </div>
                 </div>

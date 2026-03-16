@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
+import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import {
   Select,
   SelectContent,
@@ -23,6 +24,7 @@ import {
   X,
   Check,
   AlertCircle,
+  Camera,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -229,22 +231,19 @@ const QuestionDetailsStep = ({
 const MediaStep = ({ data, updateData }) => {
   const [imagePreview, setImagePreview] = useState(data.imageUrl || null);
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        alert("Image size must be less than 5MB");
-        return;
-      }
-
-      updateData({ imageFile: file });
-      const reader = new FileReader();
-      reader.onload = (e) => setImagePreview(e.target.result);
-      reader.readAsDataURL(file);
+  const handleImageSelect = (file) => {
+    if (file.size > 5 * 1024 * 1024) {
+      // This error should be handled by the DragDropUpload component
+      return;
     }
+
+    updateData({ imageFile: file });
+    const reader = new FileReader();
+    reader.onload = (e) => setImagePreview(e.target.result);
+    reader.readAsDataURL(file);
   };
 
-  const removeImage = () => {
+  const handleImageRemove = () => {
     updateData({ imageFile: null, imageUrl: null });
     setImagePreview(null);
   };
@@ -258,31 +257,23 @@ const MediaStep = ({ data, updateData }) => {
         </div>
 
         {!imagePreview ? (
-          <div className="border-2 border-dashed border-muted-foreground/25 rounded-lg p-8 text-center">
-            <Image className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <DragDropUpload
+            onFileSelect={handleImageSelect}
+            onFileRemove={handleImageRemove}
+            accept="image/*"
+            maxSize={5 * 1024 * 1024} // 5MB
+            maxFiles={1}
+            files={data.imageFile ? [data.imageFile] : []}
+            showPreview={false}
+            helperText="Upload an image to accompany your question">
+            <Camera className="h-12 w-12 mb-4 text-muted-foreground" />
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">
-                Upload an image to accompany your question
+              <p className="text-sm font-medium">Drag & drop an image here</p>
+              <p className="text-xs text-muted-foreground">
+                Supported formats: JPG, PNG, GIF, WebP (Max 5MB)
               </p>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => document.getElementById("image-upload").click()}>
-                <Upload className="h-4 w-4 mr-2" />
-                Choose Image
-              </Button>
-              <input
-                id="image-upload"
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleImageUpload}
-              />
             </div>
-            <p className="text-xs text-muted-foreground mt-4">
-              Supported formats: JPG, PNG, GIF, WebP (Max 5MB)
-            </p>
-          </div>
+          </DragDropUpload>
         ) : (
           <div className="relative">
             <img
@@ -295,7 +286,7 @@ const MediaStep = ({ data, updateData }) => {
               variant="destructive"
               size="sm"
               className="absolute top-2 right-2"
-              onClick={removeImage}>
+              onClick={handleImageRemove}>
               <X className="h-4 w-4" />
             </Button>
           </div>
