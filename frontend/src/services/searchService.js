@@ -68,7 +68,7 @@ export const searchService = {
           title: exam.title,
           description:
             exam.description || `${exam.subject} - ${exam.duration} minutes`,
-          path: `/exams/${exam._id || exam.id}`,
+          path: `/exams`, // Navigate to exams list page
           category: "Exams",
           relevance: this.calculateRelevance(
             query,
@@ -80,6 +80,7 @@ export const searchService = {
             duration: exam.duration,
             status: exam.status,
             questions: exam.questionCount || 0,
+            examId: exam._id || exam.id, // Store ID for future use
           },
         }));
     } catch (error) {
@@ -106,7 +107,7 @@ export const searchService = {
           type: "question",
           title: question.question?.substring(0, 60) + "...",
           description: `${question.type} - ${question.subject || "General"}`,
-          path: `/questions/${question._id || question.id}`,
+          path: `/questions`, // Navigate to questions list page
           category: "Questions",
           relevance: this.calculateRelevance(
             query,
@@ -118,6 +119,7 @@ export const searchService = {
             subject: question.subject,
             difficulty: question.difficulty,
             points: question.points,
+            questionId: question._id || question.id, // Store ID for future use
           },
         }));
     } catch (error) {
@@ -144,7 +146,7 @@ export const searchService = {
           type: "user",
           title: user.name,
           description: `${user.role} - ${user.email}`,
-          path: `/users/${user._id || user.id}`,
+          path: `/users`, // Navigate to users list page
           category: "Users",
           relevance: this.calculateRelevance(query, user.name, user.email),
           metadata: {
@@ -152,6 +154,7 @@ export const searchService = {
             email: user.email,
             status: user.status,
             joinDate: user.createdAt,
+            userId: user._id || user.id, // Store ID for future use
           },
         }));
     } catch (error) {
@@ -178,7 +181,7 @@ export const searchService = {
           type: "course",
           title: course.name,
           description: `${course.code} - ${course.description?.substring(0, 50)}...`,
-          path: `/courses/${course._id || course.id}`,
+          path: `/courses`, // Navigate to courses list page
           category: "Courses",
           relevance: this.calculateRelevance(
             query,
@@ -190,6 +193,7 @@ export const searchService = {
             instructor: course.instructor,
             students: course.studentCount || 0,
             status: course.status,
+            courseId: course._id || course.id, // Store ID for future use
           },
         }));
     } catch (error) {

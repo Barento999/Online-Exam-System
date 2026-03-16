@@ -202,7 +202,7 @@ export const Navbar = () => {
         type: "exam",
         title: "Mathematics Final Exam",
         description: "Advanced calculus and algebra",
-        path: "/exams/1",
+        path: "/exams", // Navigate to exams list page
         icon: BookOpen,
         category: "Exams",
       },
@@ -212,7 +212,7 @@ export const Navbar = () => {
         title: "Quadratic Equations",
         description:
           "Multiple choice question about solving quadratic equations",
-        path: "/questions/2",
+        path: "/questions", // Navigate to questions list page
         icon: Hash,
         category: "Questions",
       },
@@ -221,7 +221,7 @@ export const Navbar = () => {
         type: "user",
         title: "John Smith",
         description: "Student - Computer Science",
-        path: "/users/3",
+        path: "/users", // Navigate to users list page
         icon: User,
         category: "Users",
       },
@@ -230,7 +230,7 @@ export const Navbar = () => {
         type: "course",
         title: "Introduction to Programming",
         description: "CS101 - Fall 2024",
-        path: "/courses/4",
+        path: "/courses", // Navigate to courses list page
         icon: GraduationCap,
         category: "Courses",
       },
@@ -253,6 +253,23 @@ export const Navbar = () => {
   };
 
   const handleSearchSelect = (result) => {
+    // Store the selected item info for potential use on the target page
+    if (result.metadata) {
+      sessionStorage.setItem(
+        "searchSelectedItem",
+        JSON.stringify({
+          type: result.type,
+          id:
+            result.metadata.examId ||
+            result.metadata.questionId ||
+            result.metadata.userId ||
+            result.metadata.courseId,
+          title: result.title,
+          timestamp: Date.now(),
+        }),
+      );
+    }
+
     navigate(result.path);
     setIsSearchOpen(false);
     setSearchQuery("");
