@@ -1,165 +1,165 @@
 import { useEffect } from "react";
 import { useNotificationContext } from "@/context/NotificationContext";
 import { useAuth } from "@/context/AuthContext";
-import { useSocket } from "@/context/SocketContext";
+import { notificationService } from "@/services/notificationService";
 
 /**
- * Hook for real-time notification updates via WebSocket
- * Integrates with the existing SocketContext to listen for notification events
+ * Hook for real-time notification updates
+ * This hook can be used to update notifications when specific actions occur
  */
 export const useRealTimeNotifications = () => {
-  const { incrementNotification, setNotification } = useNotificationContext();
-  const { user } = useAuth();
-  const { socket } = useSocket();
-
-  useEffect(() => {
-    if (!socket || !user) return;
-
-    // Listen for various real-time events that should trigger notifications
-    const handleNewUser = (data) => {
-      if (user.role === "admin") {
-        incrementNotification("/users", 1);
-      }
-    };
-
-    const handleExamCreated = (data) => {
-      if (user.role === "admin" || user.role === "teacher") {
-        incrementNotification("/exams", 1);
-      }
-    };
-
-    const handleExamSubmitted = (data) => {
-      if (user.role === "admin" || user.role === "teacher") {
-        incrementNotification("/results", 1);
-      }
-    };
-
-    const handleQuestionAdded = (data) => {
-      if (user.role === "admin" || user.role === "teacher") {
-        incrementNotification("/questions", 1);
-      }
-    };
-
-    const handleNewEnrollment = (data) => {
-      if (user.role === "admin" || user.role === "teacher") {
-        incrementNotification("/enrollments", 1);
-      }
-    };
-
-    const handleResultPublished = (data) => {
-      if (user.role === "student" && data.studentId === user._id) {
-        incrementNotification("/results", 1);
-      }
-    };
-
-    const handleSystemAlert = (data) => {
-      // System alerts for admins
-      if (user.role === "admin") {
-        setNotification("/settings", 1, "error");
-      }
-    };
-
-    const handleExamAvailable = (data) => {
-      // New exam available for students
-      if (user.role === "student") {
-        incrementNotification("/exams", 1);
-      }
-    };
-
-    // Register event listeners
-    socket.on("user:registered", handleNewUser);
-    socket.on("exam:created", handleExamCreated);
-    socket.on("exam:submitted", handleExamSubmitted);
-    socket.on("question:added", handleQuestionAdded);
-    socket.on("enrollment:created", handleNewEnrollment);
-    socket.on("result:published", handleResultPublished);
-    socket.on("system:alert", handleSystemAlert);
-    socket.on("exam:available", handleExamAvailable);
-
-    // Cleanup listeners on unmount
-    return () => {
-      socket.off("user:registered", handleNewUser);
-      socket.off("exam:created", handleExamCreated);
-      socket.off("exam:submitted", handleExamSubmitted);
-      socket.off("question:added", handleQuestionAdded);
-      socket.off("enrollment:created", handleNewEnrollment);
-      socket.off("result:published", handleResultPublished);
-      socket.off("system:alert", handleSystemAlert);
-      socket.off("exam:available", handleExamAvailable);
-    };
-  }, [socket, user, incrementNotification, setNotification]);
-};
-
-/**
- * Hook for triggering notifications based on user actions
- * Use this in components where users perform actions that should notify others
- */
-export const useNotificationTriggers = () => {
-  const { socket } = useSocket();
+  const { setNotification, incrementNotification, decrementNotification } =
+    useNotificationContext();
   const { user } = useAuth();
 
-  const triggerUserRegistration = (userData) => {
-    if (socket) {
-      socket.emit("user:registered", { user: userData, triggeredBy: user._id });
-    }
-  };
+  // Refresh all notifications
+  const refreshNotifications = async () => {
+    if (!user?.role) return;
 
-  const triggerExamCreation = (examData) => {
-    if (socket) {
-      socket.emit("exam:created", { exam: examData, createdBy: user._id });
-    }
-  };
+    try {
+      const notifications = await notificationService.getNotificationCounts(
+        user.role,
+      );
 
-  const triggerExamSubmission = (examId, studentId) => {
-    if (socket) {
-      socket.emit("exam:submitted", {
-        examId,
-        studentId,
-        submittedAt: new Date(),
+      Object.entries(notifications).forEach(([path, notification]) => {
+        setNotification(path, notification.count, notification.type);
       });
+    } catch (error) {
+      console.error("Failed to refresh notifications:", error);
     }
   };
 
-  const triggerQuestionAdded = (questionData) => {
-    if (socket) {
-      socket.emit("question:added", {
-        question: questionData,
-        addedBy: user._id,
-      });
+  // Specific notification updaters
+  const updateUserNotifications = async () => {
+    if (user?.role === "admin") {
+      try {
+        const count = await notificationService.getUserNotifications();
+        setNotification("/users", count, "info");
+      } catch (error) {
+        console.error("Failed to update user notifications:", error);
+      }
     }
   };
 
-  const triggerEnrollment = (enrollmentData) => {
-    if (socket) {
-      socket.emit("enrollment:created", {
-        enrollment: enrollmentData,
-        createdBy: user._id,
-      });
+  const updateExamNotifications = async () => {
+    try {
+      const count = await notificationService.getExamNotifications(user?.role);
+      const type = user?.role === "student" ? "success" : "warning";
+      setNotification("/exams", count, type);
+    } catch (error) {
+      console.error("Failed to update exam notifications:", error);
     }
   };
 
-  const triggerResultPublished = (resultData) => {
-    if (socket) {
-      socket.emit("result:published", {
-        result: resultData,
-        publishedBy: user._id,
-      });
+  const updateQuestionNotifications = async () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      try {
+        const count = await notificationService.getQuestionNotifications();
+        setNotification("/questions", count, "warning");
+      } catch (error) {
+        console.error("Failed to update question notifications:", error);
+      }
     }
   };
 
-  const triggerSystemAlert = (alertData) => {
-    if (socket && user.role === "admin") {
-      socket.emit("system:alert", { alert: alertData, triggeredBy: user._id });
+  const updateResultNotifications = async () => {
+    try {
+      const count = await notificationService.getResultNotifications(
+        user?.role,
+      );
+      const type = user?.role === "student" ? "success" : "error";
+      setNotification("/results", count, type);
+    } catch (error) {
+      console.error("Failed to update result notifications:", error);
+    }
+  };
+
+  const updateEnrollmentNotifications = async () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      try {
+        const count = await notificationService.getEnrollmentNotifications();
+        setNotification("/enrollments", count, "info");
+      } catch (error) {
+        console.error("Failed to update enrollment notifications:", error);
+      }
+    }
+  };
+
+  // Event handlers for common actions
+  const handleUserCreated = () => {
+    if (user?.role === "admin") {
+      incrementNotification("/users", 1);
+    }
+  };
+
+  const handleExamCreated = () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      incrementNotification("/exams", 1);
+    }
+  };
+
+  const handleExamPublished = () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      decrementNotification("/exams", 1);
+    }
+  };
+
+  const handleQuestionCreated = () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      incrementNotification("/questions", 1);
+    }
+  };
+
+  const handleQuestionAssigned = () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      decrementNotification("/questions", 1);
+    }
+  };
+
+  const handleResultSubmitted = () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      incrementNotification("/results", 1);
+    }
+  };
+
+  const handleResultGraded = () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      decrementNotification("/results", 1);
+    } else if (user?.role === "student") {
+      incrementNotification("/results", 1);
+    }
+  };
+
+  const handleEnrollmentRequested = () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      incrementNotification("/enrollments", 1);
+    }
+  };
+
+  const handleEnrollmentApproved = () => {
+    if (user?.role === "admin" || user?.role === "teacher") {
+      decrementNotification("/enrollments", 1);
     }
   };
 
   return {
-    triggerUserRegistration,
-    triggerExamCreation,
-    triggerExamSubmission,
-    triggerQuestionAdded,
-    triggerEnrollment,
-    triggerResultPublished,
-    triggerSystemAlert,
+    // Refresh functions
+    refreshNotifications,
+    updateUserNotifications,
+    updateExamNotifications,
+    updateQuestionNotifications,
+    updateResultNotifications,
+    updateEnrollmentNotifications,
+
+    // Event handlers
+    handleUserCreated,
+    handleExamCreated,
+    handleExamPublished,
+    handleQuestionCreated,
+    handleQuestionAssigned,
+    handleResultSubmitted,
+    handleResultGraded,
+    handleEnrollmentRequested,
+    handleEnrollmentApproved,
   };
 };

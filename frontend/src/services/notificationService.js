@@ -12,15 +12,22 @@ export const notificationService = {
     try {
       const notifications = {};
 
-      // Users notifications (for admin - get total users for demo, in real app this would be pending users)
+      // Users notifications - show actual new/pending users
       if (userRole === "admin") {
         try {
           const response = await usersApi.getAll();
-          const totalUsers =
-            response.data?.total || response.data?.users?.length || 0;
-          if (totalUsers > 0) {
-            // For demo purposes, show a portion as "new" users
-            const newUsers = Math.min(totalUsers, 5);
+          const users = response.data?.users || [];
+
+          // Count users created in the last 7 days as "new"
+          const weekAgo = new Date();
+          weekAgo.setDate(weekAgo.getDate() - 7);
+
+          const newUsers = users.filter((user) => {
+            const createdDate = new Date(user.createdAt);
+            return createdDate > weekAgo;
+          }).length;
+
+          if (newUsers > 0) {
             notifications["/users"] = { count: newUsers, type: "info" };
           }
         } catch (error) {
@@ -28,16 +35,19 @@ export const notificationService = {
         }
       }
 
-      // Exams notifications
+      // Exams notifications - show draft/unpublished exams
       if (userRole === "admin" || userRole === "teacher") {
         try {
           const response = await examsApi.getAll();
-          const totalExams =
-            response.data?.total || response.data?.exams?.length || 0;
-          if (totalExams > 0) {
-            // For demo purposes, show some as "pending review"
-            const pendingExams = Math.min(totalExams, 3);
-            notifications["/exams"] = { count: pendingExams, type: "warning" };
+          const exams = response.data?.exams || [];
+
+          // Count draft or unpublished exams
+          const draftExams = exams.filter(
+            (exam) => exam.status === "draft" || exam.status === "unpublished",
+          ).length;
+
+          if (draftExams > 0) {
+            notifications["/exams"] = { count: draftExams, type: "warning" };
           }
         } catch (error) {
           console.warn("Failed to fetch exam notifications:", error);
@@ -60,18 +70,21 @@ export const notificationService = {
         }
       }
 
-      // Questions notifications
+      // Questions notifications - show questions without exams or needing review
       if (userRole === "admin" || userRole === "teacher") {
         try {
           const response = await questionsApi.getAll();
-          const totalQuestions =
-            response.data?.total || response.data?.questions?.length || 0;
-          if (totalQuestions > 0) {
-            // For demo purposes, show some as "needs review"
-            const questionsNeedingReview = Math.min(totalQuestions, 8);
+          const questions = response.data?.questions || [];
+
+          // Count questions that don't have an examId (orphaned questions)
+          const orphanedQuestions = questions.filter(
+            (question) => !question.examId,
+          ).length;
+
+          if (orphanedQuestions > 0) {
             notifications["/questions"] = {
-              count: questionsNeedingReview,
-              type: "success",
+              count: orphanedQuestions,
+              type: "warning",
             };
           }
         } catch (error) {
@@ -79,21 +92,36 @@ export const notificationService = {
         }
       }
 
-      // Results notifications
+      // Results notifications - show ungraded or recent results
       try {
         const response = await resultsApi.getAll();
-        const totalResults =
-          response.data?.total || response.data?.results?.length || 0;
-        if (totalResults > 0) {
-          if (userRole === "student") {
-            // For students, show new results
-            const newResults = Math.min(totalResults, 2);
-            notifications["/results"] = { count: newResults, type: "success" };
-          } else {
-            // For admin/teacher, show results needing attention
-            const resultsNeedingAttention = Math.min(totalResults, 4);
+        const results = response.data?.results || [];
+
+        if (userRole === "student") {
+          // For students, show results from the last 3 days
+          const threeDaysAgo = new Date();
+          threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+          const recentResults = results.filter((result) => {
+            const submittedDate = new Date(result.submittedAt);
+            return submittedDate > threeDaysAgo;
+          }).length;
+
+          if (recentResults > 0) {
             notifications["/results"] = {
-              count: resultsNeedingAttention,
+              count: recentResults,
+              type: "success",
+            };
+          }
+        } else {
+          // For admin/teacher, show results that need grading or attention
+          const needsAttention = results.filter(
+            (result) => result.status === "pending" || result.needsReview,
+          ).length;
+
+          if (needsAttention > 0) {
+            notifications["/results"] = {
+              count: needsAttention,
               type: "error",
             };
           }
@@ -102,15 +130,18 @@ export const notificationService = {
         console.warn("Failed to fetch result notifications:", error);
       }
 
-      // Enrollments notifications (for admin/teacher)
+      // Enrollments notifications - show pending enrollments
       if (userRole === "admin" || userRole === "teacher") {
         try {
           const response = await enrollmentsApi.getAll();
-          const totalEnrollments =
-            response.data?.total || response.data?.enrollments?.length || 0;
-          if (totalEnrollments > 0) {
-            // For demo purposes, show some as "pending approval"
-            const pendingEnrollments = Math.min(totalEnrollments, 6);
+          const enrollments = response.data?.enrollments || [];
+
+          // Count pending enrollments
+          const pendingEnrollments = enrollments.filter(
+            (enrollment) => enrollment.status === "pending",
+          ).length;
+
+          if (pendingEnrollments > 0) {
             notifications["/enrollments"] = {
               count: pendingEnrollments,
               type: "info",
@@ -121,10 +152,13 @@ export const notificationService = {
         }
       }
 
-      // Analytics notifications (for admin/teacher)
+      // Analytics notifications - show if there are new analytics data
       if (userRole === "admin" || userRole === "teacher") {
-        // For demo purposes, show analytics updates
-        notifications["/analytics"] = { count: 1, type: "info" };
+        // Check if there's new data to analyze (simplified check)
+        const hasNewData = Object.keys(notifications).length > 0;
+        if (hasNewData) {
+          notifications["/analytics"] = { count: 1, type: "info" };
+        }
       }
 
       return notifications;
@@ -134,13 +168,19 @@ export const notificationService = {
     }
   },
 
-  // Get specific notification counts
+  // Get specific notification counts with better logic
   async getUserNotifications() {
     try {
       const response = await usersApi.getAll();
-      const totalUsers =
-        response.data?.total || response.data?.users?.length || 0;
-      return Math.min(totalUsers, 5); // Show max 5 as "new" users
+      const users = response.data?.users || [];
+
+      const weekAgo = new Date();
+      weekAgo.setDate(weekAgo.getDate() - 7);
+
+      return users.filter((user) => {
+        const createdDate = new Date(user.createdAt);
+        return createdDate > weekAgo;
+      }).length;
     } catch (error) {
       console.warn("Failed to fetch user notifications:", error);
       return 0;
@@ -154,9 +194,10 @@ export const notificationService = {
         return response.data?.length || 0;
       } else {
         const response = await examsApi.getAll();
-        const totalExams =
-          response.data?.total || response.data?.exams?.length || 0;
-        return Math.min(totalExams, 3); // Show max 3 as "pending"
+        const exams = response.data?.exams || [];
+        return exams.filter(
+          (exam) => exam.status === "draft" || exam.status === "unpublished",
+        ).length;
       }
     } catch (error) {
       console.warn("Failed to fetch exam notifications:", error);
@@ -167,9 +208,8 @@ export const notificationService = {
   async getQuestionNotifications() {
     try {
       const response = await questionsApi.getAll();
-      const totalQuestions =
-        response.data?.total || response.data?.questions?.length || 0;
-      return Math.min(totalQuestions, 8); // Show max 8 as "needs review"
+      const questions = response.data?.questions || [];
+      return questions.filter((question) => !question.examId).length;
     } catch (error) {
       console.warn("Failed to fetch question notifications:", error);
       return 0;
@@ -179,13 +219,20 @@ export const notificationService = {
   async getResultNotifications(userRole) {
     try {
       const response = await resultsApi.getAll();
-      const totalResults =
-        response.data?.total || response.data?.results?.length || 0;
+      const results = response.data?.results || [];
 
       if (userRole === "student") {
-        return Math.min(totalResults, 2); // Show max 2 as "new results"
+        const threeDaysAgo = new Date();
+        threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+        return results.filter((result) => {
+          const submittedDate = new Date(result.submittedAt);
+          return submittedDate > threeDaysAgo;
+        }).length;
       } else {
-        return Math.min(totalResults, 4); // Show max 4 as "needs attention"
+        return results.filter(
+          (result) => result.status === "pending" || result.needsReview,
+        ).length;
       }
     } catch (error) {
       console.warn("Failed to fetch result notifications:", error);
@@ -196,9 +243,9 @@ export const notificationService = {
   async getEnrollmentNotifications() {
     try {
       const response = await enrollmentsApi.getAll();
-      const totalEnrollments =
-        response.data?.total || response.data?.enrollments?.length || 0;
-      return Math.min(totalEnrollments, 6); // Show max 6 as "pending"
+      const enrollments = response.data?.enrollments || [];
+      return enrollments.filter((enrollment) => enrollment.status === "pending")
+        .length;
     } catch (error) {
       console.warn("Failed to fetch enrollment notifications:", error);
       return 0;

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNotificationContext } from "@/context/NotificationContext";
 import { useAuth } from "@/context/AuthContext";
 import { notificationService } from "@/services/notificationService";
+import { enhancedNotificationService } from "@/services/fallbackNotificationService";
 
 export const NotificationLoader = () => {
   const { setNotification, clearAllNotifications } = useNotificationContext();
@@ -15,10 +16,12 @@ export const NotificationLoader = () => {
         // Clear existing notifications first
         clearAllNotifications();
 
-        // Fetch real notification data
-        const notifications = await notificationService.getNotificationCounts(
-          user.role,
-        );
+        // Fetch notification data with fallback
+        const notifications =
+          await enhancedNotificationService.getNotificationCounts(
+            user.role,
+            notificationService,
+          );
 
         // Set notifications with a slight delay to show the animation
         Object.entries(notifications).forEach(([path, notification], index) => {
