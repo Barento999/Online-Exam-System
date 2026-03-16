@@ -5,12 +5,21 @@ import {
   Sun,
   LogOut,
   Bell,
-  User,
   Settings,
   UserCircle,
   BellRing,
   Check,
   X,
+  Plus,
+  BookOpen,
+  BarChart3,
+  Users,
+  FileText,
+  Calendar,
+  HelpCircle,
+  Zap,
+  Activity,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -24,7 +33,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
-import { useNotificationContext } from "@/context/NotificationContext";
 import { notificationService } from "@/services/notificationService";
 import toast from "react-hot-toast";
 
@@ -34,8 +42,11 @@ export const Navbar = () => {
   const [isDark, setIsDark] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const { getTotalCount, clearAllNotifications: clearSidebarNotifications } =
-    useNotificationContext();
+  const [userStats, setUserStats] = useState({
+    examsToday: 0,
+    pendingTasks: 0,
+    recentActivity: "Active 2h ago",
+  });
 
   // Theme management
   useEffect(() => {
@@ -53,7 +64,7 @@ export const Navbar = () => {
     }
   }, []);
 
-  // Load notifications
+  // Load notifications and user stats
   useEffect(() => {
     const loadNotifications = async () => {
       if (user?.role) {
@@ -77,6 +88,13 @@ export const Navbar = () => {
 
           setNotifications(notificationItems);
           setUnreadCount(notificationItems.length);
+
+          // Load user stats (mock data - replace with real API calls)
+          setUserStats({
+            examsToday: user.role === "student" ? 2 : 5,
+            pendingTasks: notificationItems.length,
+            recentActivity: "Active now",
+          });
         } catch (error) {
           console.error("Failed to load notifications:", error);
         }
@@ -161,6 +179,113 @@ export const Navbar = () => {
     setNotifications([]);
     setUnreadCount(0);
     toast.success("All notifications cleared");
+  };
+
+  const handleQuickAction = (action) => {
+    switch (action) {
+      case "create-exam":
+        navigate("/exams?action=create");
+        toast.success("Creating new exam...");
+        break;
+      case "create-question":
+        navigate("/questions?action=create");
+        toast.success("Adding new question...");
+        break;
+      case "view-results":
+        navigate("/results");
+        break;
+      case "take-exam":
+        navigate("/exams");
+        break;
+      case "view-analytics":
+        navigate("/analytics");
+        break;
+      case "manage-users":
+        navigate("/users");
+        break;
+      case "help":
+        // In a real app, this might open a help modal or external documentation
+        toast.info("Help documentation coming soon!");
+        break;
+      default:
+        break;
+    }
+  };
+
+  const getQuickActions = () => {
+    const baseActions = [
+      {
+        id: "help",
+        label: "Help & Support",
+        icon: HelpCircle,
+        description: "Get help and documentation",
+      },
+    ];
+
+    switch (user?.role) {
+      case "admin":
+        return [
+          {
+            id: "create-exam",
+            label: "Create Exam",
+            icon: Plus,
+            description: "Create a new exam",
+          },
+          {
+            id: "manage-users",
+            label: "Manage Users",
+            icon: Users,
+            description: "View and manage users",
+          },
+          {
+            id: "view-analytics",
+            label: "View Analytics",
+            icon: BarChart3,
+            description: "Check system analytics",
+          },
+          ...baseActions,
+        ];
+      case "teacher":
+        return [
+          {
+            id: "create-exam",
+            label: "Create Exam",
+            icon: Plus,
+            description: "Create a new exam",
+          },
+          {
+            id: "create-question",
+            label: "Add Question",
+            icon: FileText,
+            description: "Add new question",
+          },
+          {
+            id: "view-results",
+            label: "View Results",
+            icon: BarChart3,
+            description: "Check exam results",
+          },
+          ...baseActions,
+        ];
+      case "student":
+        return [
+          {
+            id: "take-exam",
+            label: "Take Exam",
+            icon: BookOpen,
+            description: "View available exams",
+          },
+          {
+            id: "view-results",
+            label: "My Results",
+            icon: BarChart3,
+            description: "Check my exam results",
+          },
+          ...baseActions,
+        ];
+      default:
+        return baseActions;
+    }
   };
 
   const getInitials = (name) => {
@@ -303,7 +428,7 @@ export const Navbar = () => {
           </DropdownMenuContent>
         </DropdownMenu>
 
-        {/* User Profile Dropdown */}
+        {/* Enhanced User Profile Dropdown with Quick Actions */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" className="relative h-10 w-10 rounded-full">
@@ -315,32 +440,136 @@ export const Navbar = () => {
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" align="end" forceMount>
-            <DropdownMenuLabel className="font-normal">
-              <div className="flex flex-col space-y-1">
-                <p className="text-sm font-medium leading-none">{user?.name}</p>
-                <p className="text-xs leading-none text-muted-foreground">
-                  {user?.email}
-                </p>
-                <Badge variant="secondary" className="w-fit mt-1">
-                  {user?.role}
-                </Badge>
+          <DropdownMenuContent className="w-80" align="end" forceMount>
+            {/* User Info Header */}
+            <DropdownMenuLabel className="font-normal p-4">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-12 w-12">
+                  <AvatarImage src={user?.avatar} alt={user?.name} />
+                  <AvatarFallback className="bg-primary text-primary-foreground text-lg">
+                    {getInitials(user?.name)}
+                  </AvatarFallback>
+                </Avatar>
+                <div className="flex flex-col space-y-1">
+                  <p className="text-sm font-medium leading-none">
+                    {user?.name}
+                  </p>
+                  <p className="text-xs leading-none text-muted-foreground">
+                    {user?.email}
+                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <Badge variant="secondary" className="text-xs">
+                      {user?.role}
+                    </Badge>
+                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                      <Activity className="h-3 w-3" />
+                      {userStats.recentActivity}
+                    </div>
+                  </div>
+                </div>
               </div>
             </DropdownMenuLabel>
+
+            {/* Quick Stats */}
+            <div className="px-4 pb-2">
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div className="bg-accent/50 rounded-lg p-2 text-center">
+                  <div className="font-semibold text-primary">
+                    {userStats.examsToday}
+                  </div>
+                  <div className="text-muted-foreground">
+                    {user?.role === "student" ? "Exams Today" : "Active Exams"}
+                  </div>
+                </div>
+                <div className="bg-accent/50 rounded-lg p-2 text-center">
+                  <div className="font-semibold text-primary">
+                    {userStats.pendingTasks}
+                  </div>
+                  <div className="text-muted-foreground">Pending Tasks</div>
+                </div>
+              </div>
+            </div>
+
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate("/profile")}>
-              <UserCircle className="mr-2 h-4 w-4" />
-              <span>Profile</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => navigate("/settings")}>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
+
+            {/* Quick Actions */}
+            <div className="px-2 py-1">
+              <div className="text-xs font-medium text-muted-foreground px-2 py-1 mb-1">
+                Quick Actions
+              </div>
+              {getQuickActions().map((action) => {
+                const IconComponent = action.icon;
+                return (
+                  <DropdownMenuItem
+                    key={action.id}
+                    onClick={() => handleQuickAction(action.id)}
+                    className="cursor-pointer px-2 py-2">
+                    <div className="flex items-center space-x-3 w-full">
+                      <div className="flex-shrink-0">
+                        <IconComponent className="h-4 w-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="text-sm font-medium">
+                          {action.label}
+                        </div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {action.description}
+                        </div>
+                      </div>
+                      <Zap className="h-3 w-3 text-muted-foreground" />
+                    </div>
+                  </DropdownMenuItem>
+                );
+              })}
+            </div>
+
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleLogout} className="text-red-600">
-              <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
-            </DropdownMenuItem>
+
+            {/* Account Management */}
+            <div className="px-2 py-1">
+              <div className="text-xs font-medium text-muted-foreground px-2 py-1 mb-1">
+                Account
+              </div>
+              <DropdownMenuItem
+                onClick={() => navigate("/profile")}
+                className="px-2 py-2">
+                <UserCircle className="mr-3 h-4 w-4" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium">Profile</div>
+                  <div className="text-xs text-muted-foreground">
+                    Manage your account
+                  </div>
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigate("/settings")}
+                className="px-2 py-2">
+                <Settings className="mr-3 h-4 w-4" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium">Settings</div>
+                  <div className="text-xs text-muted-foreground">
+                    Preferences & privacy
+                  </div>
+                </div>
+              </DropdownMenuItem>
+            </div>
+
+            <DropdownMenuSeparator />
+
+            {/* Logout */}
+            <div className="px-2 py-1">
+              <DropdownMenuItem
+                onClick={handleLogout}
+                className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-950 px-2 py-2">
+                <LogOut className="mr-3 h-4 w-4" />
+                <div className="flex-1">
+                  <div className="text-sm font-medium">Log out</div>
+                  <div className="text-xs opacity-75">
+                    Sign out of your account
+                  </div>
+                </div>
+              </DropdownMenuItem>
+            </div>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
