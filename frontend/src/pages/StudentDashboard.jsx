@@ -14,7 +14,7 @@ import { FloatingActionButton } from "@/components/dashboard/FloatingActionButto
 import { PerformanceWidget } from "@/components/dashboard/PerformanceWidget";
 import { StudyProgressWidget } from "@/components/dashboard/StudyProgressWidget";
 import { ExamTrendsWidget } from "@/components/dashboard/ExamTrendsWidget";
-import { dashboardApi } from "@/services/api";
+import { studentDataService } from "@/services/studentDataService";
 import { cn } from "@/lib/utils";
 import {
   BookOpen,
@@ -23,16 +23,21 @@ import {
   Clock,
   Calendar,
   Award,
+  GraduationCap,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
 export const StudentDashboard = () => {
-  const [stats, setStats] = useState(null);
-  const [exams, setExams] = useState(null);
-  const [results, setResults] = useState(null);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [performanceData, setPerformanceData] = useState(null);
+  const [studyProgressData, setStudyProgressData] = useState(null);
+  const [examTrendsData, setExamTrendsData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [examsLoading, setExamsLoading] = useState(true);
-  const [resultsLoading, setResultsLoading] = useState(true);
+  const [dataLoading, setDataLoading] = useState({
+    performance: true,
+    studyProgress: true,
+    examTrends: true,
+  });
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -40,79 +45,47 @@ export const StudentDashboard = () => {
   }, []);
 
   const loadDashboardData = async () => {
-    // Load stats first
-    loadStats();
-
-    // Load exams and results in parallel
-    Promise.all([loadAvailableExams(), loadRecentResults()]);
-  };
-
-  const loadStats = async () => {
     try {
-      const response = await dashboardApi.getStudentStats();
-      setStats(response.data);
+      // Load main dashboard data first
+      const data = await studentDataService.getDashboardData();
+      setDashboardData(data);
+      setLoading(false);
+
+      // Load additional data in parallel
+      loadAdditionalData();
     } catch (error) {
-      console.error("Error loading stats:", error);
-    } finally {
+      console.error("Error loading dashboard data:", error);
       setLoading(false);
     }
   };
 
-  const loadAvailableExams = async () => {
+  const loadAdditionalData = async () => {
     try {
-      // Simulate API call - replace with actual API
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      setExams([
-        {
-          id: 1,
-          title: "Mathematics Midterm",
-          course: "Mathematics 101",
-          duration: 90,
-          totalMarks: 100,
-          status: "available",
-          dueDate: "2026-03-25",
-        },
-        {
-          id: 2,
-          title: "Physics Quiz 1",
-          course: "Physics Advanced",
-          duration: 45,
-          totalMarks: 50,
-          status: "available",
-          dueDate: "2026-03-22",
-        },
+      const [performance, studyProgress, examTrends] = await Promise.all([
+        studentDataService.getPerformanceData(),
+        studentDataService.getStudyProgressData(),
+        studentDataService.getExamTrendsData(),
       ]);
-    } catch (error) {
-      console.error("Error loading exams:", error);
-    } finally {
-      setExamsLoading(false);
-    }
-  };
 
-  const loadRecentResults = async () => {
-    try {
-      // Simulate API call - replace with actual API
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      setResults([
-        {
-          id: 1,
-          title: "Mathematics Midterm",
-          submittedDate: "Mar 15, 2026",
-          score: 85,
-          status: "passed",
-        },
-        {
-          id: 2,
-          title: "Physics Quiz 1",
-          submittedDate: "Mar 20, 2026",
-          score: 84,
-          status: "passed",
-        },
-      ]);
+      setPerformanceData(performance);
+      setDataLoading((prev) => ({ ...prev, performance: false }));
+
+      setTimeout(() => {
+        setStudyProgressData(studyProgress);
+        setDataLoading((prev) => ({ ...prev, studyProgress: false }));
+      }, 300);
+
+      setTimeout(() => {
+        setExamTrendsData(examTrends);
+        setDataLoading((prev) => ({ ...prev, examTrends: false }));
+      }, 600);
     } catch (error) {
-      console.error("Error loading results:", error);
-    } finally {
-      setResultsLoading(false);
+      console.error("Error loading additional data:", error);
+      setDataLoading({
+        performance: false,
+        studyProgress: false,
+        examTrends: false,
+      });
     }
   };
 
@@ -128,39 +101,39 @@ export const StudentDashboard = () => {
   const statCards = [
     {
       title: "Enrolled Courses",
-      value: stats?.enrolledCourses || 0,
+      value: dashboardData?.stats?.enrolledCourses || 0,
       icon: BookOpen,
       color: "text-blue-600",
       bgColor: "bg-blue-100 dark:bg-blue-900/20",
       trend: "up",
-      trendValue: "+2 this month",
+      trendValue: "+1 this semester",
     },
     {
       title: "Completed Exams",
-      value: stats?.completedExams || 0,
+      value: dashboardData?.stats?.completedExams || 0,
       icon: CheckCircle,
       color: "text-green-600",
       bgColor: "bg-green-100 dark:bg-green-900/20",
       trend: "up",
-      trendValue: "+3 this week",
+      trendValue: `${dashboardData?.stats?.passedExams || 0} passed`,
     },
     {
       title: "Upcoming Exams",
-      value: stats?.upcomingExams || 0,
+      value: dashboardData?.stats?.upcomingExams || 0,
       icon: Clock,
       color: "text-orange-600",
       bgColor: "bg-orange-100 dark:bg-orange-900/20",
       trend: "neutral",
-      trendValue: "2 this week",
+      trendValue: "This month",
     },
     {
       title: "Average Score",
-      value: `${stats?.avgScore || 0}%`,
+      value: `${dashboardData?.stats?.avgScore || 0}%`,
       icon: TrendingUp,
       color: "text-purple-600",
       bgColor: "bg-purple-100 dark:bg-purple-900/20",
       trend: "up",
-      trendValue: "+5% improvement",
+      trendValue: "+3.2% improvement",
     },
   ];
 
@@ -357,11 +330,20 @@ export const StudentDashboard = () => {
           <div className="lg:col-span-2">
             {/* Chart Widgets Grid */}
             <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-              <PerformanceWidget />
-              <StudyProgressWidget />
+              <PerformanceWidget
+                data={performanceData}
+                loading={dataLoading.performance}
+              />
+              <StudyProgressWidget
+                data={studyProgressData}
+                loading={dataLoading.studyProgress}
+              />
             </div>
             <div className="mt-6">
-              <ExamTrendsWidget />
+              <ExamTrendsWidget
+                data={examTrendsData}
+                loading={dataLoading.examTrends}
+              />
             </div>
           </div>
           <QuickActions />

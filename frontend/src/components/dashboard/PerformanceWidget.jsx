@@ -7,8 +7,9 @@ import {
 import { TrendingUp, Award, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const PerformanceWidget = ({ className }) => {
-  const performanceData = [
+export const PerformanceWidget = ({ data, loading, className }) => {
+  // Use provided data or fallback to default
+  const performanceData = data?.performanceData || [
     { label: "Math", value: 85 },
     { label: "Physics", value: 92 },
     { label: "Chemistry", value: 78 },
@@ -16,9 +17,47 @@ export const PerformanceWidget = ({ className }) => {
     { label: "English", value: 95 },
   ];
 
-  const overallScore = 87;
-  const targetScore = 90;
-  const improvement = 12;
+  const overallScore = data?.overallScore || 87;
+  const targetScore = data?.targetScore || 90;
+  const improvement = data?.improvement || 12;
+
+  if (loading) {
+    return (
+      <Card className={cn("animate-pulse", className)}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Performance Overview
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-2">
+              <div className="h-4 bg-muted rounded w-32"></div>
+              <div className="flex items-center gap-4">
+                <div className="h-20 w-20 bg-muted rounded-full"></div>
+                <div className="space-y-2">
+                  <div className="h-3 bg-muted rounded w-24"></div>
+                  <div className="h-3 bg-muted rounded w-20"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className="h-4 bg-muted rounded w-28"></div>
+            <div className="space-y-3">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-1">
+                  <div className="h-3 bg-muted rounded w-20"></div>
+                  <div className="h-2 bg-muted rounded"></div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card

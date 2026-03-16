@@ -3,21 +3,48 @@ import { DonutChart, LinearProgress } from "@/components/charts";
 import { BookOpen, Clock, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const StudyProgressWidget = ({ className }) => {
-  const studyData = [
+export const StudyProgressWidget = ({ data, loading, className }) => {
+  const studyData = data?.studyData || [
     { label: "Completed", value: 65, color: "stroke-green-600" },
     { label: "In Progress", value: 25, color: "stroke-blue-600" },
     { label: "Pending", value: 10, color: "stroke-orange-600" },
   ];
 
-  const weeklyGoals = [
+  const weeklyGoals = data?.weeklyGoals || [
     { label: "Study Hours", current: 28, target: 35 },
     { label: "Assignments", current: 8, target: 10 },
     { label: "Practice Tests", current: 3, target: 5 },
   ];
 
-  const totalStudyHours = 142;
-  const thisWeekHours = 28;
+  const totalStudyHours = data?.totalStudyHours || 142;
+  const thisWeekHours = data?.thisWeekHours || 28;
+
+  if (loading) {
+    return (
+      <Card className={cn("animate-pulse", className)}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="h-5 w-5" />
+            Study Progress
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="flex items-center justify-center">
+            <div className="h-40 w-40 bg-muted rounded-full"></div>
+          </div>
+          <div className="grid grid-cols-3 gap-4 text-center">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="space-y-1">
+                <div className="h-3 w-3 bg-muted rounded-full mx-auto"></div>
+                <div className="h-3 bg-muted rounded w-16 mx-auto"></div>
+                <div className="h-3 bg-muted rounded w-8 mx-auto"></div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card

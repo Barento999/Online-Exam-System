@@ -3,8 +3,8 @@ import { LineChart, CircularProgress } from "@/components/charts";
 import { TrendingUp, Calendar, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export const ExamTrendsWidget = ({ className }) => {
-  const examTrends = [
+export const ExamTrendsWidget = ({ data, loading, className }) => {
+  const examTrends = data?.examTrends || [
     { label: "Jan", value: 75 },
     { label: "Feb", value: 82 },
     { label: "Mar", value: 78 },
@@ -13,14 +13,41 @@ export const ExamTrendsWidget = ({ className }) => {
     { label: "Jun", value: 92 },
   ];
 
-  const upcomingExams = [
+  const upcomingExams = data?.upcomingExams || [
     { subject: "Mathematics", date: "Mar 25", progress: 85 },
     { subject: "Physics", date: "Mar 28", progress: 70 },
     { subject: "Chemistry", date: "Apr 2", progress: 60 },
   ];
 
-  const averageImprovement = 12;
-  const currentStreak = 5;
+  const averageImprovement = data?.averageImprovement || 12;
+  const currentStreak = data?.currentStreak || 5;
+
+  if (loading) {
+    return (
+      <Card className={cn("animate-pulse", className)}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <TrendingUp className="h-5 w-5" />
+            Exam Trends
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <div className="h-4 bg-muted rounded w-28"></div>
+            <div className="h-32 bg-muted rounded"></div>
+          </div>
+          <div className="space-y-4">
+            <div className="h-4 bg-muted rounded w-32"></div>
+            <div className="space-y-3">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="h-16 bg-muted rounded"></div>
+              ))}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card
