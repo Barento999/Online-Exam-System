@@ -11,7 +11,6 @@ import {
   AlertCircle,
   Save,
   X,
-  ExclamationTriangle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -307,7 +306,7 @@ export const MultiStepForm = ({
           {/* Step Error Alert */}
           {hasCurrentStepError && stepErrors[currentStep] && (
             <Alert variant="destructive" className="mb-6">
-              <ExclamationTriangle className="h-4 w-4" />
+              <AlertCircle className="h-4 w-4" />
               <AlertDescription>{stepErrors[currentStep]}</AlertDescription>
             </Alert>
           )}
