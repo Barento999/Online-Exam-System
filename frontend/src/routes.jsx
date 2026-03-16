@@ -22,7 +22,7 @@ import { Results } from "@/pages/Results";
 import { Enrollments } from "@/pages/Enrollments";
 import { Profile } from "@/pages/Profile";
 import { Settings } from "@/pages/Settings";
-import { Analytics } from "@/pages/Analytics";
+import { BreadcrumbsDemo } from "@/components/common/BreadcrumbsDemo";
 
 // Dashboard Router Component
 const DashboardRouter = () => {
@@ -160,6 +160,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute allowedRoles={["admin"]}>
         <Settings />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/breadcrumbs-demo",
+    element: (
+      <ProtectedRoute>
+        <BreadcrumbsDemo />
       </ProtectedRoute>
     ),
   },

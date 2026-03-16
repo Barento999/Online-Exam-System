@@ -1,4 +1,4 @@
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link } from "react-router";
 import { ChevronRight, Home } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useBreadcrumbContext } from "@/context/BreadcrumbContext";
