@@ -2,259 +2,263 @@
 
 ## Overview
 
-A comprehensive notification badge system for sidebar menu items that provides visual indicators for different types of notifications with counts, colors, and animations.
+A comprehensive notification badge system for sidebar menu items with dynamic counts, multiple types, and smooth animations.
 
 ## Features
 
-### 🎯 Dynamic Badge Display
+### 🎯 Dynamic Badge Types
 
-- **Count Display**: Shows notification counts from 1 to 99+
-- **Type-based Colors**: Different colors for info, success, warning, and error notifications
-- **Responsive Sizing**: Adapts to collapsed/expanded sidebar states
-- **Auto-hide**: Badges automatically hide when count is 0
+- **Info** (Blue): General information notifications
+- **Success** (Green): Completed tasks or positive updates
+- **Warning** (Amber): Items requiring attention
+- **Error** (Red): Critical issues or failures
 
-### 🎨 Visual Design
+### 📱 Responsive Design
 
-- **Color Coding**:
-  - `info`: Blue badges for general information
-  - `success`: Green badges for completed tasks
-  - `warning`: Amber badges for attention needed
-  - `error`: Red badges for critical alerts
-- **Smooth Animations**: Bounce and pulse effects with CSS keyframes
-- **Hover Effects**: Scale and shadow effects on interaction
+- **Collapsed Sidebar**: Small badges positioned at top-right of icons
+- **Expanded Sidebar**: Larger badges positioned at the right side of menu items
+- **Mobile Optimized**: Touch-friendly sizing and positioning
 
-### 📱 Mobile Optimized
+### ⚡ Smart Features
 
-- **Touch Targets**: Properly sized for mobile interaction
-- **Responsive Positioning**: Adjusts position based on sidebar state
-- **Performance**: Hardware-accelerated animations
+- **Auto-hide**: Badges disappear when count reaches 0
+- **Count Display**: Shows 1-99, displays "99+" for higher counts
+- **Persistent Storage**: Notifications saved to localStorage
+- **Smooth Animations**: CSS keyframe animations for appearance and interactions
 
-## Implementation
+## Usage
 
-### 1. Context Setup
-
-```jsx
-// Wrap your app with the NotificationProvider
-import { NotificationProvider } from "@/context/NotificationContext";
-
-function App() {
-  return (
-    <NotificationProvider>
-      <Layout>{/* Your app content */}</Layout>
-    </NotificationProvider>
-  );
-}
-```
-
-### 2. Using the Hook
+### Basic Implementation
 
 ```jsx
 import { useNotificationContext } from "@/context/NotificationContext";
 
 function MyComponent() {
-  const {
-    setNotification,
-    incrementNotification,
-    clearNotification,
-    getNotification,
-  } = useNotificationContext();
+  const { setNotification, incrementNotification, clearNotification } =
+    useNotificationContext();
 
   // Set a notification
-  const handleNewUser = () => {
-    setNotification("/users", 5, "info");
+  const addNotification = () => {
+    setNotification("/users", 5, "warning");
   };
 
   // Increment existing notification
-  const handleNewExam = () => {
-    incrementNotification("/exams", 1);
+  const incrementCount = () => {
+    incrementNotification("/users", 1);
   };
 
   // Clear notification
-  const handleClearResults = () => {
-    clearNotification("/results");
+  const clearCount = () => {
+    clearNotification("/users");
   };
+
+  return (
+    <div>
+      <button onClick={addNotification}>Add Notification</button>
+      <button onClick={incrementCount}>Increment</button>
+      <button onClick={clearCount}>Clear</button>
+    </div>
+  );
 }
 ```
 
-### 3. Badge Component
-
-The `NotificationBadge` component is automatically integrated into the sidebar and handles:
-
-- Positioning based on sidebar state (collapsed/expanded)
-- Color coding based on notification type
-- Count display with 99+ overflow handling
-- Smooth animations and transitions
-
-## API Reference
-
-### NotificationContext Methods
-
-#### `setNotification(path, count, type)`
-
-Set or update a notification for a specific menu path.
-
-- `path` (string): Menu item path (e.g., '/users', '/exams')
-- `count` (number): Notification count (0 to clear)
-- `type` (string): Badge type ('info', 'success', 'warning', 'error')
-
-#### `incrementNotification(path, increment = 1)`
-
-Increment the notification count for a path.
-
-- `path` (string): Menu item path
-- `increment` (number): Amount to increment (default: 1)
-
-#### `decrementNotification(path, decrement = 1)`
-
-Decrement the notification count for a path.
-
-- `path` (string): Menu item path
-- `decrement` (number): Amount to decrement (default: 1)
-
-#### `clearNotification(path)`
-
-Clear notification for a specific path.
-
-- `path` (string): Menu item path
-
-#### `clearAllNotifications()`
-
-Clear all notifications across all paths.
-
-#### `getNotification(path)`
-
-Get notification object for a specific path.
-
-- `path` (string): Menu item path
-- Returns: `{ count, type }` or `null`
-
-#### `getTotalCount()`
-
-Get total notification count across all paths.
-
-- Returns: `number`
-
-#### `hasNotifications()`
-
-Check if there are any active notifications.
-
-- Returns: `boolean`
-
-#### `getNotificationsByType(type)`
-
-Get all notifications of a specific type.
-
-- `type` (string): Badge type
-- Returns: `object` with filtered notifications
-
-## Badge Types and Colors
-
-| Type      | Color | Use Case            | Example                |
-| --------- | ----- | ------------------- | ---------------------- |
-| `info`    | Blue  | General information | New user registrations |
-| `success` | Green | Completed tasks     | Successful submissions |
-| `warning` | Amber | Attention needed    | Pending reviews        |
-| `error`   | Red   | Critical alerts     | System errors          |
-
-## CSS Classes
-
-### Animation Classes
-
-```css
-.notification-badge {
-  animation: badge-bounce 0.6s ease-out;
-}
-
-.notification-badge.pulse {
-  animation: badge-pulse 2s ease-in-out infinite;
-}
-```
-
-### Hover Effects
-
-```css
-.notification-badge:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-```
-
-## Usage Examples
-
-### Real-time Notifications
+### Available Hook Methods
 
 ```jsx
-// WebSocket or API response handler
-const handleNotification = (data) => {
-  switch (data.type) {
-    case "new_user":
-      incrementNotification("/users", 1);
-      break;
-    case "exam_submitted":
-      incrementNotification("/exams", 1);
-      break;
-    case "system_error":
-      setNotification("/settings", 1, "error");
-      break;
-  }
-};
+const {
+  // Core methods
+  setNotification, // Set notification count and type
+  incrementNotification, // Increase count by specified amount
+  decrementNotification, // Decrease count by specified amount
+  clearNotification, // Remove notification for specific path
+  clearAllNotifications, // Remove all notifications
+
+  // Query methods
+  getNotification, // Get notification for specific path
+  getTotalCount, // Get total count across all notifications
+  hasNotifications, // Check if any notifications exist
+  getNotificationsByType, // Get notifications filtered by type
+
+  // State
+  notifications, // All current notifications object
+} = useNotificationContext();
 ```
 
-### Page-specific Clearing
+## Integration Examples
+
+### Real-time Updates
 
 ```jsx
-// Clear notifications when user visits the page
+// WebSocket integration
+useEffect(() => {
+  socket.on("newUser", () => {
+    incrementNotification("/users", 1);
+  });
+
+  socket.on("examCompleted", () => {
+    incrementNotification("/results", 1);
+    setNotification("/exams", 0, "success"); // Clear pending exams
+  });
+}, []);
+```
+
+### API Integration
+
+```jsx
+// Fetch and set notifications from API
+useEffect(() => {
+  const fetchNotifications = async () => {
+    const response = await fetch("/api/notifications");
+    const data = await response.json();
+
+    data.forEach((notification) => {
+      setNotification(notification.path, notification.count, notification.type);
+    });
+  };
+
+  fetchNotifications();
+}, []);
+```
+
+### User Actions
+
+```jsx
+// Clear notification when user visits page
 useEffect(() => {
   if (location.pathname === "/users") {
     clearNotification("/users");
   }
-}, [location.pathname, clearNotification]);
+}, [location.pathname]);
 ```
 
-### Conditional Badge Display
+## Styling and Customization
+
+### CSS Classes
+
+- `.notification-badge` - Base badge styling
+- `.notification-badge.pulse` - Pulsing animation for urgent notifications
+
+### Custom Badge Colors
+
+```css
+/* Custom badge type */
+.notification-badge.custom {
+  background: linear-gradient(45deg, #ff6b6b, #feca57);
+  color: white;
+}
+```
+
+### Animation Customization
+
+```css
+/* Custom bounce animation */
+@keyframes custom-bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: scale(1);
+  }
+  40%,
+  43% {
+    transform: scale(1.3);
+  }
+  70% {
+    transform: scale(1.1);
+  }
+}
+
+.notification-badge.custom-bounce {
+  animation: custom-bounce 0.8s ease-out;
+}
+```
+
+## Best Practices
+
+### Performance
+
+- Use `incrementNotification` instead of `setNotification` for frequent updates
+- Clear notifications when users visit the relevant pages
+- Batch multiple notification updates when possible
+
+### UX Guidelines
+
+- Use appropriate badge types for different scenarios
+- Don't overwhelm users with too many notifications
+- Provide clear actions to resolve notifications
+- Consider notification priority and grouping
+
+### Accessibility
+
+- Ensure sufficient color contrast for all badge types
+- Provide alternative text for screen readers
+- Use semantic colors that match user expectations
+
+## Common Use Cases
+
+### Admin Dashboard
 
 ```jsx
-// Only show badges for admin users
-const shouldShowBadge = (path) => {
-  if (user?.role !== "admin") return false;
-  const notification = getNotification(path);
-  return notification && notification.count > 0;
-};
+// New user registrations
+setNotification("/users", pendingUsers.length, "info");
+
+// Pending exam reviews
+setNotification("/exams", pendingReviews.length, "warning");
+
+// System errors
+setNotification("/settings", errorCount, "error");
 ```
 
-## Persistence
+### Teacher Panel
 
-- Notifications are automatically saved to localStorage
-- Persist across browser sessions
-- Automatically restored on app reload
+```jsx
+// Student submissions
+setNotification("/results", newSubmissions.length, "success");
 
-## Performance Considerations
+// Exam scheduling conflicts
+setNotification("/exams", conflicts.length, "warning");
+```
 
-- Efficient re-renders with React.memo and useCallback
-- Hardware-accelerated CSS animations
-- Minimal DOM updates with conditional rendering
-- Optimized event listeners with proper cleanup
+### Student Interface
 
-## Browser Support
+```jsx
+// Available exams
+setNotification("/exams", availableExams.length, "info");
 
-- Modern browsers with CSS Grid and Flexbox support
-- CSS animations and transforms
-- localStorage API
-- Touch events for mobile interaction
+// Graded results
+setNotification("/results", newGrades.length, "success");
+```
 
-## Accessibility
+## Troubleshooting
 
-- Proper color contrast ratios for all badge types
-- Screen reader friendly with semantic HTML
-- Keyboard navigation support
-- Focus management for interactive elements
+### Common Issues
+
+1. **Notifications not appearing**
+   - Ensure NotificationProvider wraps your app
+   - Check that the path matches exactly with menu item paths
+
+2. **Badges not updating**
+   - Verify you're using the correct hook methods
+   - Check browser console for any errors
+
+3. **Styling issues**
+   - Ensure mobile-drawer.css is imported
+   - Check for CSS conflicts with existing styles
+
+### Debug Mode
+
+```jsx
+// Log all notifications for debugging
+const { notifications } = useNotificationContext();
+console.log("Current notifications:", notifications);
+```
 
 ## Future Enhancements
 
-- [ ] Sound notifications (optional)
-- [ ] Custom badge shapes and styles
-- [ ] Notification grouping and categories
-- [ ] Real-time sync with backend
-- [ ] Notification history and logs
-- [ ] Custom animation preferences
-- [ ] Notification scheduling and expiry
+- [ ] Notification grouping by category
+- [ ] Custom badge shapes and sizes
+- [ ] Sound notifications
+- [ ] Push notification integration
+- [ ] Notification history and timestamps
+- [ ] Bulk notification management
