@@ -33,7 +33,13 @@ import {
 import { cn } from "@/lib/utils";
 
 // Step 1: Basic Information
-const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttempted }) => {
+const BasicInfoStep = ({
+  data,
+  updateData,
+  errors,
+  fieldErrors,
+  validationAttempted,
+}) => {
   const [titleSuggestions] = useState([
     "Final Assessment",
     "Midterm Examination",
@@ -47,7 +53,18 @@ const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttemp
   };
 
   const hasFieldError = (fieldName) => {
-    return validationAttempted && (fieldErrors?.[fieldName] || (!data[fieldName] && ['title', 'subject', 'duration', 'totalMarks', 'passingMarks'].includes(fieldName)));
+    return (
+      validationAttempted &&
+      (fieldErrors?.[fieldName] ||
+        (!data[fieldName] &&
+          [
+            "title",
+            "subject",
+            "duration",
+            "totalMarks",
+            "passingMarks",
+          ].includes(fieldName)))
+    );
   };
 
   return (
@@ -59,12 +76,12 @@ const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttemp
           value={data.title || ""}
           onChange={(e) => updateData({ title: e.target.value })}
           placeholder="Enter exam title"
-          className={hasFieldError('title') ? "border-red-500" : ""}
+          className={hasFieldError("title") ? "border-red-500" : ""}
         />
-        {getFieldError('title') && (
+        {getFieldError("title") && (
           <p className="text-sm text-red-600 flex items-center gap-1">
             <AlertCircle className="h-3 w-3" />
-            {getFieldError('title')}
+            {getFieldError("title")}
           </p>
         )}
         <div className="flex flex-wrap gap-1 mt-2">
@@ -99,7 +116,8 @@ const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttemp
           <Select
             value={data.subject || ""}
             onValueChange={(value) => updateData({ subject: value })}>
-            <SelectTrigger className={hasFieldError('subject') ? "border-red-500" : ""}>
+            <SelectTrigger
+              className={hasFieldError("subject") ? "border-red-500" : ""}>
               <SelectValue placeholder="Select subject" />
             </SelectTrigger>
             <SelectContent>
@@ -114,10 +132,10 @@ const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttemp
               <SelectItem value="other">Other</SelectItem>
             </SelectContent>
           </Select>
-          {getFieldError('subject') && (
+          {getFieldError("subject") && (
             <p className="text-sm text-red-600 flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
-              {getFieldError('subject')}
+              {getFieldError("subject")}
             </p>
           )}
         </div>
@@ -148,105 +166,14 @@ const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttemp
             placeholder="60"
             min="1"
             max="480"
-            className={hasFieldError('duration') ? "border-red-500" : ""}
+            className={hasFieldError("duration") ? "border-red-500" : ""}
           />
-          {getFieldError('duration') && (
+          {getFieldError("duration") && (
             <p className="text-sm text-red-600 flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
-              {getFieldError('duration')}
+              {getFieldError("duration")}
             </p>
           )}
-        </div>
-      </div>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <div className="space-y-2">
-          <Label htmlFor="totalMarks">Total Marks *</Label>
-          <Input
-            id="totalMarks"
-            type="number"
-            value={data.totalMarks || ""}
-            onChange={(e) => updateData({ totalMarks: parseInt(e.target.value) })}
-            placeholder="100"
-            min="1"
-            className={hasFieldError('totalMarks') ? "border-red-500" : ""}
-          />
-          {getFieldError('totalMarks') && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {getFieldError('totalMarks')}
-            </p>
-          )}
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="passingMarks">Passing Marks *</Label>
-          <Input
-            id="passingMarks"
-            type="number"
-            value={data.passingMarks || ""}
-            onChange={(e) => updateData({ passingMarks: parseInt(e.target.value) })}
-            placeholder="40"
-            min="1"
-            max={data.totalMarks || 100}
-            className={hasFieldError('passingMarks') ? "border-red-500" : ""}
-          />
-          {getFieldError('passingMarks') && (
-            <p className="text-sm text-red-600 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {getFieldError('passingMarks')}
-            </p>
-          )}
-        </div>
-      </div>
-
-      {data.passingMarks && data.totalMarks && (
-        <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <Target className="h-4 w-4 text-primary" />
-            <span className="font-medium">Passing Percentage</span>
-          </div>
-          <p className="text-sm text-muted-foreground">
-            Students need to score {data.passingMarks} out of {data.totalMarks} marks 
-            ({Math.round((data.passingMarks / data.totalMarks) * 100)}%) to pass this exam.
-          </p>
-        </div>
-      )}
-    </div>
-  );
-};
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="difficulty">Difficulty Level</Label>
-          <Select
-            value={data.difficulty || "medium"}
-            onValueChange={(value) => updateData({ difficulty: value })}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="easy">Easy</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="hard">Hard</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="duration">Duration (minutes) *</Label>
-          <Input
-            id="duration"
-            type="number"
-            value={data.duration || ""}
-            onChange={(e) => updateData({ duration: parseInt(e.target.value) })}
-            placeholder="60"
-            min="1"
-            max="480"
-            className={errors ? "border-red-500" : ""}
-          />
         </div>
       </div>
 
@@ -262,8 +189,14 @@ const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttemp
             }
             placeholder="100"
             min="1"
-            className={errors ? "border-red-500" : ""}
+            className={hasFieldError("totalMarks") ? "border-red-500" : ""}
           />
+          {getFieldError("totalMarks") && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {getFieldError("totalMarks")}
+            </p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -278,8 +211,14 @@ const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttemp
             placeholder="40"
             min="1"
             max={data.totalMarks || 100}
-            className={errors ? "border-red-500" : ""}
+            className={hasFieldError("passingMarks") ? "border-red-500" : ""}
           />
+          {getFieldError("passingMarks") && (
+            <p className="text-sm text-red-600 flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" />
+              {getFieldError("passingMarks")}
+            </p>
+          )}
         </div>
       </div>
 
@@ -301,7 +240,13 @@ const BasicInfoStep = ({ data, updateData, errors, fieldErrors, validationAttemp
 };
 
 // Step 2: Schedule and Availability
-const ScheduleStep = ({ data, updateData, errors, fieldErrors, validationAttempted }) => {
+const ScheduleStep = ({
+  data,
+  updateData,
+  errors,
+  fieldErrors,
+  validationAttempted,
+}) => {
   const [scheduleType, setScheduleType] = useState(
     data.scheduleType || "immediate",
   );
@@ -416,12 +361,12 @@ const ScheduleStep = ({ data, updateData, errors, fieldErrors, validationAttempt
               value={data.startTime || ""}
               min={new Date().toISOString().slice(0, 16)}
               onChange={(e) => updateData({ startTime: e.target.value })}
-              className={hasFieldError('startTime') ? "border-red-500" : ""}
+              className={hasFieldError("startTime") ? "border-red-500" : ""}
             />
-            {getFieldError('startTime') && (
+            {getFieldError("startTime") && (
               <p className="text-sm text-red-600 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
-                {getFieldError('startTime')}
+                {getFieldError("startTime")}
               </p>
             )}
           </div>
@@ -434,12 +379,12 @@ const ScheduleStep = ({ data, updateData, errors, fieldErrors, validationAttempt
               value={data.endTime || ""}
               min={data.startTime || new Date().toISOString().slice(0, 16)}
               onChange={(e) => updateData({ endTime: e.target.value })}
-              className={hasFieldError('endTime') ? "border-red-500" : ""}
+              className={hasFieldError("endTime") ? "border-red-500" : ""}
             />
-            {getFieldError('endTime') && (
+            {getFieldError("endTime") && (
               <p className="text-sm text-red-600 flex items-center gap-1">
                 <AlertCircle className="h-3 w-3" />
-                {getFieldError('endTime')}
+                {getFieldError("endTime")}
               </p>
             )}
           </div>
@@ -975,7 +920,7 @@ export const MultiStepExamForm = ({ onSubmit, onCancel, initialData = {} }) => {
     return {
       isValid,
       fieldErrors: errors,
-      message: isValid ? null : "Please fix the errors above to continue"
+      message: isValid ? null : "Please fix the errors above to continue",
     };
   };
 
@@ -992,7 +937,11 @@ export const MultiStepExamForm = ({ onSubmit, onCancel, initialData = {} }) => {
         errors.endTime = "End time is required for scheduled exams";
         isValid = false;
       }
-      if (data.startTime && data.endTime && new Date(data.startTime) >= new Date(data.endTime)) {
+      if (
+        data.startTime &&
+        data.endTime &&
+        new Date(data.startTime) >= new Date(data.endTime)
+      ) {
         errors.endTime = "End time must be after start time";
         isValid = false;
       }
@@ -1001,7 +950,7 @@ export const MultiStepExamForm = ({ onSubmit, onCancel, initialData = {} }) => {
     return {
       isValid,
       fieldErrors: errors,
-      message: isValid ? null : "Please fix the schedule settings to continue"
+      message: isValid ? null : "Please fix the schedule settings to continue",
     };
   };
 
