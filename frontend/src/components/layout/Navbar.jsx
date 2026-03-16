@@ -43,8 +43,8 @@ export const Navbar = () => {
   };
 
   return (
-    <div className="h-16 bg-card border-b border-border flex items-center justify-between px-4 md:px-6 fixed top-0 left-0 lg:left-64 right-0 z-10">
-      <div className="flex items-center gap-4 ml-12 lg:ml-0">
+    <div className="h-16 bg-card/95 backdrop-blur-sm border-b border-border/50 flex items-center justify-between px-4 md:px-6 fixed top-0 left-0 lg:left-64 right-0 z-10 shadow-sm">
+      <div className="flex items-center gap-4 ml-16 lg:ml-0">
         <h2 className="text-lg md:text-xl font-semibold">
           Welcome back, {user?.name?.split(" ")[0]}!
         </h2>

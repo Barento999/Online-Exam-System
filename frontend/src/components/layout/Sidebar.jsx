@@ -1,6 +1,6 @@
 import { Link, useLocation } from "react-router";
 import { useAuth } from "@/context/AuthContext";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -29,12 +29,130 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStartX, setDragStartX] = useState(0);
+  const [dragCurrentX, setDragCurrentX] = useState(0);
+  const sidebarRef = useRef(null);
+  const overlayRef = useRef(null);
+
+  // Enhanced mobile drawer with swipe gestures
+  useEffect(() => {
+    const handleTouchStart = (e) => {
+      if (window.innerWidth >= 1024) return; // Only on mobile
+
+      const touch = e.touches[0];
+      const startX = touch.clientX;
+
+      // Allow opening from left edge (within 20px)
+      if (!isOpen && startX <= 20) {
+        setIsDragging(true);
+        setDragStartX(startX);
+        setDragCurrentX(startX);
+      }
+      // Allow closing when drawer is open
+      else if (isOpen) {
+        setIsDragging(true);
+        setDragStartX(startX);
+        setDragCurrentX(startX);
+      }
+    };
+
+    const handleTouchMove = (e) => {
+      if (!isDragging || window.innerWidth >= 1024) return;
+
+      e.preventDefault();
+      const touch = e.touches[0];
+      setDragCurrentX(touch.clientX);
+    };
+
+    const handleTouchEnd = () => {
+      if (!isDragging || window.innerWidth >= 1024) return;
+
+      const dragDistance = dragCurrentX - dragStartX;
+      const threshold = 50; // Minimum drag distance to trigger action
+
+      if (!isOpen && dragDistance > threshold) {
+        setIsOpen(true);
+      } else if (isOpen && dragDistance < -threshold) {
+        setIsOpen(false);
+      }
+
+      setIsDragging(false);
+      setDragStartX(0);
+      setDragCurrentX(0);
+    };
+
+    document.addEventListener("touchstart", handleTouchStart, {
+      passive: false,
+    });
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [isOpen, isDragging, dragStartX, dragCurrentX]);
+
+  // Close drawer on route change (mobile)
+  useEffect(() => {
+    if (window.innerWidth < 1024) {
+      setIsOpen(false);
+    }
+  }, [location.pathname]);
+
+  // Prevent body scroll when drawer is open on mobile
+  useEffect(() => {
+    if (isOpen && window.innerWidth < 1024) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
 
   const toggleExpanded = (path) => {
     setExpandedItems((prev) => ({
       ...prev,
       [path]: !prev[path],
     }));
+  };
+
+  // Calculate transform for drag gesture
+  const getDragTransform = () => {
+    if (!isDragging) return "";
+
+    const dragDistance = dragCurrentX - dragStartX;
+
+    if (!isOpen) {
+      // Opening gesture - translate from closed position
+      const translateX = Math.max(-256, Math.min(0, -256 + dragDistance));
+      return `translateX(${translateX}px)`;
+    } else {
+      // Closing gesture - translate from open position
+      const translateX = Math.max(-256, Math.min(0, dragDistance));
+      return `translateX(${translateX}px)`;
+    }
+  };
+
+  const getOverlayOpacity = () => {
+    if (!isDragging) return "";
+
+    const dragDistance = dragCurrentX - dragStartX;
+
+    if (!isOpen) {
+      // Opening gesture
+      const progress = Math.max(0, Math.min(1, dragDistance / 256));
+      return { opacity: progress * 0.5 };
+    } else {
+      // Closing gesture
+      const progress = Math.max(0, Math.min(1, 1 + dragDistance / 256));
+      return { opacity: progress * 0.5 };
+    }
   };
 
   const adminMenuItems = [
@@ -110,40 +228,66 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   return (
     <>
-      {/* Mobile Menu Button */}
+      {/* Enhanced Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg",
-          "bg-sidebar text-sidebar-foreground border border-sidebar-border",
-          "hover:bg-sidebar-accent transition-all duration-200",
-          "hover:scale-110 active:scale-95",
+          "lg:hidden fixed top-4 left-4 z-50 p-3 rounded-xl mobile-menu-button",
+          "bg-sidebar/95 backdrop-blur-sm text-sidebar-foreground",
+          "border border-sidebar-border/50 shadow-lg",
+          "hover:bg-sidebar-accent transition-all duration-300",
+          "hover:scale-110 active:scale-95 haptic-feedback",
+          "focus:outline-none focus:ring-2 focus:ring-sidebar-primary/50",
+          isOpen && "bg-sidebar-accent",
         )}>
-        {isOpen ? (
-          <X className="h-6 w-6 transition-transform duration-200 rotate-90" />
-        ) : (
-          <Menu className="h-6 w-6 transition-transform duration-200" />
-        )}
+        <div className="relative">
+          {isOpen ? (
+            <X className="h-5 w-5 transition-all duration-300 rotate-180 scale-110" />
+          ) : (
+            <Menu className="h-5 w-5 transition-all duration-300" />
+          )}
+          {/* Ripple effect */}
+          <div className="absolute inset-0 rounded-xl bg-sidebar-primary/20 scale-0 group-active:scale-150 transition-transform duration-200" />
+        </div>
       </button>
 
-      {/* Overlay for mobile */}
-      {isOpen && (
+      {/* Enhanced Overlay for mobile with drag support */}
+      {(isOpen || isDragging) && (
         <div
-          className="lg:hidden fixed inset-0 bg-black/50 z-30 animate-in fade-in duration-200"
-          onClick={() => setIsOpen(false)}></div>
+          ref={overlayRef}
+          className="lg:hidden fixed inset-0 z-30 transition-all duration-300"
+          style={{
+            backgroundColor: `rgba(0, 0, 0, ${isDragging ? getOverlayOpacity().opacity || 0.5 : 0.5})`,
+            backdropFilter: "blur(4px)",
+          }}
+          onClick={() => setIsOpen(false)}
+        />
       )}
 
-      {/* Sidebar */}
+      {/* Swipe indicator for mobile */}
+      {!isOpen && (
+        <div className="lg:hidden fixed left-0 top-1/2 -translate-y-1/2 w-1 h-16 bg-sidebar-primary/30 rounded-r-full z-20 swipe-indicator" />
+      )}
+
+      {/* Enhanced Sidebar with drag support */}
       <div
+        ref={sidebarRef}
         className={cn(
-          "h-screen bg-sidebar text-sidebar-foreground flex flex-col",
-          "fixed left-0 top-0 border-r border-sidebar-border z-40",
-          "transition-all duration-300 ease-in-out",
+          "h-screen bg-sidebar/95 backdrop-blur-sm text-sidebar-foreground flex flex-col",
+          "fixed left-0 top-0 border-r border-sidebar-border/50 z-40",
+          "shadow-2xl lg:shadow-none mobile-drawer-scroll",
+          "transition-all duration-300 ease-out",
           isCollapsed ? "w-20" : "w-64",
-          isOpen
-            ? "translate-x-0 shadow-2xl"
+          // Enhanced mobile animations
+          isOpen || isDragging
+            ? "translate-x-0 lg:translate-x-0"
             : "-translate-x-full lg:translate-x-0",
-        )}>
+          isDragging && "dragging",
+        )}
+        style={{
+          transform: isDragging ? getDragTransform() : undefined,
+          transition: isDragging ? "none" : undefined,
+        }}>
         {/* Header */}
         <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3 group">
@@ -192,7 +336,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         </button>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4 scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
+        <nav className="flex-1 overflow-y-auto p-4 mobile-drawer-scroll scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
           <ul className="space-y-1">
             {menuItems.map((item, index) => {
               const Icon = item.icon;
@@ -217,7 +361,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                           !isCollapsed && toggleExpanded(item.path)
                         }
                         className={cn(
-                          "w-full flex items-center rounded-lg",
+                          "w-full flex items-center rounded-lg mobile-nav-item",
                           "transition-all duration-200 ease-out group relative overflow-hidden",
                           isCollapsed
                             ? "justify-center p-3"
@@ -268,7 +412,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                         to={item.path}
                         onClick={() => setIsOpen(false)}
                         className={cn(
-                          "flex items-center rounded-lg",
+                          "flex items-center rounded-lg mobile-nav-item",
                           "transition-all duration-200 ease-out group relative overflow-hidden",
                           isCollapsed
                             ? "justify-center p-3"
@@ -343,7 +487,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                                 to={child.path}
                                 onClick={() => setIsOpen(false)}
                                 className={cn(
-                                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm",
+                                  "flex items-center gap-3 px-3 py-2 rounded-lg text-sm mobile-nav-item",
                                   "transition-all duration-200 ease-out group relative overflow-hidden",
                                   isChildActive
                                     ? "bg-sidebar-primary/80 text-sidebar-primary-foreground shadow-sm"
