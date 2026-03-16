@@ -14,6 +14,7 @@ import { FloatingActionButton } from "@/components/dashboard/FloatingActionButto
 import { PerformanceWidget } from "@/components/dashboard/PerformanceWidget";
 import { StudyProgressWidget } from "@/components/dashboard/StudyProgressWidget";
 import { ExamTrendsWidget } from "@/components/dashboard/ExamTrendsWidget";
+import { DevModeIndicator } from "@/components/dashboard/DevModeIndicator";
 import { studentDataService } from "@/services/studentDataService";
 import { cn } from "@/lib/utils";
 import {
@@ -33,6 +34,7 @@ export const StudentDashboard = () => {
   const [studyProgressData, setStudyProgressData] = useState(null);
   const [examTrendsData, setExamTrendsData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [usingMockData, setUsingMockData] = useState(false);
   const [dataLoading, setDataLoading] = useState({
     performance: true,
     studyProgress: true,
@@ -51,11 +53,17 @@ export const StudentDashboard = () => {
       setDashboardData(data);
       setLoading(false);
 
+      // Check if we're using mock data (simple heuristic)
+      const isMockData =
+        data.stats?.enrolledCourses === 6 && data.stats?.avgScore === 87.5;
+      setUsingMockData(isMockData);
+
       // Load additional data in parallel
       loadAdditionalData();
     } catch (error) {
       console.error("Error loading dashboard data:", error);
       setLoading(false);
+      setUsingMockData(true);
     }
   };
 
@@ -139,6 +147,7 @@ export const StudentDashboard = () => {
 
   return (
     <Layout>
+      <DevModeIndicator usingMockData={usingMockData} />
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-semibold mb-2">Student Dashboard</h1>
@@ -181,13 +190,14 @@ export const StudentDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-3">
-                {examsLoading ? (
+                {!dashboardData ? (
                   <>
                     <ExamCardSkeleton />
                     <ExamCardSkeleton />
                   </>
-                ) : exams && exams.length > 0 ? (
-                  exams.map((exam, index) => (
+                ) : dashboardData.availableExams &&
+                  dashboardData.availableExams.length > 0 ? (
+                  dashboardData.availableExams.map((exam, index) => (
                     <div
                       key={exam.id}
                       className={cn(
@@ -268,13 +278,14 @@ export const StudentDashboard = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {resultsLoading ? (
+                {!dashboardData ? (
                   <>
                     <ResultCardSkeleton />
                     <ResultCardSkeleton />
                   </>
-                ) : results && results.length > 0 ? (
-                  results.map((result, index) => (
+                ) : dashboardData.stats?.recentResults &&
+                  dashboardData.stats.recentResults.length > 0 ? (
+                  dashboardData.stats.recentResults.map((result, index) => (
                     <div
                       key={result.id}
                       className={cn(

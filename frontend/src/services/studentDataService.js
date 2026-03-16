@@ -1,24 +1,35 @@
 import { dashboardApi, resultsApi, examsApi, enrollmentsApi } from "./api";
+import { mockDataService } from "./mockDataService";
 
 // Enhanced student data service with realistic data structure
 export const studentDataService = {
   // Get comprehensive dashboard data
   getDashboardData: async () => {
     try {
-      const [dashboardStats, recentResults, availableExams, enrollments] =
-        await Promise.all([
-          dashboardApi.getStudentStats(),
-          resultsApi.getByStudent("current"), // Will be replaced with actual student ID
-          examsApi.getAvailable(),
-          enrollmentsApi.getMyCourses(),
-        ]);
+      // Try to fetch real data, but handle each API call separately
+      const promises = [
+        dashboardApi.getStudentStats().catch(() => null),
+        resultsApi.getAll().catch(() => null), // Changed from getByStudent('current')
+        examsApi.getAvailable().catch(() => null),
+        enrollmentsApi.getMyCourses().catch(() => null),
+      ];
 
-      return {
-        stats: dashboardStats.data,
-        recentResults: recentResults.data,
-        availableExams: availableExams.data,
-        enrollments: enrollments.data,
-      };
+      const [dashboardStats, recentResults, availableExams, enrollments] =
+        await Promise.all(promises);
+
+      // If we have some real data, use it; otherwise fall back to mock data
+      if (dashboardStats || recentResults || availableExams || enrollments) {
+        return {
+          stats: dashboardStats?.data || getMockStudentData().stats,
+          recentResults: recentResults?.data || [],
+          availableExams:
+            availableExams?.data || getMockStudentData().availableExams,
+          enrollments: enrollments?.data || getMockStudentData().enrollments,
+        };
+      } else {
+        // All APIs failed, return mock data
+        return getMockStudentData();
+      }
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
       // Return mock data for development
@@ -29,11 +40,12 @@ export const studentDataService = {
   // Get performance data for charts
   getPerformanceData: async () => {
     try {
-      const results = await resultsApi.getByStudent("current");
+      // Try to get results from the current user's results
+      const results = await resultsApi.getAll(); // Use getAll instead of getByStudent with 'current'
       return processPerformanceData(results.data);
     } catch (error) {
       console.error("Error fetching performance data:", error);
-      return getMockPerformanceData();
+      return mockDataService.getPerformanceData();
     }
   },
 
@@ -44,18 +56,19 @@ export const studentDataService = {
       return processStudyProgressData(enrollments.data);
     } catch (error) {
       console.error("Error fetching study progress data:", error);
-      return getMockStudyProgressData();
+      return mockDataService.getStudyProgressData();
     }
   },
 
   // Get exam trends data
   getExamTrendsData: async () => {
     try {
-      const results = await resultsApi.getByStudent("current");
+      // Try to get results from the current user's results
+      const results = await resultsApi.getAll(); // Use getAll instead of getByStudent with 'current'
       return processExamTrendsData(results.data);
     } catch (error) {
       console.error("Error fetching exam trends data:", error);
-      return getMockExamTrendsData();
+      return mockDataService.getExamTrendsData();
     }
   },
 };

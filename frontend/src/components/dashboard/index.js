@@ -8,3 +8,4 @@ export { StudyProgressWidget } from "./StudyProgressWidget";
 export { ExamTrendsWidget } from "./ExamTrendsWidget";
 export { ChartShowcase } from "./ChartShowcase";
 export { StudentProfile } from "./StudentProfile";
+export { DevModeIndicator } from "./DevModeIndicator";
