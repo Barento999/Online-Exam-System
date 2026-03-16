@@ -7,7 +7,6 @@ import {
   ExamCardSkeleton,
   ResultCardSkeleton,
 } from "@/components/skeletons/ExamCardSkeleton";
-import { StatsGridSkeleton } from "@/components/skeletons/StatsCardSkeleton";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { FloatingActionButton } from "@/components/dashboard/FloatingActionButton";
@@ -24,7 +23,6 @@ import {
   Clock,
   Calendar,
   Award,
-  GraduationCap,
 } from "lucide-react";
 import { useNavigate } from "react-router";
 
@@ -53,9 +51,13 @@ export const StudentDashboard = () => {
       setDashboardData(data);
       setLoading(false);
 
-      // Check if we're using mock data (simple heuristic)
+      // Check if we're using mock data by looking for specific mock data patterns
       const isMockData =
-        data.stats?.enrolledCourses === 6 && data.stats?.avgScore === 87.5;
+        data.stats?.enrolledCourses === 6 &&
+        data.stats?.avgScore === 87.5 &&
+        data.stats?.recentResults?.[0]?.examId?.title ===
+          "Advanced Mathematics Midterm";
+
       setUsingMockData(isMockData);
 
       // Load additional data in parallel

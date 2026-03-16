@@ -1,73 +1,136 @@
 import { dashboardApi, resultsApi, examsApi, enrollmentsApi } from "./api";
 import { mockDataService } from "./mockDataService";
 
+// Check if user is authenticated
+const isAuthenticated = () => {
+  const token = localStorage.getItem("token");
+  const user = localStorage.getItem("user");
+  return !!(token && user);
+};
+
 // Enhanced student data service with realistic data structure
 export const studentDataService = {
   // Get comprehensive dashboard data
   getDashboardData: async () => {
+    if (!isAuthenticated()) {
+      console.log("No authentication token found - using mock data");
+      return mockDataService.getDashboardData();
+    }
+
     try {
-      // Try to fetch real data, but handle each API call separately
-      const promises = [
-        dashboardApi.getStudentStats().catch(() => null),
-        resultsApi.getAll().catch(() => null), // Changed from getByStudent('current')
-        examsApi.getAvailable().catch(() => null),
-        enrollmentsApi.getMyCourses().catch(() => null),
-      ];
+      // Try to get real data from API
+      const [statsResponse, examsResponse, enrollmentsResponse] =
+        await Promise.all([
+          dashboardApi.getStudentStats(),
+          examsApi.getAvailable(),
+          enrollmentsApi.getMyCourses(),
+        ]);
 
-      const [dashboardStats, recentResults, availableExams, enrollments] =
-        await Promise.all(promises);
+      // Get recent results
+      const resultsResponse = await resultsApi.getAll();
 
-      // If we have some real data, use it; otherwise fall back to mock data
-      if (dashboardStats || recentResults || availableExams || enrollments) {
-        return {
-          stats: dashboardStats?.data || getMockStudentData().stats,
-          recentResults: recentResults?.data || [],
-          availableExams:
-            availableExams?.data || getMockStudentData().availableExams,
-          enrollments: enrollments?.data || getMockStudentData().enrollments,
-        };
-      } else {
-        // All APIs failed, return mock data
-        return getMockStudentData();
-      }
+      // Transform API data to match expected format
+      const dashboardData = {
+        stats: {
+          enrolledCourses: enrollmentsResponse.data?.length || 0,
+          completedExams: statsResponse.data?.completedExams || 0,
+          upcomingExams: examsResponse.data?.length || 0,
+          avgScore: statsResponse.data?.avgScore || 0,
+          passedExams: statsResponse.data?.passedExams || 0,
+          recentResults: resultsResponse.data?.slice(0, 5) || [],
+        },
+        availableExams: examsResponse.data || [],
+        enrollments: enrollmentsResponse.data || [],
+      };
+
+      console.log("Successfully loaded real dashboard data");
+      return dashboardData;
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
-      // Return mock data for development
-      return getMockStudentData();
+      console.warn(
+        "Failed to load real data, falling back to mock data:",
+        error.message,
+      );
+      return mockDataService.getDashboardData();
     }
   },
 
   // Get performance data for charts
   getPerformanceData: async () => {
+    if (!isAuthenticated()) {
+      console.log("No authentication token found - using mock data");
+      return mockDataService.getPerformanceData();
+    }
+
     try {
-      // Try to get results from the current user's results
-      const results = await resultsApi.getAll(); // Use getAll instead of getByStudent with 'current'
-      return processPerformanceData(results.data);
+      const resultsResponse = await resultsApi.getAll();
+      const results = resultsResponse.data || [];
+
+      if (results.length === 0) {
+        return mockDataService.getPerformanceData();
+      }
+
+      const processedData = processPerformanceData(results);
+      console.log("Successfully loaded real performance data");
+      return processedData;
     } catch (error) {
-      console.error("Error fetching performance data:", error);
+      console.warn(
+        "Failed to load performance data, falling back to mock data:",
+        error.message,
+      );
       return mockDataService.getPerformanceData();
     }
   },
 
   // Get study progress data
   getStudyProgressData: async () => {
+    if (!isAuthenticated()) {
+      console.log("No authentication token found - using mock data");
+      return mockDataService.getStudyProgressData();
+    }
+
     try {
-      const enrollments = await enrollmentsApi.getMyCourses();
-      return processStudyProgressData(enrollments.data);
+      const enrollmentsResponse = await enrollmentsApi.getMyCourses();
+      const enrollments = enrollmentsResponse.data || [];
+
+      if (enrollments.length === 0) {
+        return mockDataService.getStudyProgressData();
+      }
+
+      const processedData = processStudyProgressData(enrollments);
+      console.log("Successfully loaded real study progress data");
+      return processedData;
     } catch (error) {
-      console.error("Error fetching study progress data:", error);
+      console.warn(
+        "Failed to load study progress data, falling back to mock data:",
+        error.message,
+      );
       return mockDataService.getStudyProgressData();
     }
   },
 
   // Get exam trends data
   getExamTrendsData: async () => {
+    if (!isAuthenticated()) {
+      console.log("No authentication token found - using mock data");
+      return mockDataService.getExamTrendsData();
+    }
+
     try {
-      // Try to get results from the current user's results
-      const results = await resultsApi.getAll(); // Use getAll instead of getByStudent with 'current'
-      return processExamTrendsData(results.data);
+      const resultsResponse = await resultsApi.getAll();
+      const results = resultsResponse.data || [];
+
+      if (results.length === 0) {
+        return mockDataService.getExamTrendsData();
+      }
+
+      const processedData = processExamTrendsData(results);
+      console.log("Successfully loaded real exam trends data");
+      return processedData;
     } catch (error) {
-      console.error("Error fetching exam trends data:", error);
+      console.warn(
+        "Failed to load exam trends data, falling back to mock data:",
+        error.message,
+      );
       return mockDataService.getExamTrendsData();
     }
   },
@@ -80,13 +143,14 @@ const processPerformanceData = (results) => {
   let examCount = 0;
 
   results.forEach((result) => {
-    const subject = result.examId?.courseId?.name || "Unknown";
+    const subject =
+      result.examId?.courseId?.name || result.examId?.title || "Unknown";
     if (!subjectScores[subject]) {
       subjectScores[subject] = { total: 0, count: 0 };
     }
-    subjectScores[subject].total += result.percentage;
+    subjectScores[subject].total += result.percentage || result.score || 0;
     subjectScores[subject].count += 1;
-    totalScore += result.percentage;
+    totalScore += result.percentage || result.score || 0;
     examCount += 1;
   });
 
@@ -147,7 +211,7 @@ const processExamTrendsData = (results) => {
   // Group results by month
   const monthlyScores = {};
   results.forEach((result) => {
-    const date = new Date(result.submittedAt);
+    const date = new Date(result.submittedAt || result.createdAt);
     const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
     if (!monthlyScores[monthKey]) {
       monthlyScores[monthKey] = {
@@ -156,7 +220,7 @@ const processExamTrendsData = (results) => {
         month: date.toLocaleDateString("en", { month: "short" }),
       };
     }
-    monthlyScores[monthKey].total += result.percentage;
+    monthlyScores[monthKey].total += result.percentage || result.score || 0;
     monthlyScores[monthKey].count += 1;
   });
 
@@ -178,151 +242,5 @@ const processExamTrendsData = (results) => {
     ],
   };
 };
-
-// Mock data for development/fallback
-const getMockStudentData = () => ({
-  stats: {
-    enrolledCourses: 6,
-    completedExams: 12,
-    upcomingExams: 3,
-    avgScore: 87.5,
-    passedExams: 11,
-    recentResults: [
-      {
-        id: 1,
-        examId: {
-          title: "Advanced Mathematics Midterm",
-          courseId: { name: "Mathematics" },
-        },
-        percentage: 92,
-        status: "passed",
-        submittedAt: "2026-03-15T10:30:00Z",
-      },
-      {
-        id: 2,
-        examId: {
-          title: "Physics Quantum Mechanics",
-          courseId: { name: "Physics" },
-        },
-        percentage: 88,
-        status: "passed",
-        submittedAt: "2026-03-12T14:15:00Z",
-      },
-      {
-        id: 3,
-        examId: {
-          title: "Organic Chemistry Lab",
-          courseId: { name: "Chemistry" },
-        },
-        percentage: 85,
-        status: "passed",
-        submittedAt: "2026-03-10T09:45:00Z",
-      },
-      {
-        id: 4,
-        examId: { title: "Cell Biology Quiz", courseId: { name: "Biology" } },
-        percentage: 94,
-        status: "passed",
-        submittedAt: "2026-03-08T16:20:00Z",
-      },
-      {
-        id: 5,
-        examId: {
-          title: "English Literature Essay",
-          courseId: { name: "English" },
-        },
-        percentage: 89,
-        status: "passed",
-        submittedAt: "2026-03-05T11:10:00Z",
-      },
-    ],
-  },
-  availableExams: [
-    {
-      id: 1,
-      title: "Calculus Final Exam",
-      courseId: { name: "Advanced Mathematics" },
-      duration: 120,
-      totalMarks: 100,
-      status: "available",
-      startTime: "2026-03-25T09:00:00Z",
-      endTime: "2026-03-25T18:00:00Z",
-    },
-    {
-      id: 2,
-      title: "Thermodynamics Quiz",
-      courseId: { name: "Physics" },
-      duration: 60,
-      totalMarks: 50,
-      status: "available",
-      startTime: "2026-03-28T14:00:00Z",
-      endTime: "2026-03-28T17:00:00Z",
-    },
-    {
-      id: 3,
-      title: "Molecular Structure Test",
-      courseId: { name: "Chemistry" },
-      duration: 90,
-      totalMarks: 75,
-      status: "available",
-      startTime: "2026-04-02T10:00:00Z",
-      endTime: "2026-04-02T16:00:00Z",
-    },
-  ],
-  enrollments: [
-    { courseId: { name: "Mathematics" }, progress: 85, studyHours: 45 },
-    { courseId: { name: "Physics" }, progress: 78, studyHours: 38 },
-    { courseId: { name: "Chemistry" }, progress: 92, studyHours: 42 },
-    { courseId: { name: "Biology" }, progress: 88, studyHours: 35 },
-    { courseId: { name: "English" }, progress: 95, studyHours: 28 },
-    { courseId: { name: "Computer Science" }, progress: 72, studyHours: 40 },
-  ],
-});
-
-const getMockPerformanceData = () => ({
-  performanceData: [
-    { label: "Mathematics", value: 92 },
-    { label: "Physics", value: 88 },
-    { label: "Chemistry", value: 85 },
-    { label: "Biology", value: 94 },
-    { label: "English", value: 89 },
-  ],
-  overallScore: 87,
-  targetScore: 90,
-  improvement: 12,
-});
-
-const getMockStudyProgressData = () => ({
-  studyData: [
-    { label: "Completed", value: 2, color: "stroke-green-600" },
-    { label: "In Progress", value: 3, color: "stroke-blue-600" },
-    { label: "Pending", value: 1, color: "stroke-orange-600" },
-  ],
-  totalStudyHours: 228,
-  thisWeekHours: 32,
-  weeklyGoals: [
-    { label: "Study Hours", current: 32, target: 35 },
-    { label: "Assignments", current: 9, target: 10 },
-    { label: "Practice Tests", current: 4, target: 5 },
-  ],
-});
-
-const getMockExamTrendsData = () => ({
-  examTrends: [
-    { label: "Oct", value: 78 },
-    { label: "Nov", value: 82 },
-    { label: "Dec", value: 79 },
-    { label: "Jan", value: 85 },
-    { label: "Feb", value: 88 },
-    { label: "Mar", value: 92 },
-  ],
-  averageImprovement: 14,
-  currentStreak: 7,
-  upcomingExams: [
-    { subject: "Calculus Final", date: "Mar 25", progress: 88 },
-    { subject: "Physics Quiz", date: "Mar 28", progress: 75 },
-    { subject: "Chemistry Test", date: "Apr 2", progress: 82 },
-  ],
-});
 
 export default studentDataService;

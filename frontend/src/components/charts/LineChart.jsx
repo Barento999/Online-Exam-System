@@ -200,7 +200,7 @@ export const LineChart = ({
         })}
       </svg>
 
-      <style jsx>{`
+      <style>{`
         @keyframes drawLine {
           from {
             stroke-dashoffset: 1000;
