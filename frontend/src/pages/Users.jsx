@@ -29,9 +29,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
+import { MultiStepUserForm } from "@/components/forms/MultiStepUserForm";
 import { usersApi } from "@/services/api";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
-import { Plus, Pencil, Trash2, Search, Upload, Download } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Search,
+  Upload,
+  Download,
+  UserPlus,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 export const Users = () => {
@@ -43,6 +52,7 @@ export const Users = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isMultiStepOpen, setIsMultiStepOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     userId: null,
@@ -85,6 +95,28 @@ export const Users = () => {
     }
   };
 
+  const handleMultiStepSubmit = async (userData) => {
+    try {
+      if (editingUser) {
+        await usersApi.update(editingUser.id, userData);
+        toast.success("User updated successfully");
+      } else {
+        await usersApi.create(userData);
+        toast.success("User created successfully");
+      }
+      setIsMultiStepOpen(false);
+      setEditingUser(null);
+      loadUsers();
+    } catch (error) {
+      toast.error(error.message || "Operation failed");
+    }
+  };
+
+  const handleMultiStepCancel = () => {
+    setIsMultiStepOpen(false);
+    setEditingUser(null);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -113,6 +145,11 @@ export const Users = () => {
       status: user.status,
     });
     setIsDialogOpen(true);
+  };
+
+  const handleMultiStepEdit = (user) => {
+    setEditingUser(user);
+    setIsMultiStepOpen(true);
   };
 
   const handleDelete = async () => {
@@ -313,11 +350,15 @@ Admin User,admin@example.com,password123,admin,active`;
                 </div>
               </DialogContent>
             </Dialog>
+            <Button onClick={() => setIsMultiStepOpen(true)}>
+              <UserPlus className="mr-2 h-4 w-4" />
+              Create User (Advanced)
+            </Button>
             <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger asChild>
-                <Button>
+                <Button variant="outline">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add User
+                  Quick Add User
                 </Button>
               </DialogTrigger>
               <DialogContent>
@@ -474,8 +515,16 @@ Admin User,admin@example.com,password123,admin,active`;
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(user)}>
+                              onClick={() => handleEdit(user)}
+                              title="Quick Edit">
                               <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleMultiStepEdit(user)}
+                              title="Advanced Edit">
+                              <UserPlus className="h-4 w-4 text-primary" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -503,6 +552,30 @@ Admin User,admin@example.com,password123,admin,active`;
           description="Are you sure you want to delete this user? This action cannot be undone."
           onConfirm={handleDelete}
         />
+
+        {/* Multi-Step User Form */}
+        {isMultiStepOpen && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-6xl max-h-[95vh] overflow-hidden">
+              <MultiStepUserForm
+                onSubmit={handleMultiStepSubmit}
+                onCancel={handleMultiStepCancel}
+                initialData={
+                  editingUser
+                    ? {
+                        firstName: editingUser.name?.split(" ")[0] || "",
+                        lastName:
+                          editingUser.name?.split(" ").slice(1).join(" ") || "",
+                        email: editingUser.email,
+                        role: editingUser.role,
+                        status: editingUser.status,
+                      }
+                    : {}
+                }
+              />
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -22,9 +22,18 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
+import { MultiStepQuestionForm } from "@/components/forms/MultiStepQuestionForm";
 import { questionsApi, examsApi } from "@/services/api";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
-import { Plus, Pencil, Trash2, Filter, Upload, Download } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Filter,
+  Upload,
+  Download,
+  HelpCircle,
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 export const Questions = () => {
@@ -35,6 +44,7 @@ export const Questions = () => {
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isMultiStepOpen, setIsMultiStepOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     questionId: null,
@@ -75,6 +85,53 @@ export const Questions = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMultiStepSubmit = async (questionData) => {
+    try {
+      const formDataToSend = new FormData();
+
+      // Add all form fields
+      Object.keys(questionData).forEach((key) => {
+        if (key === "imageFile" && questionData[key]) {
+          formDataToSend.append("image", questionData[key]);
+        } else if (key === "options" && Array.isArray(questionData[key])) {
+          questionData[key].forEach((option, index) => {
+            formDataToSend.append(
+              `option${String.fromCharCode(65 + index)}`,
+              option,
+            );
+          });
+        } else if (key === "tags" && Array.isArray(questionData[key])) {
+          formDataToSend.append("tags", questionData[key].join(","));
+        } else if (key === "keywords" && Array.isArray(questionData[key])) {
+          formDataToSend.append("keywords", questionData[key].join(","));
+        } else if (
+          questionData[key] !== undefined &&
+          questionData[key] !== null
+        ) {
+          formDataToSend.append(key, questionData[key]);
+        }
+      });
+
+      if (editingQuestion) {
+        await questionsApi.update(editingQuestion._id, formDataToSend);
+        toast.success("Question updated successfully");
+      } else {
+        await questionsApi.create(formDataToSend);
+        toast.success("Question created successfully");
+      }
+      setIsMultiStepOpen(false);
+      setEditingQuestion(null);
+      loadData();
+    } catch (error) {
+      toast.error(error.message || "Operation failed");
+    }
+  };
+
+  const handleMultiStepCancel = () => {
+    setIsMultiStepOpen(false);
+    setEditingQuestion(null);
   };
 
   const handleSubmit = async (e) => {
@@ -127,6 +184,11 @@ export const Questions = () => {
       );
     }
     setIsDialogOpen(true);
+  };
+
+  const handleMultiStepEdit = (question) => {
+    setEditingQuestion(question);
+    setIsMultiStepOpen(true);
   };
 
   const handleDelete = async () => {
@@ -324,11 +386,15 @@ export const Questions = () => {
                 </div>
               </DialogContent>
             </Dialog>
+            <Button onClick={() => setIsMultiStepOpen(true)}>
+              <HelpCircle className="mr-2 h-4 w-4" />
+              Create Question (Advanced)
+            </Button>
             <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger asChild>
-                <Button>
+                <Button variant="outline">
                   <Plus className="mr-2 h-4 w-4" />
-                  Add Question
+                  Quick Add Question
                 </Button>
               </DialogTrigger>
               <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -575,8 +641,16 @@ export const Questions = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleEdit(question)}>
+                              onClick={() => handleEdit(question)}
+                              title="Quick Edit">
                               <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleMultiStepEdit(question)}
+                              title="Advanced Edit">
+                              <HelpCircle className="h-4 w-4 text-primary" />
                             </Button>
                             <Button
                               variant="ghost"
@@ -607,6 +681,38 @@ export const Questions = () => {
           description="Are you sure you want to delete this question? This action cannot be undone."
           onConfirm={handleDelete}
         />
+
+        {/* Multi-Step Question Form */}
+        {isMultiStepOpen && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-6xl max-h-[95vh] overflow-hidden">
+              <MultiStepQuestionForm
+                onSubmit={handleMultiStepSubmit}
+                onCancel={handleMultiStepCancel}
+                initialData={
+                  editingQuestion
+                    ? {
+                        examId: editingQuestion.examId?.toString(),
+                        type: "multiple-choice",
+                        questionText: editingQuestion.questionText,
+                        options: [
+                          editingQuestion.optionA,
+                          editingQuestion.optionB,
+                          editingQuestion.optionC,
+                          editingQuestion.optionD,
+                        ],
+                        correctAnswer: ["A", "B", "C", "D"].indexOf(
+                          editingQuestion.correctAnswer,
+                        ),
+                        marks: editingQuestion.marks,
+                        imageUrl: editingQuestion.imageUrl,
+                      }
+                    : {}
+                }
+              />
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

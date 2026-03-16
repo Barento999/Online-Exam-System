@@ -31,9 +31,10 @@ import { Switch } from "@/components/ui/switch";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
+import { MultiStepExamForm } from "@/components/forms/MultiStepExamForm";
 import { examsApi, coursesApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
-import { Plus, Pencil, Trash2, Play, Eye } from "lucide-react";
+import { Plus, Pencil, Trash2, Play, Eye, BookOpen } from "lucide-react";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 
@@ -45,6 +46,7 @@ export const Exams = () => {
   const [courses, setCourses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isMultiStepOpen, setIsMultiStepOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     examId: null,
@@ -81,6 +83,28 @@ export const Exams = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleMultiStepSubmit = async (examData) => {
+    try {
+      if (editingExam) {
+        await examsApi.update(editingExam._id, examData);
+        toast.success("Exam updated successfully");
+      } else {
+        await examsApi.create(examData);
+        toast.success("Exam created successfully");
+      }
+      setIsMultiStepOpen(false);
+      setEditingExam(null);
+      loadData();
+    } catch (error) {
+      toast.error(error.message || "Operation failed");
+    }
+  };
+
+  const handleMultiStepCancel = () => {
+    setIsMultiStepOpen(false);
+    setEditingExam(null);
   };
 
   const handleSubmit = async (e) => {
@@ -126,6 +150,11 @@ export const Exams = () => {
       randomizeQuestions: exam.randomizeQuestions || false,
     });
     setIsDialogOpen(true);
+  };
+
+  const handleMultiStepEdit = (exam) => {
+    setEditingExam(exam);
+    setIsMultiStepOpen(true);
   };
 
   const handleDelete = async () => {
@@ -195,175 +224,189 @@ export const Exams = () => {
             </p>
           </div>
           {canCreateEdit && (
-            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-              <DialogTrigger asChild>
-                <Button>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Exam
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingExam ? "Edit Exam" : "Create New Exam"}
-                  </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2 col-span-2">
-                      <Label htmlFor="title">Exam Title</Label>
-                      <Input
-                        id="title"
-                        value={formData.title}
-                        onChange={(e) =>
-                          setFormData({ ...formData, title: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2 col-span-2">
-                      <Label htmlFor="course">Course</Label>
-                      <Select
-                        value={formData.courseId}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, courseId: value })
-                        }>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a course" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {courses.map((course) => (
-                            <SelectItem
-                              key={course._id}
-                              value={course._id.toString()}>
-                              {course.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="duration">Duration (minutes)</Label>
-                      <Input
-                        id="duration"
-                        type="number"
-                        value={formData.duration}
-                        onChange={(e) =>
-                          setFormData({ ...formData, duration: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="totalMarks">Total Marks</Label>
-                      <Input
-                        id="totalMarks"
-                        type="number"
-                        value={formData.totalMarks}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            totalMarks: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="passingMarks">Passing Marks</Label>
-                      <Input
-                        id="passingMarks"
-                        type="number"
-                        value={formData.passingMarks}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            passingMarks: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="status">Status</Label>
-                      <Select
-                        value={formData.status}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, status: value })
-                        }>
-                        <SelectTrigger>
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="draft">Draft</SelectItem>
-                          <SelectItem value="published">Published</SelectItem>
-                          <SelectItem value="completed">Completed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="startTime">Start Time</Label>
-                      <Input
-                        id="startTime"
-                        type="datetime-local"
-                        value={formData.startTime}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            startTime: e.target.value,
-                          })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="endTime">End Time</Label>
-                      <Input
-                        id="endTime"
-                        type="datetime-local"
-                        value={formData.endTime}
-                        onChange={(e) =>
-                          setFormData({ ...formData, endTime: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <div className="space-y-0.5">
-                          <Label htmlFor="randomize">Randomize Questions</Label>
-                          <p className="text-sm text-muted-foreground">
-                            Shuffle questions for each student to prevent
-                            cheating
-                          </p>
-                        </div>
-                        <Switch
-                          id="randomize"
-                          checked={formData.randomizeQuestions}
-                          onCheckedChange={(checked) =>
-                            setFormData({
-                              ...formData,
-                              randomizeQuestions: checked,
-                            })
+            <div className="flex gap-2">
+              <Button onClick={() => setIsMultiStepOpen(true)}>
+                <BookOpen className="mr-2 h-4 w-4" />
+                Create Exam (Advanced)
+              </Button>
+              <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+                <DialogTrigger asChild>
+                  <Button variant="outline">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Quick Create
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>
+                      {editingExam ? "Edit Exam" : "Create New Exam"}
+                    </DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2 col-span-2">
+                        <Label htmlFor="title">Exam Title</Label>
+                        <Input
+                          id="title"
+                          value={formData.title}
+                          onChange={(e) =>
+                            setFormData({ ...formData, title: e.target.value })
                           }
+                          required
                         />
                       </div>
+                      <div className="space-y-2 col-span-2">
+                        <Label htmlFor="course">Course</Label>
+                        <Select
+                          value={formData.courseId}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, courseId: value })
+                          }>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a course" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {courses.map((course) => (
+                              <SelectItem
+                                key={course._id}
+                                value={course._id.toString()}>
+                                {course.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="duration">Duration (minutes)</Label>
+                        <Input
+                          id="duration"
+                          type="number"
+                          value={formData.duration}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              duration: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="totalMarks">Total Marks</Label>
+                        <Input
+                          id="totalMarks"
+                          type="number"
+                          value={formData.totalMarks}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              totalMarks: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="passingMarks">Passing Marks</Label>
+                        <Input
+                          id="passingMarks"
+                          type="number"
+                          value={formData.passingMarks}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              passingMarks: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="status">Status</Label>
+                        <Select
+                          value={formData.status}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, status: value })
+                          }>
+                          <SelectTrigger>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="draft">Draft</SelectItem>
+                            <SelectItem value="published">Published</SelectItem>
+                            <SelectItem value="completed">Completed</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="startTime">Start Time</Label>
+                        <Input
+                          id="startTime"
+                          type="datetime-local"
+                          value={formData.startTime}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              startTime: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="endTime">End Time</Label>
+                        <Input
+                          id="endTime"
+                          type="datetime-local"
+                          value={formData.endTime}
+                          onChange={(e) =>
+                            setFormData({
+                              ...formData,
+                              endTime: e.target.value,
+                            })
+                          }
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="space-y-0.5">
+                            <Label htmlFor="randomize">
+                              Randomize Questions
+                            </Label>
+                            <p className="text-sm text-muted-foreground">
+                              Shuffle questions for each student to prevent
+                              cheating
+                            </p>
+                          </div>
+                          <Switch
+                            id="randomize"
+                            checked={formData.randomizeQuestions}
+                            onCheckedChange={(checked) =>
+                              setFormData({
+                                ...formData,
+                                randomizeQuestions: checked,
+                              })
+                            }
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex justify-end gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => handleDialogClose(false)}>
-                      Cancel
-                    </Button>
-                    <Button type="submit">
-                      {editingExam ? "Update" : "Create"}
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
+                    <div className="flex justify-end gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => handleDialogClose(false)}>
+                        Cancel
+                      </Button>
+                      <Button type="submit">
+                        {editingExam ? "Update" : "Create"}
+                      </Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
           )}
         </div>
 
@@ -434,8 +477,16 @@ export const Exams = () => {
                                 <Button
                                   variant="ghost"
                                   size="sm"
-                                  onClick={() => handleEdit(exam)}>
+                                  onClick={() => handleEdit(exam)}
+                                  title="Quick Edit">
                                   <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleMultiStepEdit(exam)}
+                                  title="Advanced Edit">
+                                  <BookOpen className="h-4 w-4 text-primary" />
                                 </Button>
                                 <Button
                                   variant="ghost"
@@ -468,6 +519,35 @@ export const Exams = () => {
           description="Are you sure you want to delete this exam? This action cannot be undone."
           onConfirm={handleDelete}
         />
+
+        {/* Multi-Step Exam Form */}
+        {isMultiStepOpen && (
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="w-full max-w-6xl max-h-[95vh] overflow-hidden">
+              <MultiStepExamForm
+                onSubmit={handleMultiStepSubmit}
+                onCancel={handleMultiStepCancel}
+                initialData={
+                  editingExam
+                    ? {
+                        title: editingExam.title,
+                        description: editingExam.description,
+                        subject: editingExam.subject,
+                        difficulty: editingExam.difficulty,
+                        duration: editingExam.duration,
+                        totalMarks: editingExam.totalMarks,
+                        passingMarks: editingExam.passingMarks,
+                        startTime: editingExam.startTime?.slice(0, 16),
+                        endTime: editingExam.endTime?.slice(0, 16),
+                        randomizeQuestions: editingExam.randomizeQuestions,
+                        status: editingExam.status,
+                      }
+                    : {}
+                }
+              />
+            </div>
+          </div>
+        )}
       </div>
     </Layout>
   );

@@ -20,6 +20,7 @@ import { TakeExam } from "@/pages/TakeExam";
 import { ExamMonitoring } from "@/pages/ExamMonitoring";
 import { Results } from "@/pages/Results";
 import { Enrollments } from "@/pages/Enrollments";
+import { Analytics } from "@/pages/Analytics";
 import { Profile } from "@/pages/Profile";
 import { Settings } from "@/pages/Settings";
 import { BreadcrumbsDemo } from "@/components/common/BreadcrumbsDemo";
