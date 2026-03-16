@@ -11,6 +11,9 @@ import { StatsGridSkeleton } from "@/components/skeletons/StatsCardSkeleton";
 import { StatsCard } from "@/components/dashboard/StatsCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { FloatingActionButton } from "@/components/dashboard/FloatingActionButton";
+import { PerformanceWidget } from "@/components/dashboard/PerformanceWidget";
+import { StudyProgressWidget } from "@/components/dashboard/StudyProgressWidget";
+import { ExamTrendsWidget } from "@/components/dashboard/ExamTrendsWidget";
 import { dashboardApi } from "@/services/api";
 import { cn } from "@/lib/utils";
 import {
@@ -352,7 +355,14 @@ export const StudentDashboard = () => {
         {/* Quick Actions Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            {/* This space can be used for additional widgets in the future */}
+            {/* Chart Widgets Grid */}
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+              <PerformanceWidget />
+              <StudyProgressWidget />
+            </div>
+            <div className="mt-6">
+              <ExamTrendsWidget />
+            </div>
           </div>
           <QuickActions />
         </div>

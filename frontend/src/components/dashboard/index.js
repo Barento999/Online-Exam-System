@@ -3,3 +3,7 @@ export { QuickActions } from "./QuickActions";
 export { ProgressIndicator } from "./ProgressIndicator";
 export { LoadingDemo } from "./LoadingDemo";
 export { FloatingActionButton } from "./FloatingActionButton";
+export { PerformanceWidget } from "./PerformanceWidget";
+export { StudyProgressWidget } from "./StudyProgressWidget";
+export { ExamTrendsWidget } from "./ExamTrendsWidget";
+export { ChartShowcase } from "./ChartShowcase";
