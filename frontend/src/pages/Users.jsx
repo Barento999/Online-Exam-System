@@ -555,24 +555,27 @@ Admin User,admin@example.com,password123,admin,active`;
 
         {/* Multi-Step User Form */}
         {isMultiStepOpen && (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-6xl max-h-[95vh] overflow-hidden">
-              <MultiStepUserForm
-                onSubmit={handleMultiStepSubmit}
-                onCancel={handleMultiStepCancel}
-                initialData={
-                  editingUser
-                    ? {
-                        firstName: editingUser.name?.split(" ")[0] || "",
-                        lastName:
-                          editingUser.name?.split(" ").slice(1).join(" ") || "",
-                        email: editingUser.email,
-                        role: editingUser.role,
-                        status: editingUser.status,
-                      }
-                    : {}
-                }
-              />
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
+            <div className="w-full max-w-6xl min-h-screen flex items-center justify-center py-8">
+              <div className="w-full">
+                <MultiStepUserForm
+                  onSubmit={handleMultiStepSubmit}
+                  onCancel={handleMultiStepCancel}
+                  initialData={
+                    editingUser
+                      ? {
+                          firstName: editingUser.name?.split(" ")[0] || "",
+                          lastName:
+                            editingUser.name?.split(" ").slice(1).join(" ") ||
+                            "",
+                          email: editingUser.email,
+                          role: editingUser.role,
+                          status: editingUser.status,
+                        }
+                      : {}
+                  }
+                />
+              </div>
             </div>
           </div>
         )}

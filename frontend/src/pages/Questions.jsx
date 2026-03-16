@@ -684,32 +684,34 @@ export const Questions = () => {
 
         {/* Multi-Step Question Form */}
         {isMultiStepOpen && (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-6xl max-h-[95vh] overflow-hidden">
-              <MultiStepQuestionForm
-                onSubmit={handleMultiStepSubmit}
-                onCancel={handleMultiStepCancel}
-                initialData={
-                  editingQuestion
-                    ? {
-                        examId: editingQuestion.examId?.toString(),
-                        type: "multiple-choice",
-                        questionText: editingQuestion.questionText,
-                        options: [
-                          editingQuestion.optionA,
-                          editingQuestion.optionB,
-                          editingQuestion.optionC,
-                          editingQuestion.optionD,
-                        ],
-                        correctAnswer: ["A", "B", "C", "D"].indexOf(
-                          editingQuestion.correctAnswer,
-                        ),
-                        marks: editingQuestion.marks,
-                        imageUrl: editingQuestion.imageUrl,
-                      }
-                    : {}
-                }
-              />
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
+            <div className="w-full max-w-6xl min-h-screen flex items-center justify-center py-8">
+              <div className="w-full">
+                <MultiStepQuestionForm
+                  onSubmit={handleMultiStepSubmit}
+                  onCancel={handleMultiStepCancel}
+                  initialData={
+                    editingQuestion
+                      ? {
+                          examId: editingQuestion.examId?.toString(),
+                          type: "multiple-choice",
+                          questionText: editingQuestion.questionText,
+                          options: [
+                            editingQuestion.optionA,
+                            editingQuestion.optionB,
+                            editingQuestion.optionC,
+                            editingQuestion.optionD,
+                          ],
+                          correctAnswer: ["A", "B", "C", "D"].indexOf(
+                            editingQuestion.correctAnswer,
+                          ),
+                          marks: editingQuestion.marks,
+                          imageUrl: editingQuestion.imageUrl,
+                        }
+                      : {}
+                  }
+                />
+              </div>
             </div>
           </div>
         )}

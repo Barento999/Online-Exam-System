@@ -522,29 +522,31 @@ export const Exams = () => {
 
         {/* Multi-Step Exam Form */}
         {isMultiStepOpen && (
-          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-6xl max-h-[95vh] overflow-hidden">
-              <MultiStepExamForm
-                onSubmit={handleMultiStepSubmit}
-                onCancel={handleMultiStepCancel}
-                initialData={
-                  editingExam
-                    ? {
-                        title: editingExam.title,
-                        description: editingExam.description,
-                        subject: editingExam.subject,
-                        difficulty: editingExam.difficulty,
-                        duration: editingExam.duration,
-                        totalMarks: editingExam.totalMarks,
-                        passingMarks: editingExam.passingMarks,
-                        startTime: editingExam.startTime?.slice(0, 16),
-                        endTime: editingExam.endTime?.slice(0, 16),
-                        randomizeQuestions: editingExam.randomizeQuestions,
-                        status: editingExam.status,
-                      }
-                    : {}
-                }
-              />
+          <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-start justify-center p-4 overflow-y-auto">
+            <div className="w-full max-w-6xl min-h-screen flex items-center justify-center py-8">
+              <div className="w-full">
+                <MultiStepExamForm
+                  onSubmit={handleMultiStepSubmit}
+                  onCancel={handleMultiStepCancel}
+                  initialData={
+                    editingExam
+                      ? {
+                          title: editingExam.title,
+                          description: editingExam.description,
+                          subject: editingExam.subject,
+                          difficulty: editingExam.difficulty,
+                          duration: editingExam.duration,
+                          totalMarks: editingExam.totalMarks,
+                          passingMarks: editingExam.passingMarks,
+                          startTime: editingExam.startTime?.slice(0, 16),
+                          endTime: editingExam.endTime?.slice(0, 16),
+                          randomizeQuestions: editingExam.randomizeQuestions,
+                          status: editingExam.status,
+                        }
+                      : {}
+                  }
+                />
+              </div>
             </div>
           </div>
         )}
