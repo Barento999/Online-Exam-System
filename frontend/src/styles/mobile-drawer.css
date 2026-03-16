@@ -78,3 +78,44 @@
 .swipe-indicator {
   animation: swipe-pulse 2s ease-in-out infinite;
 }
+/* Notification Badge Animations */
+@keyframes badge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+}
+
+@keyframes badge-bounce {
+  0%,
+  20%,
+  53%,
+  80%,
+  100% {
+    transform: scale(1);
+  }
+  40%,
+  43% {
+    transform: scale(1.2);
+  }
+  70% {
+    transform: scale(1.1);
+  }
+}
+
+.notification-badge {
+  animation: badge-bounce 0.6s ease-out;
+}
+
+.notification-badge.pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* Badge hover effects */
+.notification-badge:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}

@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router";
 import { useAuth } from "@/context/AuthContext";
+import { useNotificationContext } from "@/context/NotificationContext";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -26,6 +27,7 @@ import {
 
 export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const { user } = useAuth();
+  const { getNotification } = useNotificationContext();
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState({});
@@ -153,6 +155,54 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       const progress = Math.max(0, Math.min(1, 1 + dragDistance / 256));
       return { opacity: progress * 0.5 };
     }
+  };
+
+  // Badge component
+  const NotificationBadge = ({ count, type, isCollapsed }) => {
+    if (!count || count === 0) return null;
+
+    const getBadgeStyles = () => {
+      const baseStyles =
+        "absolute flex items-center justify-center text-xs font-bold rounded-full transition-all duration-200 animate-in zoom-in notification-badge";
+
+      switch (type) {
+        case "error":
+          return `${baseStyles} bg-red-500 text-white`;
+        case "warning":
+          return `${baseStyles} bg-amber-500 text-white`;
+        case "success":
+          return `${baseStyles} bg-green-500 text-white`;
+        case "info":
+        default:
+          return `${baseStyles} bg-blue-500 text-white`;
+      }
+    };
+
+    const displayCount = count > 99 ? "99+" : count.toString();
+
+    if (isCollapsed) {
+      return (
+        <div
+          className={cn(
+            getBadgeStyles(),
+            "top-1 right-1 min-w-[18px] h-[18px] text-[10px]",
+            count > 9 ? "px-1" : "",
+          )}>
+          {displayCount}
+        </div>
+      );
+    }
+
+    return (
+      <div
+        className={cn(
+          getBadgeStyles(),
+          "top-1/2 -translate-y-1/2 right-3 min-w-[20px] h-[20px] text-[11px]",
+          count > 9 ? "px-1.5" : "",
+        )}>
+        {displayCount}
+      </div>
+    );
   };
 
   const adminMenuItems = [
@@ -406,6 +456,20 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                               ))}
                           </>
                         )}
+
+                        {/* Notification Badge */}
+                        {(() => {
+                          const badge = getNotification(item.path);
+                          return (
+                            badge && (
+                              <NotificationBadge
+                                count={badge.count}
+                                type={badge.type}
+                                isCollapsed={isCollapsed}
+                              />
+                            )
+                          );
+                        })()}
                       </button>
                     ) : (
                       <Link
@@ -447,6 +511,20 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                         {!isCollapsed && (
                           <span className="font-medium">{item.label}</span>
                         )}
+
+                        {/* Notification Badge */}
+                        {(() => {
+                          const badge = getNotification(item.path);
+                          return (
+                            badge && (
+                              <NotificationBadge
+                                count={badge.count}
+                                type={badge.type}
+                                isCollapsed={isCollapsed}
+                              />
+                            )
+                          );
+                        })()}
                       </Link>
                     )}
 
@@ -506,7 +584,29 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
                                       : "group-hover:scale-110",
                                   )}
                                 />
-                                <span>{child.label}</span>
+                                <span className="flex-1">{child.label}</span>
+
+                                {/* Child Notification Badge */}
+                                {(() => {
+                                  const badge = getNotification(child.path);
+                                  return (
+                                    badge && (
+                                      <div
+                                        className={cn(
+                                          "flex items-center justify-center text-xs font-bold rounded-full transition-all duration-200 animate-in zoom-in min-w-[16px] h-[16px] notification-badge",
+                                          badge.type === "error"
+                                            ? "bg-red-500 text-white"
+                                            : badge.type === "warning"
+                                              ? "bg-amber-500 text-white"
+                                              : badge.type === "success"
+                                                ? "bg-green-500 text-white"
+                                                : "bg-blue-500 text-white",
+                                        )}>
+                                        {badge.count > 99 ? "99+" : badge.count}
+                                      </div>
+                                    )
+                                  );
+                                })()}
                               </Link>
                             </li>
                           );
