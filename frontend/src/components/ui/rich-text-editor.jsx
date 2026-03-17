@@ -139,6 +139,8 @@ export const RichTextEditor = ({
 
       // Add paste handler to clean up pasted content
       const handlePaste = (e) => {
+        if (!editorRef.current) return;
+
         e.preventDefault();
         const text = e.clipboardData.getData("text/plain");
         document.execCommand("insertText", false, text);
@@ -150,6 +152,8 @@ export const RichTextEditor = ({
 
       // Add focus handler to manage placeholder and cursor direction
       const handleFocus = () => {
+        if (!editorRef.current) return;
+
         if (
           editorRef.current.innerHTML === "" ||
           editorRef.current.innerHTML === "<br>"
@@ -165,6 +169,8 @@ export const RichTextEditor = ({
 
       // Add blur handler to manage empty state
       const handleBlur = () => {
+        if (!editorRef.current) return;
+
         if (
           editorRef.current.innerHTML === "" ||
           editorRef.current.innerHTML === "<br>"
@@ -186,7 +192,9 @@ export const RichTextEditor = ({
         if (selectionTimeout) return;
         if (editorRef.current && document.activeElement === editorRef.current) {
           selectionTimeout = setTimeout(() => {
-            setDirectionProperties();
+            if (editorRef.current) {
+              setDirectionProperties();
+            }
             selectionTimeout = null;
           }, 200); // Less frequent than other handlers
         }

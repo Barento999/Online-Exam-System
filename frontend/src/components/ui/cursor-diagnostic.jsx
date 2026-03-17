@@ -17,7 +17,6 @@ export const CursorDiagnostic = () => {
       userAgent: navigator.userAgent,
       language: navigator.language,
       languages: navigator.languages,
-      platform: navigator.platform,
     };
 
     // Check document direction
@@ -88,6 +87,19 @@ export const CursorDiagnostic = () => {
 
   useEffect(() => {
     runDiagnostics();
+
+    // Add selection change listener for cursor tracking
+    const handleSelectionChange = () => {
+      if (testRef.current && document.activeElement === testRef.current) {
+        handleCursorMove();
+      }
+    };
+
+    document.addEventListener("selectionchange", handleSelectionChange);
+
+    return () => {
+      document.removeEventListener("selectionchange", handleSelectionChange);
+    };
   }, []);
 
   return (
@@ -118,7 +130,6 @@ export const CursorDiagnostic = () => {
                   writingMode: "horizontal-tb",
                 }}
                 onInput={handleCursorMove}
-                onSelectionChange={handleCursorMove}
                 onClick={handleCursorMove}
                 onKeyUp={handleCursorMove}
                 placeholder="Type here to test cursor behavior..."
