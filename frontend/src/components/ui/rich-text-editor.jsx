@@ -41,45 +41,6 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const FONT_SIZES = [
-  { value: "12px", label: "12px" },
-  { value: "14px", label: "14px" },
-  { value: "16px", label: "16px" },
-  { value: "18px", label: "18px" },
-  { value: "20px", label: "20px" },
-  { value: "24px", label: "24px" },
-  { value: "32px", label: "32px" },
-];
-
-const FONT_FAMILIES = [
-  { value: "Arial, sans-serif", label: "Arial" },
-  { value: "Georgia, serif", label: "Georgia" },
-  { value: "Times New Roman, serif", label: "Times New Roman" },
-  { value: "Helvetica, sans-serif", label: "Helvetica" },
-  { value: "Courier New, monospace", label: "Courier New" },
-];
-
-const COLORS = [
-  "#000000",
-  "#333333",
-  "#666666",
-  "#999999",
-  "#CCCCCC",
-  "#FFFFFF",
-  "#FF0000",
-  "#FF6600",
-  "#FFCC00",
-  "#00FF00",
-  "#0066FF",
-  "#6600FF",
-  "#FF0066",
-  "#FF3366",
-  "#FF6699",
-  "#66FF99",
-  "#6699FF",
-  "#9966FF",
-];
-
 export const RichTextEditor = ({
   value = "",
   onChange,
@@ -204,74 +165,19 @@ export const RichTextEditor = ({
       editorRef.current.focus();
 
       try {
-        // Use modern approach where possible, fallback to execCommand for compatibility
-        const selection = window.getSelection();
-        const range = selection.getRangeAt(0);
-
         switch (command) {
           case "bold":
-            document.execCommand("bold", false, null);
-            break;
           case "italic":
-            document.execCommand("italic", false, null);
-            break;
           case "underline":
-            document.execCommand("underline", false, null);
-            break;
-          case "strikeThrough":
-            document.execCommand("strikeThrough", false, null);
-            break;
           case "justifyLeft":
-            document.execCommand("justifyLeft", false, null);
-            break;
           case "justifyCenter":
-            document.execCommand("justifyCenter", false, null);
-            break;
           case "justifyRight":
-            document.execCommand("justifyRight", false, null);
-            break;
-          case "justifyFull":
-            document.execCommand("justifyFull", false, null);
-            break;
           case "insertUnorderedList":
-            document.execCommand("insertUnorderedList", false, null);
-            break;
           case "insertOrderedList":
-            document.execCommand("insertOrderedList", false, null);
+            document.execCommand(command, false, null);
             break;
           case "formatBlock":
             document.execCommand("formatBlock", false, value);
-            break;
-          case "createLink":
-            document.execCommand("createLink", false, value);
-            break;
-          case "insertImage":
-            document.execCommand("insertImage", false, value);
-            break;
-          case "undo":
-            document.execCommand("undo", false, null);
-            break;
-          case "redo":
-            document.execCommand("redo", false, null);
-            break;
-          case "fontName":
-            document.execCommand("fontName", false, value);
-            break;
-          case "fontSize":
-            // Convert px to size number for execCommand
-            const sizeMap = {
-              "12px": "1",
-              "14px": "2",
-              "16px": "3",
-              "18px": "4",
-              "20px": "5",
-              "24px": "6",
-              "32px": "7",
-            };
-            document.execCommand("fontSize", false, sizeMap[value] || "3");
-            break;
-          case "foreColor":
-            document.execCommand("foreColor", false, value);
             break;
           default:
             document.execCommand(command, false, value);
@@ -288,20 +194,6 @@ export const RichTextEditor = ({
     [disabled, handleContentChange],
   );
 
-  const insertLink = useCallback(() => {
-    const url = prompt("Enter URL:");
-    if (url) {
-      executeCommand("createLink", url);
-    }
-  }, [executeCommand]);
-
-  const insertImage = useCallback(() => {
-    const url = prompt("Enter image URL:");
-    if (url) {
-      executeCommand("insertImage", url);
-    }
-  }, [executeCommand]);
-
   const toggleFullscreen = useCallback(() => {
     setIsFullscreen(!isFullscreen);
   }, [isFullscreen]);
@@ -317,7 +209,6 @@ export const RichTextEditor = ({
       { command: "bold", icon: Bold, title: "Bold" },
       { command: "italic", icon: Italic, title: "Italic" },
       { command: "underline", icon: Underline, title: "Underline" },
-      { command: "strikeThrough", icon: Strikethrough, title: "Strikethrough" },
       { type: "separator" },
       { command: "insertUnorderedList", icon: List, title: "Bullet List" },
       {
@@ -329,12 +220,6 @@ export const RichTextEditor = ({
       { command: "justifyLeft", icon: AlignLeft, title: "Align Left" },
       { command: "justifyCenter", icon: AlignCenter, title: "Align Center" },
       { command: "justifyRight", icon: AlignRight, title: "Align Right" },
-      { type: "separator" },
-      { type: "custom", icon: Link, title: "Insert Link", action: insertLink },
-      { command: "formatBlock", icon: Code, title: "Code Block", value: "pre" },
-      { type: "separator" },
-      { command: "undo", icon: Undo, title: "Undo" },
-      { command: "redo", icon: Redo, title: "Redo" },
     ];
 
     const fullButtons = [
@@ -389,68 +274,6 @@ export const RichTextEditor = ({
 
     return (
       <div className="flex items-center gap-1 p-2 border-b bg-muted/30 flex-wrap">
-        {/* Font Family */}
-        {toolbar === "full" && (
-          <Select
-            onValueChange={(value) => executeCommand("fontName", value)}
-            disabled={disabled}>
-            <SelectTrigger className="w-32 h-8">
-              <SelectValue placeholder="Font" />
-            </SelectTrigger>
-            <SelectContent>
-              {FONT_FAMILIES.map((font) => (
-                <SelectItem key={font.value} value={font.value}>
-                  {font.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-
-        {/* Font Size */}
-        {toolbar === "full" && (
-          <Select
-            onValueChange={(value) => executeCommand("fontSize", value)}
-            disabled={disabled}>
-            <SelectTrigger className="w-20 h-8">
-              <Type className="h-3 w-3" />
-            </SelectTrigger>
-            <SelectContent>
-              {FONT_SIZES.map((size) => (
-                <SelectItem key={size.value} value={size.value}>
-                  {size.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
-
-        {/* Color Picker */}
-        {toolbar === "full" && (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="ghost" size="sm" disabled={disabled}>
-                <Palette className="h-4 w-4" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-48">
-              <div className="grid grid-cols-6 gap-1">
-                {COLORS.map((color) => (
-                  <button
-                    key={color}
-                    className="w-6 h-6 rounded border border-gray-300 hover:scale-110 transition-transform"
-                    style={{ backgroundColor: color }}
-                    onClick={() => executeCommand("foreColor", color)}
-                    title={color}
-                  />
-                ))}
-              </div>
-            </PopoverContent>
-          </Popover>
-        )}
-
-        {toolbar === "full" && <div className="w-px h-6 bg-border mx-1" />}
-
         {/* Main Buttons */}
         {buttons.map((button, index) => {
           if (button.type === "separator") {
