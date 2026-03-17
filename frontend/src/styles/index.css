@@ -2,6 +2,24 @@
 @import "./tailwind.css";
 @import "./theme.css";
 @import "./mobile-drawer.css";
+
+/* Global LTR enforcement for rich text editors */
+html,
+body {
+  direction: ltr;
+  text-align: left;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Ensure no global RTL inheritance */
+[contenteditable] {
+  direction: ltr !important;
+  text-align: left !important;
+}
+
 /* Rich Text Editor Styles */
 .rich-text-editor [contenteditable]:empty:before {
   content: attr(data-placeholder);
@@ -262,4 +280,73 @@
 
 .simple-rich-text-editor .prose * {
   direction: ltr;
+}
+
+/* Textarea Rich Editor */
+.textarea-rich-editor textarea {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: normal !important;
+}
+
+.textarea-rich-editor textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Forced LTR Editor - Most aggressive approach */
+.forced-ltr-editor [contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+
+.forced-ltr-editor [contenteditable]:focus:before {
+  display: none;
+}
+
+.forced-ltr-editor [contenteditable] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: bidi-override !important;
+  writing-mode: horizontal-tb !important;
+  -webkit-writing-mode: horizontal-tb !important;
+  -webkit-text-direction: ltr !important;
+  -moz-text-direction: ltr !important;
+  text-direction: ltr !important;
+}
+
+.forced-ltr-editor [contenteditable]:focus {
+  outline: none;
+  box-shadow: none;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.forced-ltr-editor [contenteditable] *,
+.forced-ltr-editor [contenteditable] p,
+.forced-ltr-editor [contenteditable] div,
+.forced-ltr-editor [contenteditable] span,
+.forced-ltr-editor [contenteditable] strong,
+.forced-ltr-editor [contenteditable] em,
+.forced-ltr-editor [contenteditable] u,
+.forced-ltr-editor [contenteditable] ul,
+.forced-ltr-editor [contenteditable] ol,
+.forced-ltr-editor [contenteditable] li {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: bidi-override !important;
+}
+
+.forced-ltr-editor .prose {
+  color: hsl(var(--foreground));
+  max-width: none;
+  direction: ltr !important;
+}
+
+.forced-ltr-editor .prose * {
+  direction: ltr !important;
 }

@@ -1,15 +1,28 @@
 import { useState } from "react";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
+import { TextareaRichEditor } from "@/components/ui/textarea-rich-editor";
+import { ForcedLTREditor } from "@/components/ui/forced-ltr-editor";
+import { CursorDiagnostic } from "@/components/ui/cursor-diagnostic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, CheckCircle, TestTube, Zap } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle,
+  TestTube,
+  Zap,
+  Type,
+  Shield,
+  Search,
+} from "lucide-react";
 
 export const RichTextCursorTest = () => {
   const [testContent, setTestContent] = useState("");
   const [simpleTestContent, setSimpleTestContent] = useState("");
+  const [textareaTestContent, setTextareaTestContent] = useState("");
+  const [forcedTestContent, setForcedTestContent] = useState("");
   const [testResults, setTestResults] = useState([]);
 
   const runCursorTest = () => {
@@ -48,6 +61,8 @@ export const RichTextCursorTest = () => {
   const clearTest = () => {
     setTestContent("");
     setSimpleTestContent("");
+    setTextareaTestContent("");
+    setForcedTestContent("");
     setTestResults([]);
   };
 
@@ -113,14 +128,86 @@ export const RichTextCursorTest = () => {
           <CardTitle>Rich Text Editor Test Area</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="simple" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
+          <Tabs defaultValue="forced" className="w-full">
+            <TabsList className="grid w-full grid-cols-5">
+              <TabsTrigger value="forced">
+                <Shield className="h-4 w-4 mr-2" />
+                Forced LTR
+              </TabsTrigger>
+              <TabsTrigger value="textarea">
+                <Type className="h-4 w-4 mr-2" />
+                Textarea
+              </TabsTrigger>
               <TabsTrigger value="simple">
                 <Zap className="h-4 w-4 mr-2" />
-                Simple Editor (Recommended)
+                Simple
               </TabsTrigger>
-              <TabsTrigger value="advanced">Advanced Editor</TabsTrigger>
+              <TabsTrigger value="advanced">Advanced</TabsTrigger>
+              <TabsTrigger value="diagnostic">
+                <Search className="h-4 w-4 mr-2" />
+                Diagnostic
+              </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="forced" className="space-y-4">
+              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>Most Aggressive:</strong> This editor uses the most
+                  aggressive LTR enforcement with bidi-override and
+                  comprehensive cursor control. Try this first!
+                </p>
+              </div>
+
+              <ForcedLTREditor
+                value={forcedTestContent}
+                onChange={setForcedTestContent}
+                placeholder="Click here and start typing to test cursor direction..."
+                minHeight="200px"
+                maxHeight="400px"
+                showWordCount={true}
+                label="Forced LTR Rich Text Editor"
+              />
+
+              {forcedTestContent && (
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <h4 className="font-medium mb-2">Current Content:</h4>
+                  <div
+                    className="text-sm prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: forcedTestContent }}
+                  />
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="textarea" className="space-y-4">
+              <div className="bg-purple-50 dark:bg-purple-950 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+                <p className="text-sm text-purple-800 dark:text-purple-200">
+                  <strong>Alternative Approach:</strong> This uses a textarea
+                  with HTML markup insertion. Textarea elements have more
+                  predictable cursor behavior.
+                </p>
+              </div>
+
+              <TextareaRichEditor
+                value={textareaTestContent}
+                onChange={setTextareaTestContent}
+                placeholder="Click here and start typing to test cursor direction..."
+                minHeight="200px"
+                maxHeight="400px"
+                showWordCount={true}
+                label="Textarea-Based Rich Text Editor"
+              />
+
+              {textareaTestContent && (
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <h4 className="font-medium mb-2">Current Content:</h4>
+                  <div
+                    className="text-sm prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: textareaTestContent }}
+                  />
+                </div>
+              )}
+            </TabsContent>
 
             <TabsContent value="simple" className="space-y-4">
               <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3">
@@ -182,6 +269,18 @@ export const RichTextCursorTest = () => {
                   />
                 </div>
               )}
+            </TabsContent>
+
+            <TabsContent value="diagnostic" className="space-y-4">
+              <div className="bg-orange-50 dark:bg-orange-950 border border-orange-200 dark:border-orange-800 rounded-lg p-3">
+                <p className="text-sm text-orange-800 dark:text-orange-200">
+                  <strong>System Diagnostic:</strong> This tool helps identify
+                  what might be causing the cursor direction issue by examining
+                  browser, system, and CSS settings.
+                </p>
+              </div>
+
+              <CursorDiagnostic />
             </TabsContent>
           </Tabs>
         </CardContent>
