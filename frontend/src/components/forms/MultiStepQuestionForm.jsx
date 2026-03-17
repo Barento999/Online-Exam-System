@@ -7,8 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
+import { ModernRichTextEditor } from "@/components/ui/modern-rich-text-editor";
 import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
 import { LTRTextEditor } from "@/components/ui/ltr-text-editor";
+import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import {
   Select,
@@ -141,12 +143,17 @@ const QuestionDetailsStep = ({
 
       <div className="space-y-2">
         <Label htmlFor="questionText">Question Text *</Label>
-        <LTRTextEditor
+        <ModernRichTextEditor
           value={data.questionText || ""}
           onChange={(value) => updateData({ questionText: value })}
-          placeholder="Enter your question here... Use the toolbar for formatting"
+          placeholder="Enter your question here..."
           minHeight="150px"
-          maxHeight="250px"
+          maxHeight="300px"
+          toolbar="exam"
+          showWordCount={true}
+          error={getFieldError("questionText")}
+          label={null}
+        />
           label=""
           required={true}
           error={
@@ -330,12 +337,15 @@ const MediaStep = ({ data, updateData }) => {
 
       <div className="space-y-2">
         <Label htmlFor="references">References (Optional)</Label>
-        <Textarea
-          id="references"
+        <ModernRichTextEditor
           value={data.references || ""}
-          onChange={(e) => updateData({ references: e.target.value })}
+          onChange={(value) => updateData({ references: value })}
           placeholder="Add references, sources, or additional reading materials..."
-          rows={2}
+          minHeight="100px"
+          maxHeight="200px"
+          toolbar="basic"
+          showWordCount={false}
+          label={null}
         />
       </div>
     </div>

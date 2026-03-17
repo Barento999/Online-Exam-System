@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
+import { ModernRichTextEditor } from "@/components/ui/modern-rich-text-editor";
 import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
 import { LTRTextEditor } from "@/components/ui/ltr-text-editor";
+import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
 import {
   Select,
   SelectContent,
@@ -104,12 +106,16 @@ const BasicInfoStep = ({
 
       <div className="space-y-2">
         <Label htmlFor="description">Description & Instructions</Label>
-        <LTRTextEditor
+        <ModernRichTextEditor
           value={data.description || ""}
           onChange={(value) => updateData({ description: value })}
           placeholder="Enter exam description and instructions for students..."
-          minHeight="120px"
-          maxHeight="200px"
+          minHeight="150px"
+          maxHeight="300px"
+          toolbar="full"
+          showWordCount={true}
+          label={null}
+        />
           label=""
           showWordCount={true}
         />

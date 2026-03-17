@@ -8,6 +8,10 @@ import {
   useRichTextEditor,
 } from "@/components/ui/rich-text-editor";
 import {
+  ModernRichTextEditor,
+  useModernRichTextEditor,
+} from "@/components/ui/modern-rich-text-editor";
+import {
   MarkdownEditor,
   useMarkdownEditor,
 } from "@/components/ui/markdown-editor";
@@ -19,6 +23,7 @@ import {
   Code,
   BookOpen,
   MessageSquare,
+  Sparkles,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -26,6 +31,11 @@ export const RichTextDemo = () => {
   // Rich Text Editor Demo
   const richTextEditor = useRichTextEditor(
     "<h2>Welcome to Rich Text Editing</h2><p>This is a <strong>rich text editor</strong> with full formatting capabilities. You can make text <em>italic</em>, <u>underlined</u>, and much more!</p>",
+  );
+
+  // Modern Rich Text Editor Demo
+  const modernEditor = useModernRichTextEditor(
+    "<h2>Modern Rich Text Editor</h2><p>This is a <strong>modern editor</strong> using the latest APIs instead of deprecated execCommand. It includes <em>undo/redo</em>, <u>tables</u>, and advanced formatting!</p>",
   );
 
   // Markdown Editor Demo
@@ -55,13 +65,117 @@ export const RichTextDemo = () => {
           </p>
         </div>
 
-        <Tabs defaultValue="rich-text" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+        <Tabs defaultValue="modern" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="modern">
+              <Sparkles className="h-4 w-4 mr-2" />
+              Modern Editor
+            </TabsTrigger>
             <TabsTrigger value="rich-text">Rich Text Editor</TabsTrigger>
             <TabsTrigger value="markdown">Markdown Editor</TabsTrigger>
             <TabsTrigger value="comparison">Comparison</TabsTrigger>
             <TabsTrigger value="integration">Integration</TabsTrigger>
           </TabsList>
+
+          {/* Modern Rich Text Editor Demo */}
+          <TabsContent value="modern" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Sparkles className="h-5 w-5 text-primary" />
+                  Modern Rich Text Editor (Recommended)
+                </CardTitle>
+                <p className="text-sm text-muted-foreground">
+                  Uses modern Selection API instead of deprecated execCommand.
+                  Includes undo/redo, tables, and advanced formatting.
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid gap-6">
+                  {/* Full Featured Modern Editor */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">
+                      Full Featured Modern Editor
+                    </h3>
+                    <ModernRichTextEditor
+                      value={modernEditor.value}
+                      onChange={modernEditor.setValue}
+                      label="Content"
+                      placeholder="Start writing your content..."
+                      minHeight="300px"
+                      showWordCount={true}
+                      showCharCount={true}
+                      toolbar="full"
+                      allowFullscreen={true}
+                    />
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={() =>
+                          handleSave(
+                            "Modern Editor Content",
+                            modernEditor.value,
+                          )
+                        }>
+                        Save Content
+                      </Button>
+                      <Button variant="outline" onClick={modernEditor.reset}>
+                        Reset
+                      </Button>
+                      <Badge variant="outline">
+                        {modernEditor.getWordCount()} words
+                      </Badge>
+                    </div>
+                  </div>
+
+                  {/* Exam Editor */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">
+                      Exam Editor (Recommended for Questions)
+                    </h3>
+                    <ModernRichTextEditor
+                      value={examInstructions}
+                      onChange={setExamInstructions}
+                      label="Question Text"
+                      placeholder="Enter your exam question here..."
+                      minHeight="150px"
+                      toolbar="exam"
+                      allowFullscreen={false}
+                      showWordCount={true}
+                    />
+                  </div>
+
+                  {/* Basic Editor */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Basic Editor</h3>
+                    <ModernRichTextEditor
+                      value={announcement}
+                      onChange={setAnnouncement}
+                      label="Announcement"
+                      placeholder="Write an announcement..."
+                      minHeight="150px"
+                      toolbar="basic"
+                      allowFullscreen={false}
+                    />
+                  </div>
+
+                  {/* Minimal Editor */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Minimal Editor</h3>
+                    <ModernRichTextEditor
+                      value={blogPost}
+                      onChange={setBlogPost}
+                      label="Simple Text"
+                      placeholder="Enter simple text..."
+                      minHeight="100px"
+                      toolbar="minimal"
+                      allowFullscreen={false}
+                      showWordCount={false}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
 
           {/* Rich Text Editor Demo */}
           <TabsContent value="rich-text" className="space-y-6">

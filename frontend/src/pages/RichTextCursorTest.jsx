@@ -5,6 +5,7 @@ import { TextareaRichEditor } from "@/components/ui/textarea-rich-editor";
 import { ForcedLTREditor } from "@/components/ui/forced-ltr-editor";
 import { HybridLTREditor } from "@/components/ui/hybrid-ltr-editor";
 import { LTRTextEditor } from "@/components/ui/ltr-text-editor";
+import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
 import { CursorDiagnostic } from "@/components/ui/cursor-diagnostic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ export const RichTextCursorTest = () => {
   const [forcedTestContent, setForcedTestContent] = useState("");
   const [hybridTestContent, setHybridTestContent] = useState("");
   const [ltrTestContent, setLtrTestContent] = useState("");
+  const [simpleTextareaContent, setSimpleTextareaContent] = useState("");
   const [testResults, setTestResults] = useState([]);
 
   const runCursorTest = () => {
@@ -134,8 +136,12 @@ export const RichTextCursorTest = () => {
           <CardTitle>Rich Text Editor Test Area</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="ltr" className="w-full">
-            <TabsList className="grid w-full grid-cols-7">
+          <Tabs defaultValue="simple-textarea" className="w-full">
+            <TabsList className="grid w-full grid-cols-8">
+              <TabsTrigger value="simple-textarea">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                Simple Fix
+              </TabsTrigger>
               <TabsTrigger value="ltr">
                 <CheckCircle className="h-4 w-4 mr-2" />
                 LTR Editor
@@ -162,6 +168,26 @@ export const RichTextCursorTest = () => {
                 Diagnostic
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="simple-textarea" className="space-y-4">
+              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  <strong>Simple Solution:</strong> This uses a regular textarea
+                  which ALWAYS has correct LTR cursor behavior. It supports
+                  basic markdown formatting. This should work 100% of the time!
+                </p>
+              </div>
+
+              <SimpleTextareaEditor
+                value={simpleTextareaContent}
+                onChange={setSimpleTextareaContent}
+                placeholder="Click here and start typing to test cursor direction..."
+                minHeight="200px"
+                maxHeight="400px"
+                showWordCount={true}
+                label="Simple Textarea Editor (Guaranteed Fix)"
+              />
+            </TabsContent>
 
             <TabsContent value="ltr" className="space-y-4">
               <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3">
