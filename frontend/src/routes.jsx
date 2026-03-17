@@ -26,6 +26,7 @@ import { Settings } from "@/pages/Settings";
 import { BreadcrumbsDemo } from "@/components/common/BreadcrumbsDemo";
 import { DragDropDemo } from "@/pages/DragDropDemo";
 import { RichTextDemo } from "@/pages/RichTextDemo";
+import { RichTextCursorTest } from "@/pages/RichTextCursorTest";
 
 // Dashboard Router Component
 const DashboardRouter = () => {
@@ -187,6 +188,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <RichTextDemo />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/rich-text-cursor-test",
+    element: (
+      <ProtectedRoute>
+        <RichTextCursorTest />
       </ProtectedRoute>
     ),
   },

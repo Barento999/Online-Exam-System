@@ -179,7 +179,13 @@
 .rich-text-editor [contenteditable] *,
 .rich-text-editor [contenteditable] p,
 .rich-text-editor [contenteditable] div,
-.rich-text-editor [contenteditable] span {
+.rich-text-editor [contenteditable] span,
+.rich-text-editor [contenteditable] strong,
+.rich-text-editor [contenteditable] em,
+.rich-text-editor [contenteditable] u,
+.rich-text-editor [contenteditable] ul,
+.rich-text-editor [contenteditable] ol,
+.rich-text-editor [contenteditable] li {
   direction: ltr !important;
   text-align: start !important;
   unicode-bidi: embed !important;
@@ -199,4 +205,25 @@
 
 .rich-text-editor * {
   direction: ltr !important;
+}
+
+/* Additional cursor fixes for different browsers */
+.rich-text-editor [contenteditable] {
+  -webkit-text-direction: ltr !important;
+  -moz-text-direction: ltr !important;
+  text-direction: ltr !important;
+}
+
+/* Ensure proper text input behavior */
+.rich-text-editor [contenteditable]:focus {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Fix for webkit browsers */
+.rich-text-editor [contenteditable] {
+  -webkit-writing-mode: horizontal-tb !important;
+  -webkit-text-orientation: mixed !important;
 }
