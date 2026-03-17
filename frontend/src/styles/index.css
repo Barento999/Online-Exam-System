@@ -227,3 +227,39 @@
   -webkit-writing-mode: horizontal-tb !important;
   -webkit-text-orientation: mixed !important;
 }
+
+/* Simple Rich Text Editor - Lightweight version */
+.simple-rich-text-editor [contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+
+.simple-rich-text-editor [contenteditable]:focus:before {
+  display: none;
+}
+
+.simple-rich-text-editor [contenteditable] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: embed !important;
+  writing-mode: horizontal-tb !important;
+}
+
+.simple-rich-text-editor [contenteditable]:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.simple-rich-text-editor .prose {
+  color: hsl(var(--foreground));
+  max-width: none;
+  direction: ltr;
+}
+
+.simple-rich-text-editor .prose * {
+  direction: ltr;
+}

@@ -1,12 +1,15 @@
 import { useState } from "react";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, CheckCircle, TestTube } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertCircle, CheckCircle, TestTube, Zap } from "lucide-react";
 
 export const RichTextCursorTest = () => {
   const [testContent, setTestContent] = useState("");
+  const [simpleTestContent, setSimpleTestContent] = useState("");
   const [testResults, setTestResults] = useState([]);
 
   const runCursorTest = () => {
@@ -44,6 +47,7 @@ export const RichTextCursorTest = () => {
 
   const clearTest = () => {
     setTestContent("");
+    setSimpleTestContent("");
     setTestResults([]);
   };
 
@@ -109,26 +113,77 @@ export const RichTextCursorTest = () => {
           <CardTitle>Rich Text Editor Test Area</CardTitle>
         </CardHeader>
         <CardContent>
-          <RichTextEditor
-            value={testContent}
-            onChange={setTestContent}
-            placeholder="Click here and start typing to test cursor direction..."
-            minHeight="200px"
-            maxHeight="400px"
-            toolbar="exam"
-            showWordCount={true}
-            label="Test Editor"
-          />
+          <Tabs defaultValue="simple" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="simple">
+                <Zap className="h-4 w-4 mr-2" />
+                Simple Editor (Recommended)
+              </TabsTrigger>
+              <TabsTrigger value="advanced">Advanced Editor</TabsTrigger>
+            </TabsList>
 
-          {testContent && (
-            <div className="mt-4 p-4 bg-muted rounded-lg">
-              <h4 className="font-medium mb-2">Current Content:</h4>
-              <div
-                className="text-sm prose prose-sm max-w-none"
-                dangerouslySetInnerHTML={{ __html: testContent }}
+            <TabsContent value="simple" className="space-y-4">
+              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  <strong>Recommended:</strong> This is a lightweight version
+                  with essential cursor direction fixes and better performance.
+                  Use this if you experience any issues.
+                </p>
+              </div>
+
+              <SimpleRichTextEditor
+                value={simpleTestContent}
+                onChange={setSimpleTestContent}
+                placeholder="Click here and start typing to test cursor direction..."
+                minHeight="200px"
+                maxHeight="400px"
+                toolbar="exam"
+                showWordCount={true}
+                label="Simple Rich Text Editor"
               />
-            </div>
-          )}
+
+              {simpleTestContent && (
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <h4 className="font-medium mb-2">Current Content:</h4>
+                  <div
+                    className="text-sm prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: simpleTestContent }}
+                  />
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="advanced" className="space-y-4">
+              <div className="bg-yellow-50 dark:bg-yellow-950 border border-yellow-200 dark:border-yellow-800 rounded-lg p-3">
+                <p className="text-sm text-yellow-800 dark:text-yellow-200">
+                  <strong>Note:</strong> This is the full-featured editor with
+                  comprehensive cursor fixes. If you experience performance
+                  issues, try the Simple Editor.
+                </p>
+              </div>
+
+              <RichTextEditor
+                value={testContent}
+                onChange={setTestContent}
+                placeholder="Click here and start typing to test cursor direction..."
+                minHeight="200px"
+                maxHeight="400px"
+                toolbar="exam"
+                showWordCount={true}
+                label="Advanced Rich Text Editor"
+              />
+
+              {testContent && (
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <h4 className="font-medium mb-2">Current Content:</h4>
+                  <div
+                    className="text-sm prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: testContent }}
+                  />
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 

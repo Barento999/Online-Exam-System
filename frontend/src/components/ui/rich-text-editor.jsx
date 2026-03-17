@@ -58,22 +58,33 @@ export const RichTextEditor = ({
       // Enable rich text editing
       editorRef.current.contentEditable = !disabled;
 
+      // Track if we're currently setting direction properties to prevent infinite loops
+      let isSettingDirection = false;
+
       // Force text direction to left-to-right with comprehensive settings
       const setDirectionProperties = () => {
-        editorRef.current.dir = "ltr";
-        editorRef.current.style.direction = "ltr";
-        editorRef.current.style.textAlign = "left";
-        editorRef.current.style.unicodeBidi = "embed";
-        editorRef.current.style.writingMode = "horizontal-tb";
-        editorRef.current.setAttribute("dir", "ltr");
+        if (isSettingDirection || !editorRef.current) return;
 
-        // Force all child elements to maintain LTR direction
-        const allElements = editorRef.current.querySelectorAll("*");
-        allElements.forEach((el) => {
-          el.style.direction = "ltr";
-          el.style.textAlign = "left";
-          el.setAttribute("dir", "ltr");
-        });
+        isSettingDirection = true;
+
+        try {
+          editorRef.current.dir = "ltr";
+          editorRef.current.style.direction = "ltr";
+          editorRef.current.style.textAlign = "left";
+          editorRef.current.style.unicodeBidi = "embed";
+          editorRef.current.style.writingMode = "horizontal-tb";
+          editorRef.current.setAttribute("dir", "ltr");
+
+          // Force all child elements to maintain LTR direction
+          const allElements = editorRef.current.querySelectorAll("*");
+          allElements.forEach((el) => {
+            el.style.direction = "ltr";
+            el.style.textAlign = "left";
+            el.setAttribute("dir", "ltr");
+          });
+        } finally {
+          isSettingDirection = false;
+        }
       };
 
       // Set initial content
@@ -84,16 +95,46 @@ export const RichTextEditor = ({
       // Apply direction settings
       setDirectionProperties();
 
-      // Set up MutationObserver to watch for DOM changes
-      const observer = new MutationObserver(() => {
-        setDirectionProperties();
+      // Throttled version of setDirectionProperties to prevent excessive calls
+      let directionTimeout = null;
+      const throttledSetDirection = () => {
+        if (directionTimeout) return;
+        directionTimeout = setTimeout(() => {
+          setDirectionProperties();
+          directionTimeout = null;
+        }, 100); // Throttle to max once per 100ms
+      };
+
+      // Set up MutationObserver to watch for DOM changes (but throttled)
+      const observer = new MutationObserver((mutations) => {
+        // Only react to mutations that aren't caused by our direction setting
+        if (isSettingDirection) return;
+
+        // Check if any mutation actually needs direction fixing
+        const needsDirectionFix = mutations.some((mutation) => {
+          if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
+            return true; // New nodes might need direction
+          }
+          if (
+            mutation.type === "attributes" &&
+            mutation.attributeName === "dir" &&
+            mutation.target.getAttribute("dir") !== "ltr"
+          ) {
+            return true; // Direction was changed to something other than ltr
+          }
+          return false;
+        });
+
+        if (needsDirectionFix) {
+          throttledSetDirection();
+        }
       });
 
       observer.observe(editorRef.current, {
         childList: true,
         subtree: true,
         attributes: true,
-        attributeFilter: ["dir", "style"],
+        attributeFilter: ["dir"],
       });
 
       // Add paste handler to clean up pasted content
@@ -102,7 +143,7 @@ export const RichTextEditor = ({
         const text = e.clipboardData.getData("text/plain");
         document.execCommand("insertText", false, text);
         setTimeout(() => {
-          setDirectionProperties();
+          throttledSetDirection();
           handleContentChange();
         }, 0);
       };
@@ -116,22 +157,9 @@ export const RichTextEditor = ({
           editorRef.current.innerHTML = "";
         }
 
-        // Ensure cursor direction is correct on focus
+        // Simple direction setting on focus (no cursor manipulation)
         setTimeout(() => {
           setDirectionProperties();
-
-          // Force cursor to start position
-          const selection = window.getSelection();
-          const range = document.createRange();
-
-          if (editorRef.current.childNodes.length > 0) {
-            range.setStart(editorRef.current.childNodes[0], 0);
-          } else {
-            range.setStart(editorRef.current, 0);
-          }
-          range.collapse(true);
-          selection.removeAllRanges();
-          selection.addRange(range);
         }, 0);
       };
 
@@ -146,24 +174,22 @@ export const RichTextEditor = ({
         handleContentChange();
       };
 
-      // Add input handler to maintain direction on content changes
+      // Add input handler to maintain direction on content changes (throttled)
       const handleInput = () => {
-        setTimeout(() => {
-          setDirectionProperties();
-        }, 0);
+        throttledSetDirection();
         handleContentChange();
       };
 
-      // Add selection change handler to fix cursor direction
+      // Simplified selection change handler (throttled)
+      let selectionTimeout = null;
       const handleSelectionChange = () => {
-        setTimeout(() => {
-          if (
-            editorRef.current &&
-            document.activeElement === editorRef.current
-          ) {
+        if (selectionTimeout) return;
+        if (editorRef.current && document.activeElement === editorRef.current) {
+          selectionTimeout = setTimeout(() => {
             setDirectionProperties();
-          }
-        }, 0);
+            selectionTimeout = null;
+          }, 200); // Less frequent than other handlers
+        }
       };
 
       editorRef.current.addEventListener("paste", handlePaste);
@@ -174,6 +200,8 @@ export const RichTextEditor = ({
 
       return () => {
         observer.disconnect();
+        if (directionTimeout) clearTimeout(directionTimeout);
+        if (selectionTimeout) clearTimeout(selectionTimeout);
         document.removeEventListener("selectionchange", handleSelectionChange);
         if (editorRef.current) {
           editorRef.current.removeEventListener("paste", handlePaste);
@@ -243,21 +271,11 @@ export const RichTextEditor = ({
         console.warn("Command execution failed:", command, error);
       }
 
-      // Update content and maintain direction after command
+      // Simple direction maintenance after command (no excessive DOM manipulation)
       setTimeout(() => {
-        // Ensure direction is maintained after formatting
         if (editorRef.current) {
           editorRef.current.dir = "ltr";
           editorRef.current.style.direction = "ltr";
-          editorRef.current.style.textAlign = "left";
-          editorRef.current.style.unicodeBidi = "embed";
-
-          // Apply direction to all child elements
-          const allElements = editorRef.current.querySelectorAll("*");
-          allElements.forEach((el) => {
-            el.style.direction = "ltr";
-            el.setAttribute("dir", "ltr");
-          });
         }
         handleContentChange();
       }, 0);
@@ -451,31 +469,21 @@ export const RichTextEditor = ({
                       break;
                   }
                 }
-
-                // Ensure direction is maintained on key input
-                setTimeout(() => {
-                  if (editorRef.current) {
-                    editorRef.current.dir = "ltr";
-                    editorRef.current.style.direction = "ltr";
-                    editorRef.current.style.textAlign = "left";
-                  }
-                }, 0);
               }}
               onKeyUp={(e) => {
-                // Additional cursor direction fix on key up
-                setTimeout(() => {
-                  if (editorRef.current) {
-                    const selection = window.getSelection();
-                    if (selection.rangeCount > 0) {
-                      const range = selection.getRangeAt(0);
-                      // Ensure the cursor is positioned correctly
-                      if (range.collapsed) {
-                        editorRef.current.dir = "ltr";
-                        editorRef.current.style.direction = "ltr";
-                      }
+                // Minimal cursor direction fix on key up (only for special keys)
+                if (
+                  e.key === "Enter" ||
+                  e.key === "Backspace" ||
+                  e.key === "Delete"
+                ) {
+                  setTimeout(() => {
+                    if (editorRef.current) {
+                      editorRef.current.dir = "ltr";
+                      editorRef.current.style.direction = "ltr";
                     }
-                  }
-                }, 0);
+                  }, 0);
+                }
               }}
               data-placeholder={placeholder}
               suppressContentEditableWarning={true}
