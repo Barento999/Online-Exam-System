@@ -129,13 +129,39 @@ export const RichTextEditor = ({
         e.preventDefault();
         const text = e.clipboardData.getData("text/plain");
         document.execCommand("insertText", false, text);
+        handleContentChange();
+      };
+
+      // Add focus handler to manage placeholder
+      const handleFocus = () => {
+        if (
+          editorRef.current.innerHTML === "" ||
+          editorRef.current.innerHTML === "<br>"
+        ) {
+          editorRef.current.innerHTML = "";
+        }
+      };
+
+      // Add blur handler to manage empty state
+      const handleBlur = () => {
+        if (
+          editorRef.current.innerHTML === "" ||
+          editorRef.current.innerHTML === "<br>"
+        ) {
+          editorRef.current.innerHTML = "";
+        }
+        handleContentChange();
       };
 
       editorRef.current.addEventListener("paste", handlePaste);
+      editorRef.current.addEventListener("focus", handleFocus);
+      editorRef.current.addEventListener("blur", handleBlur);
 
       return () => {
         if (editorRef.current) {
           editorRef.current.removeEventListener("paste", handlePaste);
+          editorRef.current.removeEventListener("focus", handleFocus);
+          editorRef.current.removeEventListener("blur", handleBlur);
         }
       };
     }
@@ -151,7 +177,17 @@ export const RichTextEditor = ({
   const handleContentChange = useCallback(() => {
     if (!editorRef.current) return;
 
-    const newContent = editorRef.current.innerHTML;
+    let newContent = editorRef.current.innerHTML;
+
+    // Clean up empty content
+    if (
+      newContent === "<br>" ||
+      newContent === "<div><br></div>" ||
+      newContent.trim() === ""
+    ) {
+      newContent = "";
+      editorRef.current.innerHTML = "";
+    }
 
     // Only update if content actually changed
     if (newContent !== content) {
@@ -498,8 +534,9 @@ export const RichTextEditor = ({
               ref={editorRef}
               contentEditable={!disabled}
               className={cn(
-                "p-4 outline-none overflow-auto prose prose-sm max-w-none relative",
+                "p-4 outline-none overflow-auto min-h-[inherit]",
                 "focus:ring-0 focus:outline-none",
+                "prose prose-sm max-w-none",
                 isFullscreen && "flex-1",
                 disabled && "cursor-not-allowed",
               )}
@@ -508,7 +545,6 @@ export const RichTextEditor = ({
                 maxHeight: isFullscreen ? "auto" : maxHeight,
               }}
               onInput={handleContentChange}
-              onBlur={handleContentChange}
               onKeyDown={(e) => {
                 // Handle keyboard shortcuts
                 if (e.ctrlKey || e.metaKey) {

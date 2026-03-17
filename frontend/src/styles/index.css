@@ -8,14 +8,21 @@
   color: hsl(var(--muted-foreground));
   pointer-events: none;
   position: absolute;
+  top: 1rem;
+  left: 1rem;
 }
 
 .rich-text-editor [contenteditable]:focus:before {
   display: none;
 }
 
+.rich-text-editor [contenteditable] {
+  min-height: inherit;
+}
+
 .rich-text-editor .prose {
   color: hsl(var(--foreground));
+  max-width: none;
 }
 
 .rich-text-editor .prose h1,
@@ -25,15 +32,34 @@
 .rich-text-editor .prose h5,
 .rich-text-editor .prose h6 {
   color: hsl(var(--foreground));
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.rich-text-editor .prose p {
+  margin-top: 0.25rem;
+  margin-bottom: 0.25rem;
 }
 
 .rich-text-editor .prose strong {
   color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.rich-text-editor .prose em {
+  font-style: italic;
+}
+
+.rich-text-editor .prose u {
+  text-decoration: underline;
 }
 
 .rich-text-editor .prose blockquote {
-  border-left-color: hsl(var(--border));
+  border-left: 4px solid hsl(var(--border));
   color: hsl(var(--muted-foreground));
+  padding-left: 1rem;
+  margin: 0.5rem 0;
+  font-style: italic;
 }
 
 .rich-text-editor .prose code {
@@ -41,19 +67,93 @@
   color: hsl(var(--foreground));
   padding: 0.125rem 0.25rem;
   border-radius: 0.25rem;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo,
+    monospace;
 }
 
 .rich-text-editor .prose pre {
   background-color: hsl(var(--muted));
   color: hsl(var(--foreground));
   border: 1px solid hsl(var(--border));
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+  font-family:
+    ui-monospace, SFMono-Regular, "SF Mono", Consolas, "Liberation Mono", Menlo,
+    monospace;
 }
 
 .rich-text-editor .prose a {
   color: hsl(var(--primary));
+  text-decoration: underline;
 }
 
 .rich-text-editor .prose a:hover {
   color: hsl(var(--primary));
   opacity: 0.8;
+}
+
+.rich-text-editor .prose ul,
+.rich-text-editor .prose ol {
+  padding-left: 1.5rem;
+  margin: 0.5rem 0;
+}
+
+.rich-text-editor .prose li {
+  margin: 0.25rem 0;
+}
+
+/* Toolbar styling */
+.rich-text-editor .toolbar {
+  border-bottom: 1px solid hsl(var(--border));
+  background-color: hsl(var(--muted) / 0.3);
+}
+
+/* Focus styles */
+.rich-text-editor [contenteditable]:focus {
+  outline: none;
+  box-shadow: none;
+}
+/* Additional Rich Text Editor Improvements */
+.rich-text-editor [contenteditable] {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+
+.rich-text-editor [contenteditable]:empty {
+  position: relative;
+}
+
+.rich-text-editor [contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0.6;
+}
+
+.rich-text-editor [contenteditable]:focus:empty:before {
+  opacity: 0.4;
+}
+
+/* Ensure proper line height and spacing */
+.rich-text-editor [contenteditable] * {
+  line-height: 1.6;
+}
+
+/* Style for selected text */
+.rich-text-editor [contenteditable]::selection {
+  background-color: hsl(var(--primary) / 0.2);
+}
+
+/* Toolbar button active states */
+.rich-text-editor .toolbar button:hover {
+  background-color: hsl(var(--muted));
+}
+
+.rich-text-editor .toolbar button:active {
+  background-color: hsl(var(--muted) / 0.8);
 }
