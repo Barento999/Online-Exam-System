@@ -2,15 +2,11 @@ import { useState } from "react";
 import { MultiStepForm } from "./MultiStepForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
-import { ModernRichTextEditor } from "@/components/ui/modern-rich-text-editor";
-import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
-import { LTRTextEditor } from "@/components/ui/ltr-text-editor";
-import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import {
   Select,
