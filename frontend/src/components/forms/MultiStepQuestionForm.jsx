@@ -153,13 +153,6 @@ const QuestionDetailsStep = ({
           error={getFieldError("questionText")}
           label={null}
         />
-          label=""
-          required={true}
-          error={
-            hasFieldError("questionText") ? getFieldError("questionText") : null
-          }
-          showWordCount={true}
-        />
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -509,12 +502,13 @@ const AnswerOptionsStep = ({
         <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="sampleAnswer">Sample Answer</Label>
-            <Textarea
-              id="sampleAnswer"
+            <SimpleTextareaEditor
               value={data.sampleAnswer || ""}
-              onChange={(e) => updateData({ sampleAnswer: e.target.value })}
-              placeholder="Provide a sample correct answer..."
-              rows={questionType === "essay" ? 6 : 3}
+              onChange={(value) => updateData({ sampleAnswer: value })}
+              placeholder="Provide a sample correct answer... (Use markdown: **bold**, *italic*)"
+              minHeight={questionType === "essay" ? "180px" : "100px"}
+              showWordCount={true}
+              label={null}
             />
           </div>
 

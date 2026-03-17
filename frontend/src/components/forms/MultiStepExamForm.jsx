@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { MultiStepForm } from "./MultiStepForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -114,9 +114,6 @@ const BasicInfoStep = ({
           maxHeight="300px"
           showWordCount={true}
           label={null}
-        />
-          label=""
-          showWordCount={true}
         />
       </div>
 
@@ -656,15 +653,17 @@ const QuestionsStep = ({ data, updateData }) => {
                     <div className="grid md:grid-cols-4 gap-4">
                       <div className="md:col-span-3">
                         <Label>Question Text</Label>
-                        <Textarea
+                        <SimpleTextareaEditor
                           value={question.question}
-                          onChange={(e) =>
+                          onChange={(value) =>
                             updateQuestion(question.id, {
-                              question: e.target.value,
+                              question: value,
                             })
                           }
-                          placeholder="Enter your question here..."
-                          rows={3}
+                          placeholder="Enter your question here... (Use markdown: **bold**, *italic*)"
+                          minHeight="100px"
+                          showWordCount={false}
+                          label={null}
                         />
                       </div>
                       <div>
@@ -716,15 +715,17 @@ const QuestionsStep = ({ data, updateData }) => {
 
                     <div>
                       <Label>Explanation (Optional)</Label>
-                      <Textarea
+                      <SimpleTextareaEditor
                         value={question.explanation}
-                        onChange={(e) =>
+                        onChange={(value) =>
                           updateQuestion(question.id, {
-                            explanation: e.target.value,
+                            explanation: value,
                           })
                         }
-                        placeholder="Explain the correct answer..."
-                        rows={2}
+                        placeholder="Explain the correct answer... (Use markdown: **bold**, *italic*)"
+                        minHeight="80px"
+                        showWordCount={false}
+                        label={null}
                       />
                     </div>
                   </CardContent>

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MultiStepForm } from "./MultiStepForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -474,12 +474,13 @@ const ProfileInfoStep = ({ data, updateData }) => {
 
       <div className="space-y-2">
         <Label htmlFor="address">Address</Label>
-        <Textarea
-          id="address"
+        <SimpleTextareaEditor
           value={data.address || ""}
-          onChange={(e) => updateData({ address: e.target.value })}
+          onChange={(value) => updateData({ address: value })}
           placeholder="Enter address"
-          rows={3}
+          minHeight="100px"
+          showWordCount={false}
+          label={null}
         />
       </div>
 

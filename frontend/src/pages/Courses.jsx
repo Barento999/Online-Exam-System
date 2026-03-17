@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
 import {
   Select,
   SelectContent,
@@ -168,13 +168,15 @@ export const Courses = () => {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="description">Description</Label>
-                  <Textarea
-                    id="description"
+                  <SimpleTextareaEditor
                     value={formData.description}
-                    onChange={(e) =>
-                      setFormData({ ...formData, description: e.target.value })
+                    onChange={(value) =>
+                      setFormData({ ...formData, description: value })
                     }
-                    required
+                    placeholder="Enter course description... (Use markdown: **bold**, *italic*)"
+                    minHeight="120px"
+                    showWordCount={true}
+                    label={null}
                   />
                 </div>
                 <div className="space-y-2">

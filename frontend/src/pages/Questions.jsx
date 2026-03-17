@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { parseMarkdown } from "@/utils/markdownParser";
@@ -455,17 +455,18 @@ export const Questions = () => {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="questionText">Question Text</Label>
-                    <Textarea
-                      id="questionText"
+                    <SimpleTextareaEditor
                       value={formData.questionText}
-                      onChange={(e) =>
+                      onChange={(value) =>
                         setFormData({
                           ...formData,
-                          questionText: e.target.value,
+                          questionText: value,
                         })
                       }
-                      required
-                      rows={3}
+                      placeholder="Enter your question... (Use markdown: **bold**, *italic*)"
+                      minHeight="120px"
+                      showWordCount={true}
+                      label={null}
                     />
                   </div>
 
