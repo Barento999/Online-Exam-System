@@ -350,3 +350,27 @@ body {
 .forced-ltr-editor .prose * {
   direction: ltr !important;
 }
+
+/* Hybrid LTR Editor - Ultimate solution */
+.hybrid-ltr-editor textarea {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: normal !important;
+  writing-mode: horizontal-tb !important;
+  caret-color: black !important;
+}
+
+.hybrid-ltr-editor textarea:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.hybrid-ltr-editor .prose {
+  color: hsl(var(--foreground));
+  max-width: none;
+  direction: ltr !important;
+}
+
+.hybrid-ltr-editor .prose * {
+  direction: ltr !important;
+}

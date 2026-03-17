@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
-import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -140,7 +140,7 @@ const QuestionDetailsStep = ({
 
       <div className="space-y-2">
         <Label htmlFor="questionText">Question Text *</Label>
-        <RichTextEditor
+        <SimpleRichTextEditor
           value={data.questionText || ""}
           onChange={(value) => updateData({ questionText: value })}
           placeholder="Enter your question here... Use the toolbar for formatting"

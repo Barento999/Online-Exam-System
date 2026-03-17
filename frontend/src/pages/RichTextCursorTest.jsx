@@ -3,6 +3,7 @@ import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
 import { TextareaRichEditor } from "@/components/ui/textarea-rich-editor";
 import { ForcedLTREditor } from "@/components/ui/forced-ltr-editor";
+import { HybridLTREditor } from "@/components/ui/hybrid-ltr-editor";
 import { CursorDiagnostic } from "@/components/ui/cursor-diagnostic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,7 @@ import {
   Type,
   Shield,
   Search,
+  Layers,
 } from "lucide-react";
 
 export const RichTextCursorTest = () => {
@@ -23,6 +25,7 @@ export const RichTextCursorTest = () => {
   const [simpleTestContent, setSimpleTestContent] = useState("");
   const [textareaTestContent, setTextareaTestContent] = useState("");
   const [forcedTestContent, setForcedTestContent] = useState("");
+  const [hybridTestContent, setHybridTestContent] = useState("");
   const [testResults, setTestResults] = useState([]);
 
   const runCursorTest = () => {
@@ -63,6 +66,7 @@ export const RichTextCursorTest = () => {
     setSimpleTestContent("");
     setTextareaTestContent("");
     setForcedTestContent("");
+    setHybridTestContent("");
     setTestResults([]);
   };
 
@@ -128,8 +132,12 @@ export const RichTextCursorTest = () => {
           <CardTitle>Rich Text Editor Test Area</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="forced" className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
+          <Tabs defaultValue="hybrid" className="w-full">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="hybrid">
+                <Layers className="h-4 w-4 mr-2" />
+                Hybrid
+              </TabsTrigger>
               <TabsTrigger value="forced">
                 <Shield className="h-4 w-4 mr-2" />
                 Forced LTR
@@ -148,6 +156,37 @@ export const RichTextCursorTest = () => {
                 Diagnostic
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="hybrid" className="space-y-4">
+              <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
+                <p className="text-sm text-blue-800 dark:text-blue-200">
+                  <strong>Ultimate Solution:</strong> This hybrid editor uses an
+                  invisible textarea for input (guaranteed LTR cursor) with a
+                  visible div for rich text display. This should work even in
+                  RTL system environments!
+                </p>
+              </div>
+
+              <HybridLTREditor
+                value={hybridTestContent}
+                onChange={setHybridTestContent}
+                placeholder="Click here and start typing to test cursor direction..."
+                minHeight="200px"
+                maxHeight="400px"
+                showWordCount={true}
+                label="Hybrid LTR Rich Text Editor"
+              />
+
+              {hybridTestContent && (
+                <div className="mt-4 p-4 bg-muted rounded-lg">
+                  <h4 className="font-medium mb-2">Current Content:</h4>
+                  <div
+                    className="text-sm prose prose-sm max-w-none"
+                    dangerouslySetInnerHTML={{ __html: hybridTestContent }}
+                  />
+                </div>
+              )}
+            </TabsContent>
 
             <TabsContent value="forced" className="space-y-4">
               <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
