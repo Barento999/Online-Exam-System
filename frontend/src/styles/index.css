@@ -18,11 +18,15 @@
 
 .rich-text-editor [contenteditable] {
   min-height: inherit;
+  direction: ltr; /* Force left-to-right text direction */
+  text-align: left; /* Force left alignment */
+  unicode-bidi: embed; /* Ensure proper text direction */
 }
 
 .rich-text-editor .prose {
   color: hsl(var(--foreground));
   max-width: none;
+  direction: ltr; /* Force left-to-right text direction */
 }
 
 .rich-text-editor .prose h1,
@@ -34,11 +38,13 @@
   color: hsl(var(--foreground));
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
+  direction: ltr;
 }
 
 .rich-text-editor .prose p {
   margin-top: 0.25rem;
   margin-bottom: 0.25rem;
+  direction: ltr;
 }
 
 .rich-text-editor .prose strong {
@@ -98,10 +104,12 @@
 .rich-text-editor .prose ol {
   padding-left: 1.5rem;
   margin: 0.5rem 0;
+  direction: ltr;
 }
 
 .rich-text-editor .prose li {
   margin: 0.25rem 0;
+  direction: ltr;
 }
 
 /* Toolbar styling */
@@ -142,6 +150,7 @@
 /* Ensure proper line height and spacing */
 .rich-text-editor [contenteditable] * {
   line-height: 1.6;
+  direction: ltr;
 }
 
 /* Style for selected text */
@@ -156,4 +165,38 @@
 
 .rich-text-editor .toolbar button:active {
   background-color: hsl(var(--muted) / 0.8);
+}
+/* Fix cursor direction issues */
+.rich-text-editor [contenteditable] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: embed !important;
+  writing-mode: horizontal-tb !important;
+  caret-color: hsl(var(--foreground)) !important;
+}
+
+/* Ensure all child elements maintain left-to-right direction */
+.rich-text-editor [contenteditable] *,
+.rich-text-editor [contenteditable] p,
+.rich-text-editor [contenteditable] div,
+.rich-text-editor [contenteditable] span {
+  direction: ltr !important;
+  text-align: start !important;
+  unicode-bidi: embed !important;
+}
+
+/* Force cursor to appear correctly */
+.rich-text-editor [contenteditable]:focus {
+  direction: ltr !important;
+  text-align: left !important;
+  caret-color: hsl(var(--foreground)) !important;
+}
+
+/* Override any inherited RTL styles */
+.rich-text-editor {
+  direction: ltr !important;
+}
+
+.rich-text-editor * {
+  direction: ltr !important;
 }

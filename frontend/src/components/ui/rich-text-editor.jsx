@@ -3,36 +3,14 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Bold,
   Italic,
   Underline,
-  Strikethrough,
   AlignLeft,
   AlignCenter,
   AlignRight,
-  AlignJustify,
   List,
   ListOrdered,
-  Quote,
-  Link,
-  Image,
-  Code,
-  Undo,
-  Redo,
-  Type,
-  Palette,
   Eye,
   EyeOff,
   Maximize2,
@@ -80,6 +58,12 @@ export const RichTextEditor = ({
       // Enable rich text editing
       editorRef.current.contentEditable = !disabled;
 
+      // Force text direction to left-to-right
+      editorRef.current.dir = "ltr";
+      editorRef.current.style.direction = "ltr";
+      editorRef.current.style.textAlign = "left";
+      editorRef.current.style.unicodeBidi = "embed";
+
       // Set initial content
       if (value) {
         editorRef.current.innerHTML = value;
@@ -101,6 +85,10 @@ export const RichTextEditor = ({
         ) {
           editorRef.current.innerHTML = "";
         }
+        // Ensure cursor direction is correct on focus
+        editorRef.current.style.direction = "ltr";
+        editorRef.current.style.textAlign = "left";
+        editorRef.current.dir = "ltr";
       };
 
       // Add blur handler to manage empty state
@@ -222,41 +210,6 @@ export const RichTextEditor = ({
       { command: "justifyRight", icon: AlignRight, title: "Align Right" },
     ];
 
-    const fullButtons = [
-      ...basicButtons,
-      { command: "strikeThrough", icon: Strikethrough, title: "Strikethrough" },
-      { type: "separator" },
-      { command: "justifyLeft", icon: AlignLeft, title: "Align Left" },
-      { command: "justifyCenter", icon: AlignCenter, title: "Align Center" },
-      { command: "justifyRight", icon: AlignRight, title: "Align Right" },
-      { command: "justifyFull", icon: AlignJustify, title: "Justify" },
-      { type: "separator" },
-      { command: "insertUnorderedList", icon: List, title: "Bullet List" },
-      {
-        command: "insertOrderedList",
-        icon: ListOrdered,
-        title: "Numbered List",
-      },
-      {
-        command: "formatBlock",
-        icon: Quote,
-        title: "Quote",
-        value: "blockquote",
-      },
-      { type: "separator" },
-      { type: "custom", icon: Link, title: "Insert Link", action: insertLink },
-      {
-        type: "custom",
-        icon: Image,
-        title: "Insert Image",
-        action: insertImage,
-      },
-      { command: "formatBlock", icon: Code, title: "Code Block", value: "pre" },
-      { type: "separator" },
-      { command: "undo", icon: Undo, title: "Undo" },
-      { command: "redo", icon: Redo, title: "Redo" },
-    ];
-
     switch (toolbar) {
       case "basic":
         return basicButtons;
@@ -265,7 +218,7 @@ export const RichTextEditor = ({
       case "minimal":
         return basicButtons.slice(0, 2);
       default:
-        return fullButtons;
+        return examButtons; // Default to exam toolbar
     }
   };
 
@@ -392,6 +345,9 @@ export const RichTextEditor = ({
               style={{
                 minHeight: isFullscreen ? "auto" : minHeight,
                 maxHeight: isFullscreen ? "auto" : maxHeight,
+                direction: "ltr", // Force left-to-right
+                textAlign: "left", // Force left alignment
+                unicodeBidi: "embed", // Ensure proper text direction
               }}
               onInput={handleContentChange}
               onKeyDown={(e) => {
@@ -409,15 +365,6 @@ export const RichTextEditor = ({
                     case "u":
                       e.preventDefault();
                       executeCommand("underline");
-                      break;
-                    case "z":
-                      if (e.shiftKey) {
-                        e.preventDefault();
-                        executeCommand("redo");
-                      } else {
-                        e.preventDefault();
-                        executeCommand("undo");
-                      }
                       break;
                   }
                 }
