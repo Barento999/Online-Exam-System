@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
-import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import {
   Select,
@@ -139,62 +138,22 @@ const QuestionDetailsStep = ({
         </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="questionText">Question Text *</Label>
-          <div className="flex items-center gap-2">
-            <Button
-              type="button"
-              variant={data.editorType === "rich" ? "default" : "outline"}
-              size="sm"
-              onClick={() => updateData({ editorType: "rich" })}>
-              Rich Text
-            </Button>
-            <Button
-              type="button"
-              variant={data.editorType === "markdown" ? "default" : "outline"}
-              size="sm"
-              onClick={() => updateData({ editorType: "markdown" })}>
-              Markdown
-            </Button>
-          </div>
-        </div>
-
-        {data.editorType === "rich" ? (
-          <RichTextEditor
-            value={data.questionText || ""}
-            onChange={(value) => updateData({ questionText: value })}
-            placeholder="Enter your question here... (Rich text formatting available)"
-            minHeight="150px"
-            maxHeight="250px"
-            label=""
-            required={true}
-            error={
-              hasFieldError("questionText")
-                ? getFieldError("questionText")
-                : null
-            }
-            toolbar="basic"
-            showWordCount={true}
-          />
-        ) : (
-          <MarkdownEditor
-            value={data.questionText || ""}
-            onChange={(value) => updateData({ questionText: value })}
-            placeholder="Enter your question here... (Markdown supported for formatting)"
-            minHeight="150px"
-            maxHeight="250px"
-            label=""
-            required={true}
-            error={
-              hasFieldError("questionText")
-                ? getFieldError("questionText")
-                : null
-            }
-            showPreview={true}
-            showHelp={true}
-          />
-        )}
+      <div className="space-y-2">
+        <Label htmlFor="questionText">Question Text *</Label>
+        <RichTextEditor
+          value={data.questionText || ""}
+          onChange={(value) => updateData({ questionText: value })}
+          placeholder="Enter your question here... Use the toolbar for formatting"
+          minHeight="150px"
+          maxHeight="250px"
+          label=""
+          required={true}
+          error={
+            hasFieldError("questionText") ? getFieldError("questionText") : null
+          }
+          toolbar="exam"
+          showWordCount={true}
+        />
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
@@ -908,10 +867,7 @@ export const MultiStepQuestionForm = ({
       steps={steps}
       onSubmit={handleSubmit}
       onCancel={onCancel}
-      initialData={{
-        editorType: "rich", // Default to rich text editor
-        ...initialData,
-      }}
+      initialData={initialData}
       title="Create New Question"
       subtitle="Follow the steps to create a comprehensive question"
       showProgress={true}

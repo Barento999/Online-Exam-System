@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import {
   Select,
   SelectContent,
@@ -101,16 +102,16 @@ const BasicInfoStep = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description</Label>
-        <MarkdownEditor
+        <Label htmlFor="description">Description & Instructions</Label>
+        <RichTextEditor
           value={data.description || ""}
           onChange={(value) => updateData({ description: value })}
-          placeholder="Enter exam description and instructions (Markdown supported)"
+          placeholder="Enter exam description and instructions for students..."
           minHeight="120px"
           maxHeight="200px"
           label=""
-          showPreview={true}
-          showHelp={true}
+          toolbar="exam"
+          showWordCount={true}
         />
       </div>
 

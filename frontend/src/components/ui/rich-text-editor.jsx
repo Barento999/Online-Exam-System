@@ -313,6 +313,30 @@ export const RichTextEditor = ({
       { command: "underline", icon: Underline, title: "Underline" },
     ];
 
+    const examButtons = [
+      { command: "bold", icon: Bold, title: "Bold" },
+      { command: "italic", icon: Italic, title: "Italic" },
+      { command: "underline", icon: Underline, title: "Underline" },
+      { command: "strikeThrough", icon: Strikethrough, title: "Strikethrough" },
+      { type: "separator" },
+      { command: "insertUnorderedList", icon: List, title: "Bullet List" },
+      {
+        command: "insertOrderedList",
+        icon: ListOrdered,
+        title: "Numbered List",
+      },
+      { type: "separator" },
+      { command: "justifyLeft", icon: AlignLeft, title: "Align Left" },
+      { command: "justifyCenter", icon: AlignCenter, title: "Align Center" },
+      { command: "justifyRight", icon: AlignRight, title: "Align Right" },
+      { type: "separator" },
+      { type: "custom", icon: Link, title: "Insert Link", action: insertLink },
+      { command: "formatBlock", icon: Code, title: "Code Block", value: "pre" },
+      { type: "separator" },
+      { command: "undo", icon: Undo, title: "Undo" },
+      { command: "redo", icon: Redo, title: "Redo" },
+    ];
+
     const fullButtons = [
       ...basicButtons,
       { command: "strikeThrough", icon: Strikethrough, title: "Strikethrough" },
@@ -351,6 +375,8 @@ export const RichTextEditor = ({
     switch (toolbar) {
       case "basic":
         return basicButtons;
+      case "exam":
+        return examButtons;
       case "minimal":
         return basicButtons.slice(0, 2);
       default:

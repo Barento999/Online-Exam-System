@@ -120,14 +120,31 @@ export const RichTextDemo = () => {
                     />
                   </div>
 
+                  {/* Exam Editor */}
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">
+                      Exam Editor (Recommended for Questions)
+                    </h3>
+                    <RichTextEditor
+                      value={examInstructions}
+                      onChange={setExamInstructions}
+                      label="Question Text"
+                      placeholder="Enter your exam question here..."
+                      minHeight="150px"
+                      toolbar="exam"
+                      allowFullscreen={false}
+                      showWordCount={true}
+                    />
+                  </div>
+
                   {/* Minimal Editor */}
                   <div className="space-y-4">
                     <h3 className="text-lg font-semibold">Minimal Editor</h3>
                     <RichTextEditor
-                      value={examInstructions}
-                      onChange={setExamInstructions}
-                      label="Exam Instructions"
-                      placeholder="Enter exam instructions..."
+                      value={blogPost}
+                      onChange={setBlogPost}
+                      label="Simple Text"
+                      placeholder="Enter simple text..."
                       minHeight="100px"
                       toolbar="minimal"
                       allowFullscreen={false}
