@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
+import { LTRTextEditor } from "@/components/ui/ltr-text-editor";
 import {
   Select,
   SelectContent,
@@ -103,14 +104,13 @@ const BasicInfoStep = ({
 
       <div className="space-y-2">
         <Label htmlFor="description">Description & Instructions</Label>
-        <SimpleRichTextEditor
+        <LTRTextEditor
           value={data.description || ""}
           onChange={(value) => updateData({ description: value })}
           placeholder="Enter exam description and instructions for students..."
           minHeight="120px"
           maxHeight="200px"
           label=""
-          toolbar="exam"
           showWordCount={true}
         />
       </div>

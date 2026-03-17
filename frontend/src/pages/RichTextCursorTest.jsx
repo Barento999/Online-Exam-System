@@ -4,6 +4,7 @@ import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
 import { TextareaRichEditor } from "@/components/ui/textarea-rich-editor";
 import { ForcedLTREditor } from "@/components/ui/forced-ltr-editor";
 import { HybridLTREditor } from "@/components/ui/hybrid-ltr-editor";
+import { LTRTextEditor } from "@/components/ui/ltr-text-editor";
 import { CursorDiagnostic } from "@/components/ui/cursor-diagnostic";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -26,6 +27,7 @@ export const RichTextCursorTest = () => {
   const [textareaTestContent, setTextareaTestContent] = useState("");
   const [forcedTestContent, setForcedTestContent] = useState("");
   const [hybridTestContent, setHybridTestContent] = useState("");
+  const [ltrTestContent, setLtrTestContent] = useState("");
   const [testResults, setTestResults] = useState([]);
 
   const runCursorTest = () => {
@@ -132,8 +134,12 @@ export const RichTextCursorTest = () => {
           <CardTitle>Rich Text Editor Test Area</CardTitle>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="hybrid" className="w-full">
-            <TabsList className="grid w-full grid-cols-6">
+          <Tabs defaultValue="ltr" className="w-full">
+            <TabsList className="grid w-full grid-cols-7">
+              <TabsTrigger value="ltr">
+                <CheckCircle className="h-4 w-4 mr-2" />
+                LTR Editor
+              </TabsTrigger>
               <TabsTrigger value="hybrid">
                 <Layers className="h-4 w-4 mr-2" />
                 Hybrid
@@ -156,6 +162,27 @@ export const RichTextCursorTest = () => {
                 Diagnostic
               </TabsTrigger>
             </TabsList>
+
+            <TabsContent value="ltr" className="space-y-4">
+              <div className="bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg p-3">
+                <p className="text-sm text-green-800 dark:text-green-200">
+                  <strong>Latest Solution:</strong> This LTR Text Editor uses
+                  aggressive LTR enforcement with continuous monitoring and
+                  interval-based direction checking. It should fix the cursor
+                  direction issue completely!
+                </p>
+              </div>
+
+              <LTRTextEditor
+                value={ltrTestContent}
+                onChange={setLtrTestContent}
+                placeholder="Click here and start typing to test cursor direction..."
+                minHeight="200px"
+                maxHeight="400px"
+                showWordCount={true}
+                label="LTR Text Editor (Latest Fix)"
+              />
+            </TabsContent>
 
             <TabsContent value="hybrid" className="space-y-4">
               <div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3">

@@ -200,10 +200,11 @@ export const RichTextEditor = ({
         }
       };
 
-      editorRef.current.addEventListener("paste", handlePaste);
-      editorRef.current.addEventListener("focus", handleFocus);
-      editorRef.current.addEventListener("blur", handleBlur);
-      editorRef.current.addEventListener("input", handleInput);
+      const currentEditor = editorRef.current;
+      currentEditor.addEventListener("paste", handlePaste);
+      currentEditor.addEventListener("focus", handleFocus);
+      currentEditor.addEventListener("blur", handleBlur);
+      currentEditor.addEventListener("input", handleInput);
       document.addEventListener("selectionchange", handleSelectionChange);
 
       return () => {
@@ -211,11 +212,11 @@ export const RichTextEditor = ({
         if (directionTimeout) clearTimeout(directionTimeout);
         if (selectionTimeout) clearTimeout(selectionTimeout);
         document.removeEventListener("selectionchange", handleSelectionChange);
-        if (editorRef.current) {
-          editorRef.current.removeEventListener("paste", handlePaste);
-          editorRef.current.removeEventListener("focus", handleFocus);
-          editorRef.current.removeEventListener("blur", handleBlur);
-          editorRef.current.removeEventListener("input", handleInput);
+        if (currentEditor) {
+          currentEditor.removeEventListener("paste", handlePaste);
+          currentEditor.removeEventListener("focus", handleFocus);
+          currentEditor.removeEventListener("blur", handleBlur);
+          currentEditor.removeEventListener("input", handleInput);
         }
       };
     }

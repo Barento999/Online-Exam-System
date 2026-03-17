@@ -8,6 +8,8 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { SimpleRichTextEditor } from "@/components/ui/simple-rich-text-editor";
+import { LTRTextEditor } from "@/components/ui/ltr-text-editor";
+import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import {
   Select,
   SelectContent,
@@ -20,7 +22,6 @@ import {
   HelpCircle,
   Image,
   Target,
-  Eye,
   Upload,
   X,
   Check,
@@ -140,7 +141,7 @@ const QuestionDetailsStep = ({
 
       <div className="space-y-2">
         <Label htmlFor="questionText">Question Text *</Label>
-        <SimpleRichTextEditor
+        <LTRTextEditor
           value={data.questionText || ""}
           onChange={(value) => updateData({ questionText: value })}
           placeholder="Enter your question here... Use the toolbar for formatting"
@@ -151,7 +152,6 @@ const QuestionDetailsStep = ({
           error={
             hasFieldError("questionText") ? getFieldError("questionText") : null
           }
-          toolbar="exam"
           showWordCount={true}
         />
       </div>

@@ -374,3 +374,58 @@ body {
 .hybrid-ltr-editor .prose * {
   direction: ltr !important;
 }
+
+/* LTR Text Editor - Aggressive LTR enforcement */
+.ltr-text-editor [contenteditable]:empty:before {
+  content: attr(data-placeholder);
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+
+.ltr-text-editor [contenteditable]:focus:before {
+  display: none;
+}
+
+.ltr-text-editor [contenteditable] {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: bidi-override !important;
+  writing-mode: horizontal-tb !important;
+  -webkit-writing-mode: horizontal-tb !important;
+  caret-color: hsl(var(--foreground)) !important;
+}
+
+.ltr-text-editor [contenteditable]:focus {
+  outline: none;
+  box-shadow: none;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.ltr-text-editor [contenteditable] *,
+.ltr-text-editor [contenteditable] p,
+.ltr-text-editor [contenteditable] div,
+.ltr-text-editor [contenteditable] span,
+.ltr-text-editor [contenteditable] strong,
+.ltr-text-editor [contenteditable] em,
+.ltr-text-editor [contenteditable] u,
+.ltr-text-editor [contenteditable] ul,
+.ltr-text-editor [contenteditable] ol,
+.ltr-text-editor [contenteditable] li {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: bidi-override !important;
+}
+
+.ltr-text-editor .prose {
+  color: hsl(var(--foreground));
+  max-width: none;
+  direction: ltr !important;
+}
+
+.ltr-text-editor .prose * {
+  direction: ltr !important;
+}
