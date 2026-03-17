@@ -143,13 +143,12 @@ const QuestionDetailsStep = ({
 
       <div className="space-y-2">
         <Label htmlFor="questionText">Question Text *</Label>
-        <ModernRichTextEditor
+        <SimpleTextareaEditor
           value={data.questionText || ""}
           onChange={(value) => updateData({ questionText: value })}
-          placeholder="Enter your question here..."
+          placeholder="Enter your question here... (Use markdown: **bold**, *italic*, - list)"
           minHeight="150px"
           maxHeight="300px"
-          toolbar="exam"
           showWordCount={true}
           error={getFieldError("questionText")}
           label={null}
@@ -337,13 +336,12 @@ const MediaStep = ({ data, updateData }) => {
 
       <div className="space-y-2">
         <Label htmlFor="references">References (Optional)</Label>
-        <ModernRichTextEditor
+        <SimpleTextareaEditor
           value={data.references || ""}
           onChange={(value) => updateData({ references: value })}
           placeholder="Add references, sources, or additional reading materials..."
           minHeight="100px"
           maxHeight="200px"
-          toolbar="basic"
           showWordCount={false}
           label={null}
         />

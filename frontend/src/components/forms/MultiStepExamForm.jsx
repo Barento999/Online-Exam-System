@@ -106,13 +106,12 @@ const BasicInfoStep = ({
 
       <div className="space-y-2">
         <Label htmlFor="description">Description & Instructions</Label>
-        <ModernRichTextEditor
+        <SimpleTextareaEditor
           value={data.description || ""}
           onChange={(value) => updateData({ description: value })}
-          placeholder="Enter exam description and instructions for students..."
+          placeholder="Enter exam description and instructions... (Use markdown: **bold**, *italic*, [link](url))"
           minHeight="150px"
           maxHeight="300px"
-          toolbar="full"
           showWordCount={true}
           label={null}
         />

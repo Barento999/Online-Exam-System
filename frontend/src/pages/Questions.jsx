@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { parseMarkdown } from "@/utils/markdownParser";
 import {
   Select,
   SelectContent,
@@ -645,7 +646,11 @@ export const Questions = () => {
                               </Badge>
                             </div>
                             <p className="font-medium mb-4">
-                              {question.questionText}
+                              <span
+                                dangerouslySetInnerHTML={{
+                                  __html: parseMarkdown(question.questionText),
+                                }}
+                              />
                             </p>
                             <div className="grid grid-cols-2 gap-3">
                               {["A", "B", "C", "D"].map((option) => (
