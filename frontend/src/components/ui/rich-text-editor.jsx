@@ -37,6 +37,7 @@ import {
   EyeOff,
   Maximize2,
   Minimize2,
+  AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -104,15 +105,41 @@ export const RichTextEditor = ({
   const editorRef = useRef(null);
   const containerRef = useRef(null);
 
-  // Update content when value prop changes
+  // Initialize editor content
   useEffect(() => {
-    if (value !== content) {
+    if (editorRef.current && value !== content) {
+      editorRef.current.innerHTML = value;
       setContent(value);
-      if (editorRef.current) {
-        editorRef.current.innerHTML = value;
-      }
     }
   }, [value]);
+
+  // Setup editor on mount
+  useEffect(() => {
+    if (editorRef.current) {
+      // Enable rich text editing
+      editorRef.current.contentEditable = !disabled;
+
+      // Set initial content
+      if (value) {
+        editorRef.current.innerHTML = value;
+      }
+
+      // Add paste handler to clean up pasted content
+      const handlePaste = (e) => {
+        e.preventDefault();
+        const text = e.clipboardData.getData("text/plain");
+        document.execCommand("insertText", false, text);
+      };
+
+      editorRef.current.addEventListener("paste", handlePaste);
+
+      return () => {
+        if (editorRef.current) {
+          editorRef.current.removeEventListener("paste", handlePaste);
+        }
+      };
+    }
+  }, [disabled, value]);
 
   // Calculate word and character counts
   useEffect(() => {
@@ -125,17 +152,102 @@ export const RichTextEditor = ({
     if (!editorRef.current) return;
 
     const newContent = editorRef.current.innerHTML;
-    setContent(newContent);
-    onChange?.(newContent);
-  }, [onChange]);
+
+    // Only update if content actually changed
+    if (newContent !== content) {
+      setContent(newContent);
+      onChange?.(newContent);
+    }
+  }, [onChange, content]);
 
   const executeCommand = useCallback(
     (command, value = null) => {
-      if (disabled) return;
+      if (disabled || !editorRef.current) return;
 
-      document.execCommand(command, false, value);
-      editorRef.current?.focus();
-      handleContentChange();
+      // Focus the editor first
+      editorRef.current.focus();
+
+      try {
+        // Use modern approach where possible, fallback to execCommand for compatibility
+        const selection = window.getSelection();
+        const range = selection.getRangeAt(0);
+
+        switch (command) {
+          case "bold":
+            document.execCommand("bold", false, null);
+            break;
+          case "italic":
+            document.execCommand("italic", false, null);
+            break;
+          case "underline":
+            document.execCommand("underline", false, null);
+            break;
+          case "strikeThrough":
+            document.execCommand("strikeThrough", false, null);
+            break;
+          case "justifyLeft":
+            document.execCommand("justifyLeft", false, null);
+            break;
+          case "justifyCenter":
+            document.execCommand("justifyCenter", false, null);
+            break;
+          case "justifyRight":
+            document.execCommand("justifyRight", false, null);
+            break;
+          case "justifyFull":
+            document.execCommand("justifyFull", false, null);
+            break;
+          case "insertUnorderedList":
+            document.execCommand("insertUnorderedList", false, null);
+            break;
+          case "insertOrderedList":
+            document.execCommand("insertOrderedList", false, null);
+            break;
+          case "formatBlock":
+            document.execCommand("formatBlock", false, value);
+            break;
+          case "createLink":
+            document.execCommand("createLink", false, value);
+            break;
+          case "insertImage":
+            document.execCommand("insertImage", false, value);
+            break;
+          case "undo":
+            document.execCommand("undo", false, null);
+            break;
+          case "redo":
+            document.execCommand("redo", false, null);
+            break;
+          case "fontName":
+            document.execCommand("fontName", false, value);
+            break;
+          case "fontSize":
+            // Convert px to size number for execCommand
+            const sizeMap = {
+              "12px": "1",
+              "14px": "2",
+              "16px": "3",
+              "18px": "4",
+              "20px": "5",
+              "24px": "6",
+              "32px": "7",
+            };
+            document.execCommand("fontSize", false, sizeMap[value] || "3");
+            break;
+          case "foreColor":
+            document.execCommand("foreColor", false, value);
+            break;
+          default:
+            document.execCommand(command, false, value);
+        }
+      } catch (error) {
+        console.warn("Command execution failed:", command, error);
+      }
+
+      // Update content after command
+      setTimeout(() => {
+        handleContentChange();
+      }, 0);
     },
     [disabled, handleContentChange],
   );
@@ -360,7 +472,7 @@ export const RichTextEditor = ({
 
       <div
         className={cn(
-          "border rounded-lg overflow-hidden",
+          "border rounded-lg overflow-hidden rich-text-editor",
           error && "border-red-500",
           disabled && "opacity-50 cursor-not-allowed",
           isFullscreen && "h-full flex flex-col",
@@ -386,7 +498,7 @@ export const RichTextEditor = ({
               ref={editorRef}
               contentEditable={!disabled}
               className={cn(
-                "p-4 outline-none overflow-auto prose prose-sm max-w-none",
+                "p-4 outline-none overflow-auto prose prose-sm max-w-none relative",
                 "focus:ring-0 focus:outline-none",
                 isFullscreen && "flex-1",
                 disabled && "cursor-not-allowed",
@@ -396,19 +508,41 @@ export const RichTextEditor = ({
                 maxHeight: isFullscreen ? "auto" : maxHeight,
               }}
               onInput={handleContentChange}
-              onPaste={handleContentChange}
-              onKeyUp={handleContentChange}
+              onBlur={handleContentChange}
+              onKeyDown={(e) => {
+                // Handle keyboard shortcuts
+                if (e.ctrlKey || e.metaKey) {
+                  switch (e.key) {
+                    case "b":
+                      e.preventDefault();
+                      executeCommand("bold");
+                      break;
+                    case "i":
+                      e.preventDefault();
+                      executeCommand("italic");
+                      break;
+                    case "u":
+                      e.preventDefault();
+                      executeCommand("underline");
+                      break;
+                    case "z":
+                      if (e.shiftKey) {
+                        e.preventDefault();
+                        executeCommand("redo");
+                      } else {
+                        e.preventDefault();
+                        executeCommand("undo");
+                      }
+                      break;
+                  }
+                }
+              }}
               data-placeholder={placeholder}
               suppressContentEditableWarning={true}
             />
           )}
 
-          {/* Placeholder */}
-          {!content && !disabled && (
-            <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">
-              {placeholder}
-            </div>
-          )}
+          {/* Placeholder is now handled by CSS */}
         </div>
 
         {/* Footer */}
