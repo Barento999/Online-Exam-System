@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
-import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import {
   Select,
   SelectContent,
@@ -459,16 +458,16 @@ const ProfileInfoStep = ({ data, updateData }) => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="bio">Bio/Description</Label>
-        <MarkdownEditor
+        <UnifiedTextEditor
           value={data.bio || ""}
           onChange={(value) => updateData({ bio: value })}
           placeholder="Enter a brief description about the user... (Markdown supported)"
           minHeight="120px"
           maxHeight="180px"
-          label=""
           showPreview={true}
+          showToolbar={true}
           showHelp={false}
+          label="Bio/Description"
         />
       </div>
 

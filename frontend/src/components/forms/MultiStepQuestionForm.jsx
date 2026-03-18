@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
-import { MarkdownEditor } from "@/components/ui/markdown-editor";
 import {
   Select,
   SelectContent,
@@ -292,16 +291,16 @@ const MediaStep = ({ data, updateData }) => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="hint">Hint (Optional)</Label>
-        <MarkdownEditor
+        <UnifiedTextEditor
           value={data.hint || ""}
           onChange={(value) => updateData({ hint: value })}
           placeholder="Provide a helpful hint for students... (Markdown supported)"
           minHeight="100px"
           maxHeight="150px"
-          label=""
           showPreview={true}
+          showToolbar={true}
           showHelp={false}
+          label="Hint (Optional)"
         />
         <p className="text-xs text-muted-foreground">
           This hint can be shown to students if enabled in exam settings
@@ -309,16 +308,16 @@ const MediaStep = ({ data, updateData }) => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="explanation">Explanation (Optional)</Label>
-        <MarkdownEditor
+        <UnifiedTextEditor
           value={data.explanation || ""}
           onChange={(value) => updateData({ explanation: value })}
           placeholder="Explain the correct answer and reasoning... (Markdown supported)"
           minHeight="120px"
           maxHeight="180px"
-          label=""
           showPreview={true}
+          showToolbar={true}
           showHelp={false}
+          label="Explanation (Optional)"
         />
         <p className="text-xs text-muted-foreground">
           This explanation will be shown after the question is answered
