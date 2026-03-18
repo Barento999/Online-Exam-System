@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
+import { useTableSort } from "@/hooks/useTableSort";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
+import { SortableTableHead } from "@/components/ui/sortable-table-head";
 import {
   Select,
   SelectContent,
@@ -121,6 +123,14 @@ export const Exams = () => {
     handleClearFilters,
     activeFiltersCount,
   } = useAdvancedFilter(exams, filterConfig);
+
+  // Sorting
+  const {
+    sortedData: sortedAndFilteredExams,
+    sortField,
+    sortDirection,
+    handleSort,
+  } = useTableSort(filteredExams, "startTime", "desc");
 
   const loadData = async () => {
     try {
@@ -477,17 +487,53 @@ export const Exams = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Exam Name</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Duration</TableHead>
-                    <TableHead>Total Marks</TableHead>
-                    <TableHead>Start Date</TableHead>
-                    <TableHead>Status</TableHead>
+                    <SortableTableHead
+                      field="title"
+                      label="Exam Name"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="courseName"
+                      label="Course"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="duration"
+                      label="Duration"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="totalMarks"
+                      label="Total Marks"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="startTime"
+                      label="Start Date"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="status"
+                      label="Status"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredExams.length === 0 ? (
+                  {sortedAndFilteredExams.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={7}
@@ -496,7 +542,7 @@ export const Exams = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredExams.map((exam) => (
+                    sortedAndFilteredExams.map((exam) => (
                       <TableRow key={exam._id}>
                         <TableCell className="font-medium">
                           {exam.title}

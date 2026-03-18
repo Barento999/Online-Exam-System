@@ -7,7 +7,9 @@ import { Label } from "@/components/ui/label";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
+import { useTableSort } from "@/hooks/useTableSort";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
+import { SortableTableHead } from "@/components/ui/sortable-table-head";
 import {
   Select,
   SelectContent,
@@ -117,6 +119,14 @@ export const Users = () => {
     handleClearFilters,
     activeFiltersCount,
   } = useAdvancedFilter(users, filterConfig);
+
+  // Sorting
+  const {
+    sortedData: sortedAndFilteredUsers,
+    sortField,
+    sortDirection,
+    handleSort,
+  } = useTableSort(filteredUsers, "name", "asc");
 
   useEffect(() => {
     loadUsers();
@@ -510,15 +520,39 @@ Admin User,admin@example.com,password123,admin,active`;
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
+                    <SortableTableHead
+                      field="name"
+                      label="Name"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="email"
+                      label="Email"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="role"
+                      label="Role"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="status"
+                      label="Status"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredUsers.length === 0 ? (
+                  {sortedAndFilteredUsers.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={5}
@@ -527,7 +561,7 @@ Admin User,admin@example.com,password123,admin,active`;
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredUsers.map((user) => (
+                    sortedAndFilteredUsers.map((user) => (
                       <TableRow key={user._id}>
                         <TableCell className="font-medium">
                           {user.name}

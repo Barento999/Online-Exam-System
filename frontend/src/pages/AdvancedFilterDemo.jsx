@@ -1,7 +1,9 @@
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
+import { SortableTableHead } from "@/components/ui/sortable-table-head";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
+import { useTableSort } from "@/hooks/useTableSort";
 import {
   Table,
   TableBody,
@@ -102,6 +104,13 @@ export const AdvancedFilterDemo = () => {
     activeFiltersCount,
   } = useAdvancedFilter(sampleData, filterConfig);
 
+  // Sorting
+  const { sortedData, sortField, sortDirection, handleSort } = useTableSort(
+    filteredData,
+    "name",
+    "asc",
+  );
+
   return (
     <Layout>
       <div className="space-y-6">
@@ -128,16 +137,52 @@ export const AdvancedFilterDemo = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Score</TableHead>
-                    <TableHead>Join Date</TableHead>
+                    <SortableTableHead
+                      field="name"
+                      label="Name"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="email"
+                      label="Email"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="role"
+                      label="Role"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="status"
+                      label="Status"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="score"
+                      label="Score"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
+                    <SortableTableHead
+                      field="joinDate"
+                      label="Join Date"
+                      sortField={sortField}
+                      sortDirection={sortDirection}
+                      onSort={handleSort}
+                    />
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredData.length === 0 ? (
+                  {sortedData.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={6}
@@ -146,7 +191,7 @@ export const AdvancedFilterDemo = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    filteredData.map((item) => (
+                    sortedData.map((item) => (
                       <TableRow key={item.id}>
                         <TableCell className="font-medium">
                           {item.name}
@@ -177,7 +222,7 @@ export const AdvancedFilterDemo = () => {
             </div>
 
             <div className="mt-4 text-sm text-muted-foreground">
-              Showing {filteredData.length} of {sampleData.length} results
+              Showing {sortedData.length} of {sampleData.length} results
             </div>
           </CardContent>
         </Card>
@@ -195,8 +240,10 @@ export const AdvancedFilterDemo = () => {
               <li>✓ Active filter badges with quick remove</li>
               <li>✓ Filter count indicator</li>
               <li>✓ Clear all filters button</li>
+              <li>✓ Column sorting (click headers)</li>
+              <li>✓ Sort direction indicators (↑↓)</li>
               <li>✓ Responsive design</li>
-              <li>✓ Real-time filtering</li>
+              <li>✓ Real-time filtering and sorting</li>
             </ul>
           </CardContent>
         </Card>

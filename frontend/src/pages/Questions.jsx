@@ -8,6 +8,7 @@ import { UnifiedTextEditor } from "@/components/ui/unified-text-editor";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
+import { useTableSort } from "@/hooks/useTableSort";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { parseMarkdown } from "@/utils/markdownParser";
 import {
@@ -116,6 +117,14 @@ export const Questions = () => {
     handleClearFilters,
     activeFiltersCount,
   } = useAdvancedFilter(questions, filterConfig);
+
+  // Sorting
+  const {
+    sortedData: sortedAndFilteredQuestions,
+    sortField,
+    sortDirection,
+    handleSort,
+  } = useTableSort(filteredQuestions, "marks", "desc");
 
   const loadData = async () => {
     try {
@@ -681,12 +690,12 @@ export const Questions = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {filteredQuestions.length === 0 ? (
+              {sortedAndFilteredQuestions.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
                   No questions found
                 </div>
               ) : (
-                filteredQuestions.map((question, index) => {
+                sortedAndFilteredQuestions.map((question, index) => {
                   // Handle both populated and non-populated examId
                   const examId =
                     typeof question.examId === "object"
