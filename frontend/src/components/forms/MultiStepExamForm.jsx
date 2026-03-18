@@ -264,9 +264,13 @@ const ScheduleStep = ({
     updateData({ scheduleType: type });
 
     if (type === "immediate") {
+      const now = new Date();
+      const oneYearLater = new Date(now);
+      oneYearLater.setFullYear(now.getFullYear() + 1);
+
       updateData({
-        startTime: new Date().toISOString().slice(0, 16),
-        endTime: null,
+        startTime: now.toISOString().slice(0, 16),
+        endTime: oneYearLater.toISOString().slice(0, 16),
       });
     }
   };
