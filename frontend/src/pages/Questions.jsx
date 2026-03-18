@@ -109,23 +109,47 @@ export const Questions = () => {
       formDataToSend.append("questionText", questionData.questionText || "");
       formDataToSend.append("marks", questionData.marks || 1);
 
-      // Handle options array
-      if (Array.isArray(questionData.options)) {
+      // Handle different question types
+      if (questionData.type === "true-false") {
+        // For true/false questions, create options A=True, B=False
+        formDataToSend.append("optionA", "True");
+        formDataToSend.append("optionB", "False");
+        formDataToSend.append("optionC", "Not applicable");
+        formDataToSend.append("optionD", "Not applicable");
+
+        // Convert boolean to letter
+        const letter = questionData.correctAnswer === true ? "A" : "B";
+        formDataToSend.append("correctAnswer", letter);
+        console.log(
+          `True/False: correctAnswer=${questionData.correctAnswer} -> ${letter}`,
+        );
+      } else if (
+        questionData.type === "multiple-choice" &&
+        Array.isArray(questionData.options)
+      ) {
+        // Handle options array for multiple choice
         formDataToSend.append("optionA", questionData.options[0] || "");
         formDataToSend.append("optionB", questionData.options[1] || "");
         formDataToSend.append("optionC", questionData.options[2] || "");
         formDataToSend.append("optionD", questionData.options[3] || "");
-      }
 
-      // Handle correctAnswer - convert index to letter
-      if (typeof questionData.correctAnswer === "number") {
-        const letter = String.fromCharCode(65 + questionData.correctAnswer);
-        formDataToSend.append("correctAnswer", letter);
-        console.log(
-          `Converted correctAnswer from ${questionData.correctAnswer} to ${letter}`,
-        );
-      } else if (questionData.correctAnswer) {
-        formDataToSend.append("correctAnswer", questionData.correctAnswer);
+        // Handle correctAnswer - convert index to letter
+        if (typeof questionData.correctAnswer === "number") {
+          const letter = String.fromCharCode(65 + questionData.correctAnswer);
+          formDataToSend.append("correctAnswer", letter);
+          console.log(
+            `Multiple choice: correctAnswer index ${questionData.correctAnswer} -> ${letter}`,
+          );
+        } else if (questionData.correctAnswer) {
+          formDataToSend.append("correctAnswer", questionData.correctAnswer);
+        }
+      } else {
+        // For short-answer and essay, backend still requires 4 options
+        formDataToSend.append("optionA", "Text answer required");
+        formDataToSend.append("optionB", "Text answer required");
+        formDataToSend.append("optionC", "Text answer required");
+        formDataToSend.append("optionD", "Text answer required");
+        formDataToSend.append("correctAnswer", "A");
       }
 
       // Handle image file
