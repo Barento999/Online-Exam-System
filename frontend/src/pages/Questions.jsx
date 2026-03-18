@@ -7,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { UnifiedTextEditor } from "@/components/ui/unified-text-editor";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
+import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { parseMarkdown } from "@/utils/markdownParser";
 import {
   Select,
@@ -54,7 +56,6 @@ export const Questions = () => {
     questionId: null,
   });
   const [editingQuestion, setEditingQuestion] = useState(null);
-  const [filterExamId, setFilterExamId] = useState("all");
   const [formData, setFormData] = useState({
     examId: "",
     questionText: "",
@@ -82,6 +83,39 @@ export const Questions = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Advanced filtering configuration
+  const filterConfig = [
+    {
+      id: "search",
+      type: "search",
+      searchFields: ["questionText"],
+    },
+    {
+      id: "exam",
+      type: "select",
+      label: "Exam",
+      field: "examId._id",
+      options: exams.map((exam) => ({
+        value: exam._id.toString(),
+        label: exam.title,
+      })),
+    },
+    {
+      id: "marks",
+      type: "number-range",
+      label: "Marks",
+      field: "marks",
+    },
+  ];
+
+  const {
+    filters,
+    filteredData: filteredQuestions,
+    handleFilterChange,
+    handleClearFilters,
+    activeFiltersCount,
+  } = useAdvancedFilter(questions, filterConfig);
 
   const loadData = async () => {
     try {
@@ -341,11 +375,6 @@ export const Questions = () => {
       resetForm();
     }
   };
-
-  const filteredQuestions =
-    filterExamId === "all"
-      ? questions
-      : questions.filter((q) => q.examId === parseInt(filterExamId));
 
   if (loading) {
     return (
@@ -642,22 +671,13 @@ export const Questions = () => {
 
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-4">
-              <Filter className="h-5 w-5 text-muted-foreground" />
-              <Select value={filterExamId} onValueChange={setFilterExamId}>
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Filter by exam" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Exams</SelectItem>
-                  {exams.map((exam) => (
-                    <SelectItem key={exam._id} value={exam._id.toString()}>
-                      {exam.title}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <AdvancedTableFilter
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClearFilters={handleClearFilters}
+              activeFiltersCount={activeFiltersCount}
+              searchPlaceholder="Search questions..."
+            />
           </CardHeader>
           <CardContent>
             <div className="space-y-4">

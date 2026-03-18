@@ -4,6 +4,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
+import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import {
   Select,
   SelectContent,
@@ -69,6 +71,56 @@ export const Exams = () => {
   useEffect(() => {
     loadData();
   }, []);
+
+  // Advanced filtering configuration
+  const filterConfig = [
+    {
+      id: "search",
+      type: "search",
+      searchFields: ["title", "courseName"],
+    },
+    {
+      id: "course",
+      type: "select",
+      label: "Course",
+      field: "courseId._id",
+      options: courses.map((course) => ({
+        value: course._id.toString(),
+        label: course.name,
+      })),
+    },
+    {
+      id: "status",
+      type: "select",
+      label: "Status",
+      field: "status",
+      options: [
+        { value: "draft", label: "Draft" },
+        { value: "published", label: "Published" },
+        { value: "completed", label: "Completed" },
+      ],
+    },
+    {
+      id: "dateRange",
+      type: "date-range",
+      label: "Start Date",
+      field: "startTime",
+    },
+    {
+      id: "marksRange",
+      type: "number-range",
+      label: "Total Marks",
+      field: "totalMarks",
+    },
+  ];
+
+  const {
+    filters,
+    filteredData: filteredExams,
+    handleFilterChange,
+    handleClearFilters,
+    activeFiltersCount,
+  } = useAdvancedFilter(exams, filterConfig);
 
   const loadData = async () => {
     try {
@@ -411,6 +463,15 @@ export const Exams = () => {
         </div>
 
         <Card>
+          <CardHeader>
+            <AdvancedTableFilter
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClearFilters={handleClearFilters}
+              activeFiltersCount={activeFiltersCount}
+              searchPlaceholder="Search exams by title or course..."
+            />
+          </CardHeader>
           <CardContent className="p-0">
             <div className="rounded-md border">
               <Table>
@@ -426,7 +487,7 @@ export const Exams = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {exams.length === 0 ? (
+                  {filteredExams.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={7}
@@ -435,7 +496,7 @@ export const Exams = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    exams.map((exam) => (
+                    filteredExams.map((exam) => (
                       <TableRow key={exam._id}>
                         <TableCell className="font-medium">
                           {exam.title}

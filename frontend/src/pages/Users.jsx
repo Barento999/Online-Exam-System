@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
+import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
+import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import {
   Select,
   SelectContent,
@@ -51,9 +53,7 @@ export const Users = () => {
   usePageNotifications("/users");
 
   const [users, setUsers] = useState([]);
-  const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isMultiStepOpen, setIsMultiStepOpen] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({
@@ -80,25 +80,53 @@ export const Users = () => {
     uploadSingleFile,
   } = useFileUpload();
 
+  // Advanced filtering configuration
+  const filterConfig = [
+    {
+      id: "search",
+      type: "search",
+      searchFields: ["name", "email"],
+    },
+    {
+      id: "role",
+      type: "select",
+      label: "Role",
+      field: "role",
+      options: [
+        { value: "student", label: "Student" },
+        { value: "teacher", label: "Teacher" },
+        { value: "admin", label: "Admin" },
+      ],
+    },
+    {
+      id: "status",
+      type: "select",
+      label: "Status",
+      field: "status",
+      options: [
+        { value: "active", label: "Active" },
+        { value: "inactive", label: "Inactive" },
+      ],
+    },
+  ];
+
+  const {
+    filters,
+    filteredData: filteredUsers,
+    handleFilterChange,
+    handleClearFilters,
+    activeFiltersCount,
+  } = useAdvancedFilter(users, filterConfig);
+
   useEffect(() => {
     loadUsers();
   }, []);
-
-  useEffect(() => {
-    const filtered = users.filter(
-      (user) =>
-        user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchTerm.toLowerCase()),
-    );
-    setFilteredUsers(filtered);
-  }, [searchTerm, users]);
 
   const loadUsers = async () => {
     try {
       const response = await usersApi.getAll();
       const usersData = response.data.users || response.data;
       setUsers(usersData);
-      setFilteredUsers(usersData);
     } catch (error) {
       toast.error("Failed to load users");
     } finally {
@@ -469,17 +497,13 @@ Admin User,admin@example.com,password123,admin,active`;
 
         <Card>
           <CardHeader>
-            <div className="flex items-center gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search users..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
+            <AdvancedTableFilter
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClearFilters={handleClearFilters}
+              activeFiltersCount={activeFiltersCount}
+              searchPlaceholder="Search users by name or email..."
+            />
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
