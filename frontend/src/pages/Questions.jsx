@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
+import { UnifiedTextEditor } from "@/components/ui/unified-text-editor";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { parseMarkdown } from "@/utils/markdownParser";
@@ -454,8 +454,7 @@ export const Questions = () => {
                     </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="questionText">Question Text</Label>
-                    <SimpleTextareaEditor
+                    <UnifiedTextEditor
                       value={formData.questionText}
                       onChange={(value) =>
                         setFormData({
@@ -466,7 +465,9 @@ export const Questions = () => {
                       placeholder="Enter your question... (Use markdown: **bold**, *italic*)"
                       minHeight="120px"
                       showWordCount={true}
-                      label={null}
+                      showToolbar={true}
+                      showPreview={true}
+                      label="Question Text"
                     />
                   </div>
 

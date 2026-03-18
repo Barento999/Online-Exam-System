@@ -619,3 +619,77 @@ body {
 .modern-rich-text-editor s {
   text-decoration: line-through;
 }
+
+/* Unified Text Editor Styles */
+.unified-text-editor {
+  transition: all 0.2s ease;
+}
+
+.unified-text-editor:focus-within {
+  box-shadow: 0 0 0 2px hsl(var(--ring));
+}
+
+.unified-text-editor textarea {
+  font-family: inherit;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.unified-text-editor textarea:focus {
+  outline: none;
+}
+
+/* Ensure LTR behavior */
+.unified-text-editor textarea {
+  direction: ltr !important;
+  text-align: left !important;
+  unicode-bidi: normal !important;
+}
+
+/* Preview mode prose styles */
+.unified-text-editor .prose {
+  color: hsl(var(--foreground));
+}
+
+.unified-text-editor .prose h1,
+.unified-text-editor .prose h2,
+.unified-text-editor .prose h3 {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.unified-text-editor .prose strong {
+  color: hsl(var(--foreground));
+  font-weight: 600;
+}
+
+.unified-text-editor .prose code {
+  background: hsl(var(--muted));
+  padding: 0.125rem 0.25rem;
+  border-radius: 0.25rem;
+  font-size: 0.875em;
+}
+
+.unified-text-editor .prose pre {
+  background: hsl(var(--muted));
+  padding: 1rem;
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+.unified-text-editor .prose a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+}
+
+.unified-text-editor .prose ul,
+.unified-text-editor .prose ol {
+  padding-left: 1.5rem;
+}
+
+.unified-text-editor .prose blockquote {
+  border-left: 4px solid hsl(var(--primary));
+  padding-left: 1rem;
+  font-style: italic;
+  color: hsl(var(--muted-foreground));
+}

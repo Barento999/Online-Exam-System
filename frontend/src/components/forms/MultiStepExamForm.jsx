@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { MultiStepForm } from "./MultiStepForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
+import { UnifiedTextEditor } from "@/components/ui/unified-text-editor";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -101,15 +101,16 @@ const BasicInfoStep = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="description">Description & Instructions</Label>
-        <SimpleTextareaEditor
+        <UnifiedTextEditor
           value={data.description || ""}
           onChange={(value) => updateData({ description: value })}
           placeholder="Enter exam description and instructions... (Use markdown: **bold**, *italic*, [link](url))"
           minHeight="150px"
           maxHeight="300px"
           showWordCount={true}
-          label={null}
+          showToolbar={true}
+          showPreview={true}
+          label="Description & Instructions"
         />
       </div>
 
@@ -648,8 +649,7 @@ const QuestionsStep = ({ data, updateData }) => {
                   <CardContent className="space-y-4">
                     <div className="grid md:grid-cols-4 gap-4">
                       <div className="md:col-span-3">
-                        <Label>Question Text</Label>
-                        <SimpleTextareaEditor
+                        <UnifiedTextEditor
                           value={question.question}
                           onChange={(value) =>
                             updateQuestion(question.id, {
@@ -659,7 +659,9 @@ const QuestionsStep = ({ data, updateData }) => {
                           placeholder="Enter your question here... (Use markdown: **bold**, *italic*)"
                           minHeight="100px"
                           showWordCount={false}
-                          label={null}
+                          showToolbar={true}
+                          showPreview={true}
+                          label="Question Text"
                         />
                       </div>
                       <div>
@@ -710,8 +712,7 @@ const QuestionsStep = ({ data, updateData }) => {
                     </div>
 
                     <div>
-                      <Label>Explanation (Optional)</Label>
-                      <SimpleTextareaEditor
+                      <UnifiedTextEditor
                         value={question.explanation}
                         onChange={(value) =>
                           updateQuestion(question.id, {
@@ -721,7 +722,9 @@ const QuestionsStep = ({ data, updateData }) => {
                         placeholder="Explain the correct answer... (Use markdown: **bold**, *italic*)"
                         minHeight="80px"
                         showWordCount={false}
-                        label={null}
+                        showToolbar={true}
+                        showPreview={true}
+                        label="Explanation (Optional)"
                       />
                     </div>
                   </CardContent>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
+import { UnifiedTextEditor } from "@/components/ui/unified-text-editor";
 import {
   Select,
   SelectContent,
@@ -167,8 +167,7 @@ export const Courses = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="description">Description</Label>
-                  <SimpleTextareaEditor
+                  <UnifiedTextEditor
                     value={formData.description}
                     onChange={(value) =>
                       setFormData({ ...formData, description: value })
@@ -176,7 +175,9 @@ export const Courses = () => {
                     placeholder="Enter course description... (Use markdown: **bold**, *italic*)"
                     minHeight="120px"
                     showWordCount={true}
-                    label={null}
+                    showToolbar={true}
+                    showPreview={true}
+                    label="Description"
                   />
                 </div>
                 <div className="space-y-2">

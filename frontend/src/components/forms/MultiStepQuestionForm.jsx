@@ -2,7 +2,7 @@ import { useState } from "react";
 import { MultiStepForm } from "./MultiStepForm";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { SimpleTextareaEditor } from "@/components/ui/simple-textarea-editor";
+import { UnifiedTextEditor } from "@/components/ui/unified-text-editor";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -138,16 +138,18 @@ const QuestionDetailsStep = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="questionText">Question Text *</Label>
-        <SimpleTextareaEditor
+        <UnifiedTextEditor
           value={data.questionText || ""}
           onChange={(value) => updateData({ questionText: value })}
           placeholder="Enter your question here... (Use markdown: **bold**, *italic*, - list)"
           minHeight="150px"
           maxHeight="300px"
           showWordCount={true}
+          showToolbar={true}
+          showPreview={true}
           error={getFieldError("questionText")}
-          label={null}
+          label="Question Text *"
+          required={true}
         />
       </div>
 
@@ -324,15 +326,16 @@ const MediaStep = ({ data, updateData }) => {
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="references">References (Optional)</Label>
-        <SimpleTextareaEditor
+        <UnifiedTextEditor
           value={data.references || ""}
           onChange={(value) => updateData({ references: value })}
           placeholder="Add references, sources, or additional reading materials..."
           minHeight="100px"
           maxHeight="200px"
           showWordCount={false}
-          label={null}
+          showToolbar={true}
+          showPreview={false}
+          label="References (Optional)"
         />
       </div>
     </div>
@@ -497,14 +500,15 @@ const AnswerOptionsStep = ({
 
         <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="sampleAnswer">Sample Answer</Label>
-            <SimpleTextareaEditor
+            <UnifiedTextEditor
               value={data.sampleAnswer || ""}
               onChange={(value) => updateData({ sampleAnswer: value })}
               placeholder="Provide a sample correct answer... (Use markdown: **bold**, *italic*)"
               minHeight={questionType === "essay" ? "180px" : "100px"}
               showWordCount={true}
-              label={null}
+              showToolbar={true}
+              showPreview={true}
+              label="Sample Answer"
             />
           </div>
 
