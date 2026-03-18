@@ -528,12 +528,20 @@ export const Exams = () => {
                 <MultiStepExamForm
                   onSubmit={handleMultiStepSubmit}
                   onCancel={handleMultiStepCancel}
+                  courses={courses}
                   initialData={
                     editingExam
                       ? {
                           title: editingExam.title,
                           description: editingExam.description,
-                          subject: editingExam.subject,
+                          courseId:
+                            typeof editingExam.courseId === "object"
+                              ? editingExam.courseId._id
+                              : editingExam.courseId,
+                          courseName:
+                            typeof editingExam.courseId === "object"
+                              ? editingExam.courseId.name
+                              : editingExam.courseName,
                           difficulty: editingExam.difficulty,
                           duration: editingExam.duration,
                           totalMarks: editingExam.totalMarks,

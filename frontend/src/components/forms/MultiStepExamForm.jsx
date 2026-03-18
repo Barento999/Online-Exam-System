@@ -39,6 +39,7 @@ const BasicInfoStep = ({
   errors,
   fieldErrors,
   validationAttempted,
+  courses = [],
 }) => {
   const [titleSuggestions] = useState([
     "Final Assessment",
@@ -115,30 +116,34 @@ const BasicInfoStep = ({
 
       <div className="grid md:grid-cols-3 gap-6">
         <div className="space-y-2">
-          <Label htmlFor="subject">Subject *</Label>
+          <Label htmlFor="courseId">Course *</Label>
           <Select
-            value={data.subject || ""}
-            onValueChange={(value) => updateData({ subject: value })}>
+            value={data.courseId || ""}
+            onValueChange={(value) => {
+              const selectedCourse = courses.find(
+                (c) => c._id.toString() === value,
+              );
+              updateData({
+                courseId: value,
+                courseName: selectedCourse?.name || "",
+              });
+            }}>
             <SelectTrigger
-              className={hasFieldError("subject") ? "border-red-500" : ""}>
-              <SelectValue placeholder="Select subject" />
+              className={hasFieldError("courseId") ? "border-red-500" : ""}>
+              <SelectValue placeholder="Select course" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="mathematics">Mathematics</SelectItem>
-              <SelectItem value="physics">Physics</SelectItem>
-              <SelectItem value="chemistry">Chemistry</SelectItem>
-              <SelectItem value="biology">Biology</SelectItem>
-              <SelectItem value="computer-science">Computer Science</SelectItem>
-              <SelectItem value="english">English</SelectItem>
-              <SelectItem value="history">History</SelectItem>
-              <SelectItem value="geography">Geography</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
+              {courses.map((course) => (
+                <SelectItem key={course._id} value={course._id.toString()}>
+                  {course.name}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
-          {getFieldError("subject") && (
+          {getFieldError("courseId") && (
             <p className="text-sm text-red-600 flex items-center gap-1">
               <AlertCircle className="h-3 w-3" />
-              {getFieldError("subject")}
+              {getFieldError("courseId")}
             </p>
           )}
         </div>
@@ -780,7 +785,7 @@ const ReviewStep = ({ data }) => {
           <BookOpen className="h-8 w-8 text-primary" />
         </div>
         <h3 className="text-xl font-semibold">{data.title}</h3>
-        <p className="text-muted-foreground">{data.subject}</p>
+        <p className="text-muted-foreground">{data.courseName || "Course"}</p>
         <Badge className="mt-2 capitalize">{data.difficulty}</Badge>
       </div>
 
@@ -794,8 +799,8 @@ const ReviewStep = ({ data }) => {
           </CardHeader>
           <CardContent className="space-y-3">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Subject:</span>
-              <span>{data.subject}</span>
+              <span className="text-muted-foreground">Course:</span>
+              <span>{data.courseName || "Not selected"}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Duration:</span>
@@ -888,7 +893,12 @@ const ReviewStep = ({ data }) => {
   );
 };
 
-export const MultiStepExamForm = ({ onSubmit, onCancel, initialData = {} }) => {
+export const MultiStepExamForm = ({
+  onSubmit,
+  onCancel,
+  initialData = {},
+  courses = [],
+}) => {
   const validateBasicInfo = (data) => {
     const errors = {};
     let isValid = true;
@@ -899,9 +909,9 @@ export const MultiStepExamForm = ({ onSubmit, onCancel, initialData = {} }) => {
       isValid = false;
     }
 
-    // Subject validation
-    if (!data.subject) {
-      errors.subject = "Please select a subject";
+    // Course validation
+    if (!data.courseId) {
+      errors.courseId = "Please select a course";
       isValid = false;
     }
 
@@ -967,7 +977,7 @@ export const MultiStepExamForm = ({ onSubmit, onCancel, initialData = {} }) => {
     {
       title: "Basic Information",
       description: "Set up the exam title, subject, and basic parameters",
-      component: BasicInfoStep,
+      component: (props) => <BasicInfoStep {...props} courses={courses} />,
       validate: validateBasicInfo,
     },
     {
@@ -994,7 +1004,7 @@ export const MultiStepExamForm = ({ onSubmit, onCancel, initialData = {} }) => {
     const examData = {
       title: formData.title,
       description: formData.description,
-      subject: formData.subject,
+      courseId: formData.courseId,
       difficulty: formData.difficulty,
       duration: formData.duration,
       totalMarks: formData.totalMarks,
