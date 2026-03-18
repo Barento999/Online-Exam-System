@@ -113,13 +113,23 @@ export const Questions = () => {
               option,
             );
           });
+        } else if (
+          key === "correctAnswer" &&
+          typeof questionData[key] === "number"
+        ) {
+          // Convert index to letter (0 -> A, 1 -> B, etc.)
+          formDataToSend.append(
+            "correctAnswer",
+            String.fromCharCode(65 + questionData[key]),
+          );
         } else if (key === "tags" && Array.isArray(questionData[key])) {
           formDataToSend.append("tags", questionData[key].join(","));
         } else if (key === "keywords" && Array.isArray(questionData[key])) {
           formDataToSend.append("keywords", questionData[key].join(","));
         } else if (
           questionData[key] !== undefined &&
-          questionData[key] !== null
+          questionData[key] !== null &&
+          key !== "type" // Don't send type field to backend
         ) {
           formDataToSend.append(key, questionData[key]);
         }
