@@ -766,6 +766,7 @@ export const Questions = () => {
                 <MultiStepQuestionForm
                   onSubmit={handleMultiStepSubmit}
                   onCancel={handleMultiStepCancel}
+                  exams={exams}
                   initialData={
                     editingQuestion
                       ? {

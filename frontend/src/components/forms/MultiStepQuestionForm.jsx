@@ -34,6 +34,7 @@ const QuestionDetailsStep = ({
   errors,
   fieldErrors,
   validationAttempted,
+  exams = [],
 }) => {
   const [questionTypes] = useState([
     {
@@ -83,10 +84,11 @@ const QuestionDetailsStep = ({
             <SelectValue placeholder="Choose an exam" />
           </SelectTrigger>
           <SelectContent>
-            {/* This would be populated with actual exams */}
-            <SelectItem value="exam1">Mathematics Final Exam</SelectItem>
-            <SelectItem value="exam2">Physics Midterm</SelectItem>
-            <SelectItem value="exam3">Chemistry Quiz</SelectItem>
+            {exams.map((exam) => (
+              <SelectItem key={exam._id} value={exam._id.toString()}>
+                {exam.title}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
         {getFieldError("examId") && (
@@ -733,6 +735,7 @@ export const MultiStepQuestionForm = ({
   onSubmit,
   onCancel,
   initialData = {},
+  exams = [],
 }) => {
   const validateQuestionDetails = (data) => {
     const errors = {};
@@ -802,7 +805,7 @@ export const MultiStepQuestionForm = ({
     {
       title: "Question Details",
       description: "Set up the basic question information and type",
-      component: QuestionDetailsStep,
+      component: (props) => <QuestionDetailsStep {...props} exams={exams} />,
       validate: validateQuestionDetails,
     },
     {
