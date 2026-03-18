@@ -151,7 +151,10 @@ export const Questions = () => {
       loadData();
     } catch (error) {
       console.error("Question submission error:", error);
-      toast.error(error.message || "Operation failed");
+      console.error("Error response:", error.response?.data);
+      toast.error(
+        error.response?.data?.message || error.message || "Operation failed",
+      );
     }
   };
 
