@@ -100,40 +100,44 @@ export const Questions = () => {
 
   const handleMultiStepSubmit = async (questionData) => {
     try {
+      console.log("Question data received:", questionData);
+
       const formDataToSend = new FormData();
 
-      // Add all form fields
-      Object.keys(questionData).forEach((key) => {
-        if (key === "imageFile" && questionData[key]) {
-          formDataToSend.append("image", questionData[key]);
-        } else if (key === "options" && Array.isArray(questionData[key])) {
-          questionData[key].forEach((option, index) => {
-            formDataToSend.append(
-              `option${String.fromCharCode(65 + index)}`,
-              option,
-            );
-          });
-        } else if (
-          key === "correctAnswer" &&
-          typeof questionData[key] === "number"
-        ) {
-          // Convert index to letter (0 -> A, 1 -> B, etc.)
-          formDataToSend.append(
-            "correctAnswer",
-            String.fromCharCode(65 + questionData[key]),
-          );
-        } else if (key === "tags" && Array.isArray(questionData[key])) {
-          formDataToSend.append("tags", questionData[key].join(","));
-        } else if (key === "keywords" && Array.isArray(questionData[key])) {
-          formDataToSend.append("keywords", questionData[key].join(","));
-        } else if (
-          questionData[key] !== undefined &&
-          questionData[key] !== null &&
-          key !== "type" // Don't send type field to backend
-        ) {
-          formDataToSend.append(key, questionData[key]);
-        }
-      });
+      // Only send fields that backend expects
+      formDataToSend.append("examId", questionData.examId);
+      formDataToSend.append("questionText", questionData.questionText || "");
+      formDataToSend.append("marks", questionData.marks || 1);
+
+      // Handle options array
+      if (Array.isArray(questionData.options)) {
+        formDataToSend.append("optionA", questionData.options[0] || "");
+        formDataToSend.append("optionB", questionData.options[1] || "");
+        formDataToSend.append("optionC", questionData.options[2] || "");
+        formDataToSend.append("optionD", questionData.options[3] || "");
+      }
+
+      // Handle correctAnswer - convert index to letter
+      if (typeof questionData.correctAnswer === "number") {
+        const letter = String.fromCharCode(65 + questionData.correctAnswer);
+        formDataToSend.append("correctAnswer", letter);
+        console.log(
+          `Converted correctAnswer from ${questionData.correctAnswer} to ${letter}`,
+        );
+      } else if (questionData.correctAnswer) {
+        formDataToSend.append("correctAnswer", questionData.correctAnswer);
+      }
+
+      // Handle image file
+      if (questionData.imageFile) {
+        formDataToSend.append("image", questionData.imageFile);
+      }
+
+      // Log what's being sent
+      console.log("FormData contents:");
+      for (let pair of formDataToSend.entries()) {
+        console.log(pair[0] + ": " + pair[1]);
+      }
 
       if (editingQuestion) {
         await questionsApi.update(editingQuestion._id, formDataToSend);
@@ -146,6 +150,7 @@ export const Questions = () => {
       setEditingQuestion(null);
       loadData();
     } catch (error) {
+      console.error("Question submission error:", error);
       toast.error(error.message || "Operation failed");
     }
   };
