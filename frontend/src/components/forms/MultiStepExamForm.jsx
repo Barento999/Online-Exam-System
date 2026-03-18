@@ -259,6 +259,21 @@ const ScheduleStep = ({
     data.scheduleType || "immediate",
   );
 
+  // Initialize startTime and endTime for immediate schedule on mount
+  useEffect(() => {
+    if (scheduleType === "immediate" && (!data.startTime || !data.endTime)) {
+      const now = new Date();
+      const oneYearLater = new Date(now);
+      oneYearLater.setFullYear(now.getFullYear() + 1);
+
+      updateData({
+        scheduleType: "immediate",
+        startTime: now.toISOString().slice(0, 16),
+        endTime: oneYearLater.toISOString().slice(0, 16),
+      });
+    }
+  }, []);
+
   const handleScheduleTypeChange = (type) => {
     setScheduleType(type);
     updateData({ scheduleType: type });
@@ -1004,26 +1019,21 @@ export const MultiStepExamForm = ({
   ];
 
   const handleSubmit = async (formData) => {
-    // Transform data for API
+    // Transform data for API - only send fields backend expects
     const examData = {
       title: formData.title,
-      description: formData.description,
       courseId: formData.courseId,
-      difficulty: formData.difficulty,
       duration: formData.duration,
       totalMarks: formData.totalMarks,
       passingMarks: formData.passingMarks,
       startTime: formData.startTime,
       endTime: formData.endTime,
-      scheduleType: formData.scheduleType,
-      randomizeQuestions: formData.randomizeQuestions,
-      allowReview: formData.allowReview,
-      showResultsImmediately: formData.showResultsImmediately,
-      preventTabSwitching: formData.preventTabSwitching,
-      maxAttempts: formData.maxAttempts,
-      questions: formData.questions || [],
-      status: "draft",
+      status: formData.status || "draft",
+      randomizeQuestions: formData.randomizeQuestions || false,
     };
+
+    // Log for debugging
+    console.log("Submitting exam data:", examData);
 
     await onSubmit(examData);
   };
