@@ -109,7 +109,7 @@ export const Users = () => {
   const handleMultiStepSubmit = async (userData) => {
     try {
       if (editingUser) {
-        await usersApi.update(editingUser.id, userData);
+        await usersApi.update(editingUser._id, userData);
         toast.success("User updated successfully");
       } else {
         await usersApi.create(userData);
@@ -132,7 +132,7 @@ export const Users = () => {
     e.preventDefault();
     try {
       if (editingUser) {
-        await usersApi.update(editingUser.id, formData);
+        await usersApi.update(editingUser._id, formData);
         toast.success("User updated successfully");
       } else {
         await usersApi.create(formData);
@@ -542,7 +542,10 @@ Admin User,admin@example.com,password123,admin,active`;
                               variant="ghost"
                               size="sm"
                               onClick={() =>
-                                setDeleteDialog({ open: true, userId: user.id })
+                                setDeleteDialog({
+                                  open: true,
+                                  userId: user._id,
+                                })
                               }>
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
