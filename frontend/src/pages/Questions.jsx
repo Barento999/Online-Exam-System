@@ -680,13 +680,33 @@ export const Questions = () => {
 
         <Card>
           <CardHeader>
-            <AdvancedTableFilter
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onClearFilters={handleClearFilters}
-              activeFiltersCount={activeFiltersCount}
-              searchPlaceholder="Search questions..."
-            />
+            <div className="flex items-center gap-4">
+              <AdvancedTableFilter
+                filters={filters}
+                onFilterChange={handleFilterChange}
+                onClearFilters={handleClearFilters}
+                activeFiltersCount={activeFiltersCount}
+                searchPlaceholder="Search questions..."
+                className="flex-1"
+              />
+              <div className="flex items-center gap-2">
+                <Label className="text-sm text-muted-foreground">
+                  Sort by:
+                </Label>
+                <Select
+                  value={sortField || "marks"}
+                  onValueChange={(value) => handleSort(value)}>
+                  <SelectTrigger className="w-40">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="marks">Marks</SelectItem>
+                    <SelectItem value="questionText">Question</SelectItem>
+                    <SelectItem value="correctAnswer">Answer</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
