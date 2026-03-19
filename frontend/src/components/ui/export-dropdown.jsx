@@ -16,11 +16,16 @@ export const ExportDropdown = ({
   variant = "outline",
   size = "default",
   label = "Export",
+  className = "",
 }) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant={variant} size={size} disabled={disabled}>
+        <Button
+          variant={variant}
+          size={size}
+          disabled={disabled}
+          className={className}>
           <Download className="mr-2 h-4 w-4" />
           {label}
         </Button>

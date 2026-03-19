@@ -427,15 +427,16 @@ Admin User,admin@example.com,password123,admin,active`;
             <h1 className="text-3xl font-semibold">Users Management</h1>
             <p className="text-muted-foreground">Manage all system users</p>
           </div>
-          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto page-header-actions">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
             <ExportDropdown
               onExportPDF={handleExportPDF}
               onExportExcel={handleExportExcel}
               onExportCSV={handleExportCSV}
+              className="w-full sm:w-auto"
             />
             <Dialog open={importDialog} onOpenChange={setImportDialog}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <Upload className="mr-2 h-4 w-4" />
                   Import CSV
                 </Button>
@@ -506,13 +507,15 @@ Admin User,admin@example.com,password123,admin,active`;
                 </div>
               </DialogContent>
             </Dialog>
-            <Button onClick={() => setIsMultiStepOpen(true)}>
+            <Button
+              onClick={() => setIsMultiStepOpen(true)}
+              className="w-full sm:w-auto">
               <UserPlus className="mr-2 h-4 w-4" />
               Create User (Advanced)
             </Button>
             <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
               <DialogTrigger asChild>
-                <Button variant="outline">
+                <Button variant="outline" className="w-full sm:w-auto">
                   <Plus className="mr-2 h-4 w-4" />
                   Quick Add User
                 </Button>

@@ -420,19 +420,22 @@ export const Exams = () => {
             </p>
           </div>
           {canCreateEdit && (
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto page-header-actions">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               <ExportDropdown
                 onExportPDF={handleExportPDF}
                 onExportExcel={handleExportExcel}
                 onExportCSV={handleExportCSV}
+                className="w-full sm:w-auto"
               />
-              <Button onClick={() => setIsMultiStepOpen(true)}>
+              <Button
+                onClick={() => setIsMultiStepOpen(true)}
+                className="w-full sm:w-auto">
                 <BookOpen className="mr-2 h-4 w-4" />
                 Create Exam (Advanced)
               </Button>
               <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
                 <DialogTrigger asChild>
-                  <Button variant="outline">
+                  <Button variant="outline" className="w-full sm:w-auto">
                     <Plus className="mr-2 h-4 w-4" />
                     Quick Create
                   </Button>
