@@ -9,7 +9,9 @@ import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
 import { useTableSort } from "@/hooks/useTableSort";
+import { usePagination } from "@/hooks/usePagination";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
+import { TablePagination } from "@/components/ui/table-pagination";
 import { parseMarkdown } from "@/utils/markdownParser";
 import {
   Select,
@@ -125,6 +127,21 @@ export const Questions = () => {
     sortDirection,
     handleSort,
   } = useTableSort(filteredQuestions, "marks", "desc");
+
+  // Pagination
+  const {
+    paginatedData,
+    currentPage,
+    totalPages,
+    totalItems,
+    pageSize,
+    startIndex,
+    endIndex,
+    goToPage,
+    changePageSize,
+    hasNextPage,
+    hasPreviousPage,
+  } = usePagination(sortedAndFilteredQuestions, 10);
 
   const loadData = async () => {
     try {
@@ -710,12 +727,12 @@ export const Questions = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {sortedAndFilteredQuestions.length === 0 ? (
+              {paginatedData.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
                   No questions found
                 </div>
               ) : (
-                sortedAndFilteredQuestions.map((question, index) => {
+                paginatedData.map((question, index) => {
                   // Handle both populated and non-populated examId
                   const examId =
                     typeof question.examId === "object"
@@ -732,7 +749,9 @@ export const Questions = () => {
                         <div className="flex items-start justify-between mb-4">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="outline">Q{index + 1}</Badge>
+                              <Badge variant="outline">
+                                Q{startIndex + index}
+                              </Badge>
                               <Badge>{examTitle || "Unknown Exam"}</Badge>
                               <Badge variant="secondary">
                                 {question.marks} marks
@@ -796,6 +815,18 @@ export const Questions = () => {
                 })
               )}
             </div>
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              startIndex={startIndex}
+              endIndex={endIndex}
+              onPageChange={goToPage}
+              onPageSizeChange={changePageSize}
+              hasNextPage={hasNextPage}
+              hasPreviousPage={hasPreviousPage}
+            />
           </CardContent>
         </Card>
 

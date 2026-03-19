@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
 import { useTableSort } from "@/hooks/useTableSort";
+import { usePagination } from "@/hooks/usePagination";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { SortableTableHead } from "@/components/ui/sortable-table-head";
+import { TablePagination } from "@/components/ui/table-pagination";
 import {
   Select,
   SelectContent,
@@ -131,6 +133,21 @@ export const Exams = () => {
     sortDirection,
     handleSort,
   } = useTableSort(filteredExams, "startTime", "desc");
+
+  // Pagination
+  const {
+    paginatedData,
+    currentPage,
+    totalPages,
+    totalItems,
+    pageSize,
+    startIndex,
+    endIndex,
+    goToPage,
+    changePageSize,
+    hasNextPage,
+    hasPreviousPage,
+  } = usePagination(sortedAndFilteredExams, 10);
 
   const loadData = async () => {
     try {
@@ -533,7 +550,7 @@ export const Exams = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedAndFilteredExams.length === 0 ? (
+                  {paginatedData.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={7}
@@ -542,7 +559,7 @@ export const Exams = () => {
                       </TableCell>
                     </TableRow>
                   ) : (
-                    sortedAndFilteredExams.map((exam) => (
+                    paginatedData.map((exam) => (
                       <TableRow key={exam._id}>
                         <TableCell className="font-medium">
                           {exam.title}
@@ -616,6 +633,18 @@ export const Exams = () => {
                 </TableBody>
               </Table>
             </div>
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              startIndex={startIndex}
+              endIndex={endIndex}
+              onPageChange={goToPage}
+              onPageSizeChange={changePageSize}
+              hasNextPage={hasNextPage}
+              hasPreviousPage={hasPreviousPage}
+            />
           </CardContent>
         </Card>
 

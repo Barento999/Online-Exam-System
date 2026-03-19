@@ -8,8 +8,10 @@ import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
 import { useTableSort } from "@/hooks/useTableSort";
+import { usePagination } from "@/hooks/usePagination";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { SortableTableHead } from "@/components/ui/sortable-table-head";
+import { TablePagination } from "@/components/ui/table-pagination";
 import {
   Select,
   SelectContent,
@@ -127,6 +129,21 @@ export const Users = () => {
     sortDirection,
     handleSort,
   } = useTableSort(filteredUsers, "name", "asc");
+
+  // Pagination
+  const {
+    paginatedData,
+    currentPage,
+    totalPages,
+    totalItems,
+    pageSize,
+    startIndex,
+    endIndex,
+    goToPage,
+    changePageSize,
+    hasNextPage,
+    hasPreviousPage,
+  } = usePagination(sortedAndFilteredUsers, 10);
 
   useEffect(() => {
     loadUsers();
@@ -552,7 +569,7 @@ Admin User,admin@example.com,password123,admin,active`;
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {sortedAndFilteredUsers.length === 0 ? (
+                  {paginatedData.length === 0 ? (
                     <TableRow>
                       <TableCell
                         colSpan={5}
@@ -561,7 +578,7 @@ Admin User,admin@example.com,password123,admin,active`;
                       </TableCell>
                     </TableRow>
                   ) : (
-                    sortedAndFilteredUsers.map((user) => (
+                    paginatedData.map((user) => (
                       <TableRow key={user._id}>
                         <TableCell className="font-medium">
                           {user.name}
@@ -615,6 +632,18 @@ Admin User,admin@example.com,password123,admin,active`;
                 </TableBody>
               </Table>
             </div>
+            <TablePagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              totalItems={totalItems}
+              pageSize={pageSize}
+              startIndex={startIndex}
+              endIndex={endIndex}
+              onPageChange={goToPage}
+              onPageSizeChange={changePageSize}
+              hasNextPage={hasNextPage}
+              hasPreviousPage={hasPreviousPage}
+            />
           </CardContent>
         </Card>
 
