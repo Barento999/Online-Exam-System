@@ -422,12 +422,12 @@ Admin User,admin@example.com,password123,admin,active`;
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">Users Management</h1>
             <p className="text-muted-foreground">Manage all system users</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto page-header-actions">
             <ExportDropdown
               onExportPDF={handleExportPDF}
               onExportExcel={handleExportExcel}
@@ -646,7 +646,7 @@ Admin User,admin@example.com,password123,admin,active`;
                 },
               ]}
             />
-            <div className="rounded-md border">
+            <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>

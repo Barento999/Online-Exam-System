@@ -2,6 +2,7 @@
 @import "./tailwind.css";
 @import "./theme.css";
 @import "./mobile-drawer.css";
+@import "./responsive-table.css";
 
 /* Global LTR enforcement for rich text editors */
 html,
