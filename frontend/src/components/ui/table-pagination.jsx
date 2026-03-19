@@ -66,15 +66,6 @@ export const TablePagination = ({
 
   if (totalItems === 0) return null;
 
-  console.log("Pagination Debug:", {
-    currentPage,
-    totalPages,
-    totalItems,
-    pageSize,
-    startIndex,
-    endIndex,
-  });
-
   return (
     <div
       className={cn(
@@ -91,10 +82,7 @@ export const TablePagination = ({
           </span>
           <Select
             value={String(pageSize)}
-            onValueChange={(value) => {
-              console.log("Page size changing to:", value);
-              onPageSizeChange(Number(value));
-            }}>
+            onValueChange={(value) => onPageSizeChange(Number(value))}>
             <SelectTrigger className="h-8 w-20">
               <SelectValue placeholder={String(pageSize)} />
             </SelectTrigger>

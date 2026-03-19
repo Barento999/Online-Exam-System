@@ -10,20 +10,11 @@ export const usePagination = (data = [], itemsPerPage = 10) => {
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    console.log("Paginating:", {
-      dataLength: data.length,
-      currentPage,
-      pageSize,
-      startIndex,
-      endIndex,
-      slice: data.slice(startIndex, endIndex).length,
-    });
     return data.slice(startIndex, endIndex);
   }, [data, currentPage, pageSize]);
 
   const goToPage = (page) => {
     const pageNumber = Math.max(1, Math.min(page, totalPages));
-    console.log("Going to page:", pageNumber);
     setCurrentPage(pageNumber);
   };
 
@@ -40,15 +31,12 @@ export const usePagination = (data = [], itemsPerPage = 10) => {
   };
 
   const changePageSize = (newSize) => {
-    console.log("Changing page size from", pageSize, "to", newSize);
     setPageSize(newSize);
-    setCurrentPage(1); // Reset to first page when changing page size
+    setCurrentPage(1);
   };
 
-  // Reset to page 1 when data length changes significantly (e.g., after filtering)
   useEffect(() => {
     if (currentPage > totalPages && totalPages > 0) {
-      console.log("Resetting to page 1 because current page > total pages");
       setCurrentPage(1);
     }
   }, [data.length, totalPages, currentPage]);
