@@ -64,7 +64,25 @@ export const TablePagination = ({
     return pages;
   };
 
-  if (totalItems === 0) return null;
+  // Debug logging
+  console.log("TablePagination render:", {
+    currentPage,
+    totalPages,
+    totalItems,
+    pageSize,
+    startIndex,
+    endIndex,
+    hasNextPage,
+    hasPreviousPage,
+  });
+
+  const pageNumbers = getPageNumbers();
+  console.log("Page numbers generated:", pageNumbers);
+
+  if (totalItems === 0) {
+    console.log("TablePagination: returning null (totalItems === 0)");
+    return null;
+  }
 
   return (
     <div
