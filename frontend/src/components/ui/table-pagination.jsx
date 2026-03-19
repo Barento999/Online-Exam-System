@@ -66,27 +66,41 @@ export const TablePagination = ({
 
   if (totalItems === 0) return null;
 
+  console.log("Pagination Debug:", {
+    currentPage,
+    totalPages,
+    totalItems,
+    pageSize,
+    startIndex,
+    endIndex,
+  });
+
   return (
     <div
       className={cn(
-        "flex items-center justify-between px-2 py-4 border-t",
+        "flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 px-2 py-4 border-t",
         className,
       )}>
-      <div className="flex items-center gap-6">
-        <div className="text-sm text-muted-foreground">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-6">
+        <div className="text-sm text-muted-foreground whitespace-nowrap">
           Showing {startIndex} to {endIndex} of {totalItems} results
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted-foreground">Rows per page:</span>
+          <span className="text-sm text-muted-foreground whitespace-nowrap">
+            Rows per page:
+          </span>
           <Select
-            value={pageSize.toString()}
-            onValueChange={(value) => onPageSizeChange(parseInt(value))}>
-            <SelectTrigger className="h-8 w-16">
-              <SelectValue />
+            value={String(pageSize)}
+            onValueChange={(value) => {
+              console.log("Page size changing to:", value);
+              onPageSizeChange(Number(value));
+            }}>
+            <SelectTrigger className="h-8 w-20">
+              <SelectValue placeholder={String(pageSize)} />
             </SelectTrigger>
             <SelectContent>
               {pageSizeOptions.map((size) => (
-                <SelectItem key={size} value={size.toString()}>
+                <SelectItem key={size} value={String(size)}>
                   {size}
                 </SelectItem>
               ))}
@@ -101,7 +115,8 @@ export const TablePagination = ({
           size="sm"
           onClick={() => onPageChange(1)}
           disabled={!hasPreviousPage}
-          className="h-8 w-8 p-0">
+          className="h-8 w-8 p-0"
+          title="First page">
           <ChevronsLeft className="h-4 w-4" />
         </Button>
         <Button
@@ -109,7 +124,8 @@ export const TablePagination = ({
           size="sm"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={!hasPreviousPage}
-          className="h-8 w-8 p-0">
+          className="h-8 w-8 p-0"
+          title="Previous page">
           <ChevronLeft className="h-4 w-4" />
         </Button>
 
@@ -137,7 +153,8 @@ export const TablePagination = ({
           size="sm"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={!hasNextPage}
-          className="h-8 w-8 p-0">
+          className="h-8 w-8 p-0"
+          title="Next page">
           <ChevronRight className="h-4 w-4" />
         </Button>
         <Button
@@ -145,7 +162,8 @@ export const TablePagination = ({
           size="sm"
           onClick={() => onPageChange(totalPages)}
           disabled={!hasNextPage}
-          className="h-8 w-8 p-0">
+          className="h-8 w-8 p-0"
+          title="Last page">
           <ChevronsRight className="h-4 w-4" />
         </Button>
       </div>
