@@ -4,12 +4,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
 import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { SortableTableHead } from "@/components/ui/sortable-table-head";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { BulkActionsBar } from "@/components/ui/bulk-actions-bar";
 import {
   Select,
   SelectContent,
@@ -40,7 +43,7 @@ import { Loader } from "@/components/common/Loader";
 import { MultiStepExamForm } from "@/components/forms/MultiStepExamForm";
 import { examsApi, coursesApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
-import { Plus, Pencil, Trash2, Play, Eye, BookOpen } from "lucide-react";
+import { Plus, Pencil, Trash2, Play, Eye, BookOpen, FileX } from "lucide-react";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
 
@@ -57,6 +60,7 @@ export const Exams = () => {
     open: false,
     examId: null,
   });
+  const [bulkDeleteDialog, setBulkDeleteDialog] = useState(false);
   const [editingExam, setEditingExam] = useState(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -148,6 +152,49 @@ export const Exams = () => {
     hasNextPage,
     hasPreviousPage,
   } = usePagination(sortedAndFilteredExams, 5);
+
+  // Row selection
+  const {
+    selectedRows,
+    selectedCount,
+    toggleRow,
+    toggleAll,
+    clearSelection,
+    isSelected,
+    isAllSelected,
+    isSomeSelected,
+    getSelectedItems,
+  } = useRowSelection(paginatedData, "_id");
+
+  // Bulk action handlers
+  const handleBulkDelete = async () => {
+    try {
+      const selectedItems = getSelectedItems();
+      await Promise.all(selectedItems.map((exam) => examsApi.delete(exam._id)));
+      toast.success(`Deleted ${selectedCount} exam(s) successfully`);
+      setBulkDeleteDialog(false);
+      clearSelection();
+      loadData();
+    } catch (error) {
+      toast.error("Failed to delete some exams");
+    }
+  };
+
+  const handleBulkStatusChange = async (status) => {
+    try {
+      const selectedItems = getSelectedItems();
+      await Promise.all(
+        selectedItems.map((exam) =>
+          examsApi.update(exam._id, { ...exam, status }),
+        ),
+      );
+      toast.success(`Updated ${selectedCount} exam(s) to ${status}`);
+      clearSelection();
+      loadData();
+    } catch (error) {
+      toast.error("Failed to update some exams");
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -500,10 +547,45 @@ export const Exams = () => {
             />
           </CardHeader>
           <CardContent className="p-0">
+            <BulkActionsBar
+              selectedCount={selectedCount}
+              onClearSelection={clearSelection}
+              actions={[
+                {
+                  label: "Delete Selected",
+                  icon: <Trash2 className="h-4 w-4" />,
+                  onClick: () => setBulkDeleteDialog(true),
+                  variant: "destructive",
+                },
+                {
+                  label: "Set Draft",
+                  onClick: () => handleBulkStatusChange("draft"),
+                  variant: "outline",
+                },
+                {
+                  label: "Set Published",
+                  onClick: () => handleBulkStatusChange("published"),
+                  variant: "outline",
+                },
+                {
+                  label: "Set Completed",
+                  onClick: () => handleBulkStatusChange("completed"),
+                  variant: "outline",
+                },
+              ]}
+            />
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={isAllSelected}
+                        onCheckedChange={toggleAll}
+                        aria-label="Select all"
+                        className={isSomeSelected ? "opacity-50" : ""}
+                      />
+                    </TableHead>
                     <SortableTableHead
                       field="title"
                       label="Exam Name"
@@ -553,7 +635,7 @@ export const Exams = () => {
                   {paginatedData.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={7}
+                        colSpan={8}
                         className="text-center text-muted-foreground">
                         No exams found
                       </TableCell>
@@ -561,6 +643,13 @@ export const Exams = () => {
                   ) : (
                     paginatedData.map((exam) => (
                       <TableRow key={exam._id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={isSelected(exam._id)}
+                            onCheckedChange={() => toggleRow(exam._id)}
+                            aria-label={`Select ${exam.title}`}
+                          />
+                        </TableCell>
                         <TableCell className="font-medium">
                           {exam.title}
                         </TableCell>
@@ -654,6 +743,14 @@ export const Exams = () => {
           title="Delete Exam"
           description="Are you sure you want to delete this exam? This action cannot be undone."
           onConfirm={handleDelete}
+        />
+
+        <ConfirmDialog
+          open={bulkDeleteDialog}
+          onOpenChange={setBulkDeleteDialog}
+          title={`Delete ${selectedCount} Exam(s)`}
+          description={`Are you sure you want to delete ${selectedCount} selected exam(s)? This action cannot be undone.`}
+          onConfirm={handleBulkDelete}
         />
 
         {/* Multi-Step Exam Form */}

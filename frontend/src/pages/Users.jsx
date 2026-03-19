@@ -4,14 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
 import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { SortableTableHead } from "@/components/ui/sortable-table-head";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { BulkActionsBar } from "@/components/ui/bulk-actions-bar";
 import {
   Select,
   SelectContent,
@@ -49,6 +52,8 @@ import {
   Download,
   UserPlus,
   FileSpreadsheet,
+  UserX,
+  UserCheck,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -64,6 +69,7 @@ export const Users = () => {
     open: false,
     userId: null,
   });
+  const [bulkDeleteDialog, setBulkDeleteDialog] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -144,6 +150,53 @@ export const Users = () => {
     hasNextPage,
     hasPreviousPage,
   } = usePagination(sortedAndFilteredUsers, 5);
+
+  // Row selection
+  const {
+    selectedRows,
+    selectedCount,
+    toggleRow,
+    toggleAll,
+    clearSelection,
+    isSelected,
+    isAllSelected,
+    isSomeSelected,
+    getSelectedItems,
+  } = useRowSelection(paginatedData, "_id");
+
+  useEffect(() => {
+    loadUsers();
+  }, []);
+
+  // Bulk action handlers
+  const handleBulkDelete = async () => {
+    try {
+      const selectedItems = getSelectedItems();
+      await Promise.all(selectedItems.map((user) => usersApi.delete(user._id)));
+      toast.success(`Deleted ${selectedCount} user(s) successfully`);
+      setBulkDeleteDialog(false);
+      clearSelection();
+      loadUsers();
+    } catch (error) {
+      toast.error("Failed to delete some users");
+    }
+  };
+
+  const handleBulkStatusChange = async (status) => {
+    try {
+      const selectedItems = getSelectedItems();
+      await Promise.all(
+        selectedItems.map((user) =>
+          usersApi.update(user._id, { ...user, status }),
+        ),
+      );
+      toast.success(`Updated ${selectedCount} user(s) to ${status}`);
+      clearSelection();
+      loadUsers();
+    } catch (error) {
+      toast.error("Failed to update some users");
+    }
+  };
 
   useEffect(() => {
     loadUsers();
@@ -533,10 +586,42 @@ Admin User,admin@example.com,password123,admin,active`;
             />
           </CardHeader>
           <CardContent>
+            <BulkActionsBar
+              selectedCount={selectedCount}
+              onClearSelection={clearSelection}
+              actions={[
+                {
+                  label: "Delete Selected",
+                  icon: <Trash2 className="h-4 w-4" />,
+                  onClick: () => setBulkDeleteDialog(true),
+                  variant: "destructive",
+                },
+                {
+                  label: "Set Active",
+                  icon: <UserCheck className="h-4 w-4" />,
+                  onClick: () => handleBulkStatusChange("active"),
+                  variant: "outline",
+                },
+                {
+                  label: "Set Inactive",
+                  icon: <UserX className="h-4 w-4" />,
+                  onClick: () => handleBulkStatusChange("inactive"),
+                  variant: "outline",
+                },
+              ]}
+            />
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={isAllSelected}
+                        onCheckedChange={toggleAll}
+                        aria-label="Select all"
+                        className={isSomeSelected ? "opacity-50" : ""}
+                      />
+                    </TableHead>
                     <SortableTableHead
                       field="name"
                       label="Name"
@@ -572,7 +657,7 @@ Admin User,admin@example.com,password123,admin,active`;
                   {paginatedData.length === 0 ? (
                     <TableRow>
                       <TableCell
-                        colSpan={5}
+                        colSpan={6}
                         className="text-center text-muted-foreground">
                         No users found
                       </TableCell>
@@ -580,6 +665,13 @@ Admin User,admin@example.com,password123,admin,active`;
                   ) : (
                     paginatedData.map((user) => (
                       <TableRow key={user._id}>
+                        <TableCell>
+                          <Checkbox
+                            checked={isSelected(user._id)}
+                            onCheckedChange={() => toggleRow(user._id)}
+                            aria-label={`Select ${user.name}`}
+                          />
+                        </TableCell>
                         <TableCell className="font-medium">
                           {user.name}
                         </TableCell>
@@ -653,6 +745,14 @@ Admin User,admin@example.com,password123,admin,active`;
           title="Delete User"
           description="Are you sure you want to delete this user? This action cannot be undone."
           onConfirm={handleDelete}
+        />
+
+        <ConfirmDialog
+          open={bulkDeleteDialog}
+          onOpenChange={setBulkDeleteDialog}
+          title={`Delete ${selectedCount} User(s)`}
+          description={`Are you sure you want to delete ${selectedCount} selected user(s)? This action cannot be undone.`}
+          onConfirm={handleBulkDelete}
         />
 
         {/* Multi-Step User Form */}

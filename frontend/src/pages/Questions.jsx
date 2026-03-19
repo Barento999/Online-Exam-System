@@ -4,14 +4,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
 import { UnifiedTextEditor } from "@/components/ui/unified-text-editor";
 import { DragDropUpload } from "@/components/ui/drag-drop-upload";
 import { useFileUpload } from "@/hooks/useFileUpload";
 import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
 import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
+import { useRowSelection } from "@/hooks/useRowSelection";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { TablePagination } from "@/components/ui/table-pagination";
+import { BulkActionsBar } from "@/components/ui/bulk-actions-bar";
 import { parseMarkdown } from "@/utils/markdownParser";
 import {
   Select,
@@ -58,6 +61,7 @@ export const Questions = () => {
     open: false,
     questionId: null,
   });
+  const [bulkDeleteDialog, setBulkDeleteDialog] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState(null);
   const [formData, setFormData] = useState({
     examId: "",
@@ -142,6 +146,35 @@ export const Questions = () => {
     hasNextPage,
     hasPreviousPage,
   } = usePagination(sortedAndFilteredQuestions, 5);
+
+  // Row selection
+  const {
+    selectedRows,
+    selectedCount,
+    toggleRow,
+    toggleAll,
+    clearSelection,
+    isSelected,
+    isAllSelected,
+    isSomeSelected,
+    getSelectedItems,
+  } = useRowSelection(paginatedData, "_id");
+
+  // Bulk action handlers
+  const handleBulkDelete = async () => {
+    try {
+      const selectedItems = getSelectedItems();
+      await Promise.all(
+        selectedItems.map((question) => questionsApi.delete(question._id)),
+      );
+      toast.success(`Deleted ${selectedCount} question(s) successfully`);
+      setBulkDeleteDialog(false);
+      clearSelection();
+      loadData();
+    } catch (error) {
+      toast.error("Failed to delete some questions");
+    }
+  };
 
   const loadData = async () => {
     try {
@@ -726,6 +759,18 @@ export const Questions = () => {
             </div>
           </CardHeader>
           <CardContent>
+            <BulkActionsBar
+              selectedCount={selectedCount}
+              onClearSelection={clearSelection}
+              actions={[
+                {
+                  label: "Delete Selected",
+                  icon: <Trash2 className="h-4 w-4" />,
+                  onClick: () => setBulkDeleteDialog(true),
+                  variant: "destructive",
+                },
+              ]}
+            />
             <div className="space-y-4">
               {paginatedData.length === 0 ? (
                 <div className="text-center text-muted-foreground py-8">
@@ -747,7 +792,14 @@ export const Questions = () => {
                     <Card key={question._id}>
                       <CardContent className="p-6">
                         <div className="flex items-start justify-between mb-4">
-                          <div className="flex-1">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              checked={isSelected(question._id)}
+                              onCheckedChange={() => toggleRow(question._id)}
+                              aria-label={`Select question ${startIndex + index}`}
+                            />
+                          </div>
+                          <div className="flex-1 ml-4">
                             <div className="flex items-center gap-2 mb-2">
                               <Badge variant="outline">
                                 Q{startIndex + index}
@@ -836,6 +888,14 @@ export const Questions = () => {
           title="Delete Question"
           description="Are you sure you want to delete this question? This action cannot be undone."
           onConfirm={handleDelete}
+        />
+
+        <ConfirmDialog
+          open={bulkDeleteDialog}
+          onOpenChange={setBulkDeleteDialog}
+          title={`Delete ${selectedCount} Question(s)`}
+          description={`Are you sure you want to delete ${selectedCount} selected question(s)? This action cannot be undone.`}
+          onConfirm={handleBulkDelete}
         />
 
         {/* Multi-Step Question Form */}
