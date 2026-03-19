@@ -43,6 +43,13 @@ import { Loader } from "@/components/common/Loader";
 import { MultiStepExamForm } from "@/components/forms/MultiStepExamForm";
 import { examsApi, coursesApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
+import {
+  exportToPDF,
+  exportToExcel,
+  exportToCSV,
+  formatDateTimeForExport,
+} from "@/utils/exportUtils";
+import { ExportDropdown } from "@/components/ui/export-dropdown";
 import { Plus, Pencil, Trash2, Play, Eye, BookOpen, FileX } from "lucide-react";
 import { useNavigate } from "react-router";
 import toast from "react-hot-toast";
@@ -193,6 +200,69 @@ export const Exams = () => {
       loadData();
     } catch (error) {
       toast.error("Failed to update some exams");
+    }
+  };
+
+  // Export handlers
+  const getExportData = () => {
+    return sortedAndFilteredExams.map((exam) => ({
+      title: exam.title,
+      course: exam.courseName || "N/A",
+      duration: `${exam.duration} min`,
+      totalMarks: exam.totalMarks,
+      passingMarks: exam.passingMarks,
+      startTime: formatDateTimeForExport(exam.startTime),
+      endTime: formatDateTimeForExport(exam.endTime),
+      status: exam.status,
+    }));
+  };
+
+  const exportColumns = [
+    { header: "Exam Title", dataKey: "title" },
+    { header: "Course", dataKey: "course" },
+    { header: "Duration", dataKey: "duration" },
+    { header: "Total Marks", dataKey: "totalMarks" },
+    { header: "Passing Marks", dataKey: "passingMarks" },
+    { header: "Start Time", dataKey: "startTime" },
+    { header: "End Time", dataKey: "endTime" },
+    { header: "Status", dataKey: "status" },
+  ];
+
+  const handleExportPDF = () => {
+    try {
+      const data = getExportData();
+      exportToPDF(
+        data,
+        exportColumns,
+        `exams_export_${Date.now()}`,
+        "Exams Report",
+      );
+      toast.success("Exported to PDF successfully");
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast.error("Failed to export PDF: " + error.message);
+    }
+  };
+
+  const handleExportExcel = () => {
+    try {
+      const data = getExportData();
+      exportToExcel(data, exportColumns, `exams_export_${Date.now()}`, "Exams");
+      toast.success("Exported to Excel successfully");
+    } catch (error) {
+      console.error("Excel export error:", error);
+      toast.error("Failed to export Excel: " + error.message);
+    }
+  };
+
+  const handleExportCSV = () => {
+    try {
+      const data = getExportData();
+      exportToCSV(data, exportColumns, `exams_export_${Date.now()}`);
+      toast.success("Exported to CSV successfully");
+    } catch (error) {
+      console.error("CSV export error:", error);
+      toast.error("Failed to export CSV: " + error.message);
     }
   };
 
@@ -351,6 +421,11 @@ export const Exams = () => {
           </div>
           {canCreateEdit && (
             <div className="flex gap-2">
+              <ExportDropdown
+                onExportPDF={handleExportPDF}
+                onExportExcel={handleExportExcel}
+                onExportCSV={handleExportCSV}
+              />
               <Button onClick={() => setIsMultiStepOpen(true)}>
                 <BookOpen className="mr-2 h-4 w-4" />
                 Create Exam (Advanced)

@@ -44,6 +44,13 @@ import { MultiStepUserForm } from "@/components/forms/MultiStepUserForm";
 import { usersApi } from "@/services/api";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
 import {
+  exportToPDF,
+  exportToExcel,
+  exportToCSV,
+  formatDateForExport,
+} from "@/utils/exportUtils";
+import { ExportDropdown } from "@/components/ui/export-dropdown";
+import {
   Plus,
   Pencil,
   Trash2,
@@ -198,6 +205,63 @@ export const Users = () => {
     }
   };
 
+  // Export handlers
+  const getExportData = () => {
+    return sortedAndFilteredUsers.map((user) => ({
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      status: user.status,
+      createdAt: formatDateForExport(user.createdAt),
+    }));
+  };
+
+  const exportColumns = [
+    { header: "Name", dataKey: "name" },
+    { header: "Email", dataKey: "email" },
+    { header: "Role", dataKey: "role" },
+    { header: "Status", dataKey: "status" },
+    { header: "Created Date", dataKey: "createdAt" },
+  ];
+
+  const handleExportPDF = () => {
+    try {
+      const data = getExportData();
+      exportToPDF(
+        data,
+        exportColumns,
+        `users_export_${Date.now()}`,
+        "Users Report",
+      );
+      toast.success("Exported to PDF successfully");
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast.error("Failed to export PDF: " + error.message);
+    }
+  };
+
+  const handleExportExcel = () => {
+    try {
+      const data = getExportData();
+      exportToExcel(data, exportColumns, `users_export_${Date.now()}`, "Users");
+      toast.success("Exported to Excel successfully");
+    } catch (error) {
+      console.error("Excel export error:", error);
+      toast.error("Failed to export Excel: " + error.message);
+    }
+  };
+
+  const handleExportCSV = () => {
+    try {
+      const data = getExportData();
+      exportToCSV(data, exportColumns, `users_export_${Date.now()}`);
+      toast.success("Exported to CSV successfully");
+    } catch (error) {
+      console.error("CSV export error:", error);
+      toast.error("Failed to export CSV: " + error.message);
+    }
+  };
+
   useEffect(() => {
     loadUsers();
   }, []);
@@ -300,35 +364,6 @@ export const Users = () => {
     }
   };
 
-  const handleExport = async () => {
-    try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL}/users/export/csv`,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        },
-      );
-
-      if (!response.ok) throw new Error("Export failed");
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = `users_export_${Date.now()}.csv`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
-
-      toast.success("Users exported successfully");
-    } catch (error) {
-      toast.error("Failed to export users");
-    }
-  };
-
   const handleImport = async () => {
     if (importFiles.length === 0) {
       toast.error("Please select a file");
@@ -393,10 +428,11 @@ Admin User,admin@example.com,password123,admin,active`;
             <p className="text-muted-foreground">Manage all system users</p>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" onClick={handleExport}>
-              <Download className="mr-2 h-4 w-4" />
-              Export CSV
-            </Button>
+            <ExportDropdown
+              onExportPDF={handleExportPDF}
+              onExportExcel={handleExportExcel}
+              onExportCSV={handleExportCSV}
+            />
             <Dialog open={importDialog} onOpenChange={setImportDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline">

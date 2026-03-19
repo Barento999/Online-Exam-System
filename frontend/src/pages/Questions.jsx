@@ -36,6 +36,8 @@ import { Loader } from "@/components/common/Loader";
 import { MultiStepQuestionForm } from "@/components/forms/MultiStepQuestionForm";
 import { questionsApi, examsApi } from "@/services/api";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
+import { exportToPDF, exportToExcel, exportToCSV } from "@/utils/exportUtils";
+import { ExportDropdown } from "@/components/ui/export-dropdown";
 import {
   Plus,
   Pencil,
@@ -173,6 +175,85 @@ export const Questions = () => {
       loadData();
     } catch (error) {
       toast.error("Failed to delete some questions");
+    }
+  };
+
+  // Export handlers
+  const getExportData = () => {
+    return sortedAndFilteredQuestions.map((question) => {
+      const examId =
+        typeof question.examId === "object"
+          ? question.examId?._id
+          : question.examId;
+      const examTitle =
+        typeof question.examId === "object"
+          ? question.examId?.title
+          : exams.find((e) => e._id === examId)?.title;
+
+      return {
+        exam: examTitle || "Unknown",
+        questionText: question.questionText,
+        optionA: question.optionA,
+        optionB: question.optionB,
+        optionC: question.optionC,
+        optionD: question.optionD,
+        correctAnswer: question.correctAnswer,
+        marks: question.marks,
+      };
+    });
+  };
+
+  const exportColumns = [
+    { header: "Exam", dataKey: "exam" },
+    { header: "Question", dataKey: "questionText" },
+    { header: "Option A", dataKey: "optionA" },
+    { header: "Option B", dataKey: "optionB" },
+    { header: "Option C", dataKey: "optionC" },
+    { header: "Option D", dataKey: "optionD" },
+    { header: "Correct Answer", dataKey: "correctAnswer" },
+    { header: "Marks", dataKey: "marks" },
+  ];
+
+  const handleExportPDF = () => {
+    try {
+      const data = getExportData();
+      exportToPDF(
+        data,
+        exportColumns,
+        `questions_export_${Date.now()}`,
+        "Questions Bank",
+      );
+      toast.success("Exported to PDF successfully");
+    } catch (error) {
+      console.error("PDF export error:", error);
+      toast.error("Failed to export PDF: " + error.message);
+    }
+  };
+
+  const handleExportExcel = () => {
+    try {
+      const data = getExportData();
+      exportToExcel(
+        data,
+        exportColumns,
+        `questions_export_${Date.now()}`,
+        "Questions",
+      );
+      toast.success("Exported to Excel successfully");
+    } catch (error) {
+      console.error("Excel export error:", error);
+      toast.error("Failed to export Excel: " + error.message);
+    }
+  };
+
+  const handleExportCSV = () => {
+    try {
+      const data = getExportData();
+      exportToCSV(data, exportColumns, `questions_export_${Date.now()}`);
+      toast.success("Exported to CSV successfully");
+    } catch (error) {
+      console.error("CSV export error:", error);
+      toast.error("Failed to export CSV: " + error.message);
     }
   };
 
@@ -454,6 +535,11 @@ export const Questions = () => {
             <p className="text-muted-foreground">Manage exam questions</p>
           </div>
           <div className="flex gap-2">
+            <ExportDropdown
+              onExportPDF={handleExportPDF}
+              onExportExcel={handleExportExcel}
+              onExportCSV={handleExportCSV}
+            />
             <Dialog open={uploadDialog} onOpenChange={setUploadDialog}>
               <DialogTrigger asChild>
                 <Button variant="outline">
