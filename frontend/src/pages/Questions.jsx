@@ -141,7 +141,7 @@ export const Questions = () => {
     changePageSize,
     hasNextPage,
     hasPreviousPage,
-  } = usePagination(sortedAndFilteredQuestions, 10);
+  } = usePagination(sortedAndFilteredQuestions, 5);
 
   const loadData = async () => {
     try {

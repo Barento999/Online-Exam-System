@@ -147,7 +147,7 @@ export const Exams = () => {
     changePageSize,
     hasNextPage,
     hasPreviousPage,
-  } = usePagination(sortedAndFilteredExams, 10);
+  } = usePagination(sortedAndFilteredExams, 5);
 
   const loadData = async () => {
     try {

@@ -143,7 +143,7 @@ export const Users = () => {
     changePageSize,
     hasNextPage,
     hasPreviousPage,
-  } = usePagination(sortedAndFilteredUsers, 10);
+  } = usePagination(sortedAndFilteredUsers, 5);
 
   useEffect(() => {
     loadUsers();
