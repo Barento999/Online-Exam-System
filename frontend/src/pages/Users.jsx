@@ -145,18 +145,6 @@ export const Users = () => {
     hasPreviousPage,
   } = usePagination(sortedAndFilteredUsers, 10);
 
-  // Debug pagination
-  console.log("Users.jsx pagination:", {
-    usersCount: users.length,
-    filteredCount: filteredUsers.length,
-    sortedCount: sortedAndFilteredUsers.length,
-    paginatedCount: paginatedData.length,
-    currentPage,
-    totalPages,
-    totalItems,
-    pageSize,
-  });
-
   useEffect(() => {
     loadUsers();
   }, []);

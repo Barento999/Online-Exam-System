@@ -61,7 +61,8 @@ export const authApi = {
 // Users API
 export const usersApi = {
   getAll: async () => {
-    return api.get("/users");
+    // Request all users for client-side pagination/filtering
+    return api.get("/users?limit=10000");
   },
 
   getById: async (id) => {
@@ -84,7 +85,8 @@ export const usersApi = {
 // Courses API
 export const coursesApi = {
   getAll: async () => {
-    return api.get("/courses");
+    // Request all courses for client-side pagination/filtering
+    return api.get("/courses?limit=10000");
   },
 
   getById: async (id) => {
@@ -115,7 +117,8 @@ export const coursesApi = {
 // Exams API
 export const examsApi = {
   getAll: async () => {
-    return api.get("/exams");
+    // Request all exams for client-side pagination/filtering
+    return api.get("/exams?limit=10000");
   },
 
   getById: async (id) => {
@@ -146,7 +149,10 @@ export const examsApi = {
 // Questions API
 export const questionsApi = {
   getAll: async (examId) => {
-    const url = examId ? `/questions?examId=${examId}` : "/questions";
+    // Request all questions for client-side pagination/filtering
+    const url = examId
+      ? `/questions?examId=${examId}&limit=10000`
+      : "/questions?limit=10000";
     return api.get(url);
   },
 

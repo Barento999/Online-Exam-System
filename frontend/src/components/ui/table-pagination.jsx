@@ -64,25 +64,43 @@ export const TablePagination = ({
     return pages;
   };
 
-  // Debug logging
-  console.log("TablePagination render:", {
-    currentPage,
-    totalPages,
-    totalItems,
-    pageSize,
-    startIndex,
-    endIndex,
-    hasNextPage,
-    hasPreviousPage,
-  });
+  const getPageNumbers = () => {
+    const pages = [];
+    const maxVisible = 5;
 
-  const pageNumbers = getPageNumbers();
-  console.log("Page numbers generated:", pageNumbers);
+    if (totalPages <= maxVisible) {
+      // Show all pages if total is small
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i);
+      }
+    } else {
+      // Show first, last, and pages around current
+      if (currentPage <= 3) {
+        // Near start
+        for (let i = 1; i <= 4; i++) pages.push(i);
+        pages.push("...");
+        pages.push(totalPages);
+      } else if (currentPage >= totalPages - 2) {
+        // Near end
+        pages.push(1);
+        pages.push("...");
+        for (let i = totalPages - 3; i <= totalPages; i++) pages.push(i);
+      } else {
+        // Middle
+        pages.push(1);
+        pages.push("...");
+        pages.push(currentPage - 1);
+        pages.push(currentPage);
+        pages.push(currentPage + 1);
+        pages.push("...");
+        pages.push(totalPages);
+      }
+    }
 
-  if (totalItems === 0) {
-    console.log("TablePagination: returning null (totalItems === 0)");
-    return null;
-  }
+    return pages;
+  };
+
+  if (totalItems === 0) return null;
 
   return (
     <div

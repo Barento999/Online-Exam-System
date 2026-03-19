@@ -7,55 +7,30 @@ export const usePagination = (data = [], itemsPerPage = 10) => {
   const totalPages = Math.ceil(data.length / pageSize) || 1;
   const totalItems = data.length;
 
-  // Debug logging
-  console.log("usePagination:", {
-    dataLength: data.length,
-    currentPage,
-    pageSize,
-    totalPages,
-    totalItems,
-  });
-
   const paginatedData = useMemo(() => {
     const startIndex = (currentPage - 1) * pageSize;
     const endIndex = startIndex + pageSize;
-    const sliced = data.slice(startIndex, endIndex);
-    console.log("paginatedData slice:", {
-      startIndex,
-      endIndex,
-      slicedLength: sliced.length,
-    });
-    return sliced;
+    return data.slice(startIndex, endIndex);
   }, [data, currentPage, pageSize]);
 
   const goToPage = (page) => {
     const pageNumber = Math.max(1, Math.min(page, totalPages));
-    console.log(
-      `goToPage called: page=${page}, clamped to=${pageNumber}, totalPages=${totalPages}`,
-    );
     setCurrentPage(pageNumber);
   };
 
   const nextPage = () => {
-    console.log(
-      `nextPage called: currentPage=${currentPage}, totalPages=${totalPages}`,
-    );
     if (currentPage < totalPages) {
       setCurrentPage(currentPage + 1);
     }
   };
 
   const previousPage = () => {
-    console.log(`previousPage called: currentPage=${currentPage}`);
     if (currentPage > 1) {
       setCurrentPage(currentPage - 1);
     }
   };
 
   const changePageSize = (newSize) => {
-    console.log(
-      `changePageSize called: newSize=${newSize}, resetting to page 1`,
-    );
     setPageSize(newSize);
     setCurrentPage(1);
   };
