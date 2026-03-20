@@ -34,6 +34,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { CardListSkeleton } from "@/components/skeletons/TableSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import { MultiStepQuestionForm } from "@/components/forms/MultiStepQuestionForm";
 import { questionsApi, examsApi } from "@/services/api";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
@@ -880,8 +881,22 @@ export const Questions = () => {
             />
             <div className="space-y-4">
               {paginatedData.length === 0 ? (
-                <div className="text-center text-muted-foreground py-8">
-                  No questions found
+                <div className="py-8">
+                  {questions.length === 0 ? (
+                    <EmptyState
+                      illustration="exams"
+                      title="No questions yet"
+                      description="Create your first question to build your question bank. You can add multiple choice, true/false, or essay questions."
+                      action={() => setIsMultiStepOpen(true)}
+                      actionLabel="Create First Question"
+                    />
+                  ) : (
+                    <EmptyState
+                      illustration="exams"
+                      title="No questions found"
+                      description="No questions match your current filters. Try adjusting your search or filter criteria."
+                    />
+                  )}
                 </div>
               ) : (
                 paginatedData.map((question, index) => {

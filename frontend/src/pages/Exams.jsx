@@ -41,6 +41,7 @@ import { usePageNotifications } from "@/hooks/usePageNotifications";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import { MultiStepExamForm } from "@/components/forms/MultiStepExamForm";
 import { examsApi, coursesApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
@@ -723,10 +724,22 @@ export const Exams = () => {
                 <TableBody>
                   {paginatedData.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={8}
-                        className="text-center text-muted-foreground">
-                        No exams found
+                      <TableCell colSpan={8} className="h-96">
+                        {exams.length === 0 ? (
+                          <EmptyState
+                            illustration="exams"
+                            title="No exams yet"
+                            description="Create your first exam to get started. You can add questions, set time limits, and assign it to students."
+                            action={() => setIsMultiStepOpen(true)}
+                            actionLabel="Create First Exam"
+                          />
+                        ) : (
+                          <EmptyState
+                            illustration="exams"
+                            title="No exams found"
+                            description="No exams match your current filters. Try adjusting your search or filter criteria."
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   ) : (

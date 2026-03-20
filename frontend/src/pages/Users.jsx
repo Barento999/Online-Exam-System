@@ -41,6 +41,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import { MultiStepUserForm } from "@/components/forms/MultiStepUserForm";
 import { usersApi } from "@/services/api";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
@@ -702,10 +703,22 @@ Admin User,admin@example.com,password123,admin,active`;
                 <TableBody>
                   {paginatedData.length === 0 ? (
                     <TableRow>
-                      <TableCell
-                        colSpan={6}
-                        className="text-center text-muted-foreground">
-                        No users found
+                      <TableCell colSpan={6} className="h-96">
+                        {users.length === 0 ? (
+                          <EmptyState
+                            illustration="data"
+                            title="No users yet"
+                            description="Get started by creating your first user. You can add users manually or import them from a CSV file."
+                            action={() => setIsMultiStepOpen(true)}
+                            actionLabel="Create First User"
+                          />
+                        ) : (
+                          <EmptyState
+                            illustration="data"
+                            title="No users found"
+                            description="No users match your current filters. Try adjusting your search or filter criteria."
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   ) : (

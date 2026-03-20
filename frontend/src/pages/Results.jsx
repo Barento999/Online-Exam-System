@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Loader } from "@/components/common/Loader";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import { resultsApi, examsApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -376,8 +377,20 @@ export const Results = () => {
                     <TableRow>
                       <TableCell
                         colSpan={user?.role === "student" ? 6 : 9}
-                        className="text-center text-muted-foreground">
-                        No results found
+                        className="h-96">
+                        {results.length === 0 ? (
+                          <EmptyState
+                            illustration="results"
+                            title="No results yet"
+                            description="Results will appear here once students complete exams and teachers publish the grades."
+                          />
+                        ) : (
+                          <EmptyState
+                            illustration="results"
+                            title="No results found"
+                            description="No results match your current filters. Try adjusting your search or filter criteria."
+                          />
+                        )}
                       </TableCell>
                     </TableRow>
                   ) : (

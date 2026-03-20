@@ -24,6 +24,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { CardListSkeleton } from "@/components/skeletons/TableSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import { coursesApi, usersApi } from "@/services/api";
 import { Plus, Pencil, Trash2, BookOpen, Users } from "lucide-react";
 import toast from "react-hot-toast";
@@ -225,8 +226,14 @@ export const Courses = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.length === 0 ? (
             <Card className="col-span-full">
-              <CardContent className="flex items-center justify-center h-40">
-                <p className="text-muted-foreground">No courses found</p>
+              <CardContent className="flex items-center justify-center h-96 p-0">
+                <EmptyState
+                  illustration="courses"
+                  title="No courses yet"
+                  description="Create your first course to organize your exams and track student progress. Courses help you structure your curriculum."
+                  action={() => setIsDialogOpen(true)}
+                  actionLabel="Create First Course"
+                />
               </CardContent>
             </Card>
           ) : (

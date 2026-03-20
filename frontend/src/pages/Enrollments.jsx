@@ -30,6 +30,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
+import { EmptyState } from "@/components/common/EmptyState";
 import { enrollmentsApi, coursesApi, usersApi } from "@/services/api";
 import { Plus, Trash2, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
@@ -227,8 +228,14 @@ export const Enrollments = () => {
           </CardHeader>
           <CardContent>
             {enrollments.length === 0 ? (
-              <div className="flex items-center justify-center h-40">
-                <p className="text-muted-foreground">No enrollments found</p>
+              <div className="flex items-center justify-center h-96">
+                <EmptyState
+                  illustration="courses"
+                  title="No enrollments yet"
+                  description="Start enrolling students in courses to track their progress and manage their learning journey."
+                  action={() => setIsDialogOpen(true)}
+                  actionLabel="Create First Enrollment"
+                />
               </div>
             ) : (
               <Table>
