@@ -327,8 +327,12 @@ export const Navbar = () => {
   };
 
   const handleLogout = () => {
+    const userName = user?.name || "User";
     logout();
-    toast.success("Logged out successfully");
+    toast.success(`Goodbye, ${userName}! See you soon.`, {
+      icon: "👋",
+      duration: 3000,
+    });
     navigate("/login");
   };
 

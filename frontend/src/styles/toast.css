@@ -1,6 +1,6 @@
-/* Toast Notification Styles */
+/* Toast Notification Styles for react-hot-toast */
 
-/* Container positioning */
+/* Container positioning - react-hot-toast uses div with specific class */
 .toast-container {
   z-index: 9999 !important;
 }
@@ -11,7 +11,6 @@
     top: 70px !important;
     right: 10px !important;
     left: 10px !important;
-    bottom: 10px !important;
   }
 }
 
@@ -19,7 +18,6 @@
   .toast-container {
     top: 75px !important;
     right: 15px !important;
-    left: auto !important;
   }
 }
 
@@ -27,12 +25,17 @@
   .toast-container {
     top: 80px !important;
     right: 20px !important;
-    left: auto !important;
   }
 }
 
+/* React Hot Toast specific selectors */
+/* Target the toast wrapper */
+[data-react-hot-toast] {
+  z-index: 9999 !important;
+}
+
 /* Toast animation improvements */
-[data-sonner-toast] {
+[data-react-hot-toast] > div {
   animation: slideIn 0.3s ease-out;
 }
 
@@ -48,7 +51,7 @@
 }
 
 /* Toast exit animation */
-[data-sonner-toast][data-removed="true"] {
+[data-react-hot-toast] > div[data-visible="false"] {
   animation: slideOut 0.2s ease-in forwards;
 }
 
@@ -70,137 +73,49 @@
 
 /* Mobile: Full width toasts */
 @media (max-width: 640px) {
-  .toast-container > div > div {
-    width: 100% !important;
-    max-width: 100% !important;
+  [data-react-hot-toast] > div {
+    width: calc(100vw - 20px) !important;
+    max-width: calc(100vw - 20px) !important;
   }
 }
 
 /* Tablet: Constrained width */
 @media (min-width: 641px) and (max-width: 1024px) {
-  .toast-container > div > div {
+  [data-react-hot-toast] > div {
     max-width: 380px !important;
   }
 }
 
 /* Desktop: Standard width */
 @media (min-width: 1025px) {
-  .toast-container > div > div {
+  [data-react-hot-toast] > div {
     max-width: 420px !important;
   }
 }
 
-/* Toast stacking */
-.toast-container > div {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
 /* Ensure proper z-index hierarchy */
-.toast-container {
+[data-react-hot-toast] {
   position: fixed;
-  pointer-events: none;
-}
-
-.toast-container > div {
-  pointer-events: auto;
+  z-index: 9999;
 }
 
 /* Dark mode adjustments */
 @media (prefers-color-scheme: dark) {
-  .toast-container > div > div {
+  [data-react-hot-toast] > div {
     box-shadow:
       0 10px 15px -3px rgba(0, 0, 0, 0.3),
-      0 4px 6px -2px rgba(0, 0, 0, 0.2);
+      0 4px 6px -2px rgba(0, 0, 0, 0.2) !important;
   }
-}
-
-/* Success toast specific styles */
-.toast-container [data-type="success"] {
-  background: var(--card);
-  border-left: 4px solid #22c55e;
-}
-
-/* Error toast specific styles */
-.toast-container [data-type="error"] {
-  background: var(--card);
-  border-left: 4px solid #ef4444;
-}
-
-/* Info toast specific styles */
-.toast-container [data-type="info"] {
-  background: var(--card);
-  border-left: 4px solid #3b82f6;
-}
-
-/* Warning toast specific styles */
-.toast-container [data-type="warning"] {
-  background: var(--card);
-  border-left: 4px solid #f59e0b;
-}
-
-/* Loading toast specific styles */
-.toast-container [data-type="loading"] {
-  background: var(--card);
-  border-left: 4px solid #8b5cf6;
-}
-
-/* Toast content padding */
-.toast-container [role="status"] {
-  padding: 0.75rem 1rem;
-}
-
-/* Ensure toasts are above modals but below critical UI */
-.toast-container {
-  z-index: 9999;
-}
-
-/* Adjust for sidebar on desktop */
-@media (min-width: 1024px) {
-  .toast-container {
-    right: 20px;
-  }
-
-  /* When sidebar is collapsed */
-  body.sidebar-collapsed .toast-container {
-    right: 20px;
-  }
-
-  /* When sidebar is expanded */
-  body.sidebar-expanded .toast-container {
-    right: 20px;
-  }
-}
-
-/* Prevent toast from being cut off */
-.toast-container > div {
-  max-height: calc(100vh - 100px);
-  overflow-y: auto;
-}
-
-/* Smooth scroll for multiple toasts */
-.toast-container > div::-webkit-scrollbar {
-  width: 4px;
-}
-
-.toast-container > div::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.toast-container > div::-webkit-scrollbar-thumb {
-  background: var(--border);
-  border-radius: 2px;
 }
 
 /* Hover effects */
-.toast-container [role="status"]:hover {
+[data-react-hot-toast] > div:hover {
   transform: scale(1.02);
   transition: transform 0.2s ease;
 }
 
 /* Focus styles for accessibility */
-.toast-container [role="status"]:focus-visible {
+[data-react-hot-toast] > div:focus-visible {
   outline: 2px solid var(--primary);
   outline-offset: 2px;
 }

@@ -27,6 +27,7 @@ import { BreadcrumbsDemo } from "@/components/common/BreadcrumbsDemo";
 import { DragDropDemo } from "@/pages/DragDropDemo";
 import { RichTextDemo } from "@/pages/RichTextDemo";
 import { RichTextCursorTest } from "@/pages/RichTextCursorTest";
+import { ToastTest } from "@/pages/ToastTest";
 
 // Dashboard Router Component
 const DashboardRouter = () => {
@@ -196,6 +197,14 @@ export const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <RichTextCursorTest />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/toast-test",
+    element: (
+      <ProtectedRoute>
+        <ToastTest />
       </ProtectedRoute>
     ),
   },

@@ -57,7 +57,10 @@ export const Login = () => {
       const { token, ...userWithoutToken } = userData;
       login(userWithoutToken);
 
-      toast.success("Login successful!");
+      toast.success(`Welcome back, ${userWithoutToken.name}!`, {
+        icon: "👋",
+        duration: 4000,
+      });
       navigate("/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Invalid credentials");

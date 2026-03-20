@@ -81,7 +81,9 @@ export const Register = () => {
       const { token, ...userWithoutToken } = userData;
       login(userWithoutToken);
 
-      toast.success("Registration successful!");
+      toast.success(`Welcome to the platform, ${userWithoutToken.name}! 🎉`, {
+        duration: 4000,
+      });
       navigate("/dashboard");
     } catch (error) {
       toast.error(error.response?.data?.message || "Registration failed");
