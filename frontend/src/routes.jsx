@@ -28,6 +28,7 @@ import { DragDropDemo } from "@/pages/DragDropDemo";
 import { RichTextDemo } from "@/pages/RichTextDemo";
 import { RichTextCursorTest } from "@/pages/RichTextCursorTest";
 import { ToastTest } from "@/pages/ToastTest";
+import { NotFound } from "@/pages/NotFound";
 
 // Dashboard Router Component
 const DashboardRouter = () => {
@@ -209,7 +210,11 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: "/404",
+    element: <NotFound />,
+  },
+  {
     path: "*",
-    element: <Navigate to="/login" replace />,
+    element: <NotFound />,
   },
 ]);
