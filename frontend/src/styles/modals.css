@@ -1,0 +1,314 @@
+/* Modal and Dialog Styles */
+
+/* Alert Dialog Overlay */
+[data-radix-alert-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Alert Dialog Content */
+[data-radix-alert-dialog-content] {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Dark mode overlay */
+@media (prefers-color-scheme: dark) {
+  [data-radix-alert-dialog-overlay] {
+    background-color: rgba(0, 0, 0, 0.7);
+  }
+
+  [data-radix-alert-dialog-content] {
+    box-shadow:
+      0 20px 25px -5px rgba(0, 0, 0, 0.3),
+      0 10px 10px -5px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Dialog Overlay */
+[data-radix-dialog-overlay] {
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Dialog Content */
+[data-radix-dialog-content] {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow:
+    0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Responsive modal sizing */
+@media (max-width: 640px) {
+  [data-radix-alert-dialog-content],
+  [data-radix-dialog-content] {
+    width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
+    margin: 1rem;
+  }
+}
+
+/* Modal header spacing */
+[data-radix-alert-dialog-title],
+[data-radix-dialog-title] {
+  margin-bottom: 0.5rem;
+}
+
+/* Modal description */
+[data-radix-alert-dialog-description],
+[data-radix-dialog-description] {
+  line-height: 1.5;
+}
+
+/* Modal footer button spacing */
+[data-radix-alert-dialog-footer],
+[data-radix-dialog-footer] {
+  gap: 0.5rem;
+}
+
+/* Button focus states */
+[data-radix-alert-dialog-action]:focus-visible,
+[data-radix-alert-dialog-cancel]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Loading state for buttons */
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Icon animation in modals */
+.modal-icon-enter {
+  animation: iconBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes iconBounce {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Confirmation modal specific styles */
+.confirm-modal-destructive {
+  border-left: 4px solid hsl(var(--destructive));
+}
+
+.confirm-modal-warning {
+  border-left: 4px solid #f59e0b;
+}
+
+.confirm-modal-info {
+  border-left: 4px solid #3b82f6;
+}
+
+.confirm-modal-success {
+  border-left: 4px solid #22c55e;
+}
+
+/* Modal close button */
+[data-radix-alert-dialog-close],
+[data-radix-dialog-close] {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+[data-radix-alert-dialog-close]:hover,
+[data-radix-dialog-close]:hover {
+  opacity: 1;
+}
+
+/* Prevent body scroll when modal is open */
+body:has([data-radix-alert-dialog-overlay]),
+body:has([data-radix-dialog-overlay]) {
+  overflow: hidden;
+}
+
+/* Modal z-index hierarchy */
+[data-radix-alert-dialog-overlay],
+[data-radix-dialog-overlay] {
+  z-index: 50;
+}
+
+[data-radix-alert-dialog-content],
+[data-radix-dialog-content] {
+  z-index: 51;
+}
+
+/* Smooth transitions for modal state changes */
+[data-radix-alert-dialog-overlay][data-state="open"],
+[data-radix-dialog-overlay][data-state="open"] {
+  animation: fadeIn 0.2s ease-out;
+}
+
+[data-radix-alert-dialog-overlay][data-state="closed"],
+[data-radix-dialog-overlay][data-state="closed"] {
+  animation: fadeOut 0.2s ease-in;
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+[data-radix-alert-dialog-content][data-state="open"],
+[data-radix-dialog-content][data-state="open"] {
+  animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-radix-alert-dialog-content][data-state="closed"],
+[data-radix-dialog-content][data-state="closed"] {
+  animation: slideOut 0.2s ease-in;
+}
+
+@keyframes slideOut {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.96);
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  [data-radix-alert-dialog-content],
+  [data-radix-dialog-content] {
+    max-height: calc(100vh - 4rem);
+    overflow-y: auto;
+  }
+
+  /* Stack buttons vertically on mobile */
+  [data-radix-alert-dialog-footer],
+  [data-radix-dialog-footer] {
+    flex-direction: column-reverse;
+  }
+
+  [data-radix-alert-dialog-footer] > *,
+  [data-radix-dialog-footer] > * {
+    width: 100%;
+  }
+}
+
+/* Accessibility improvements */
+[data-radix-alert-dialog-content]:focus,
+[data-radix-dialog-content]:focus {
+  outline: none;
+}
+
+/* Keyboard navigation indicators */
+[data-radix-alert-dialog-action]:focus-visible,
+[data-radix-alert-dialog-cancel]:focus-visible,
+[data-radix-dialog-action]:focus-visible,
+[data-radix-dialog-cancel]:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 0.375rem;
+}
+
+/* Loading spinner in buttons */
+.button-spinner {
+  display: inline-block;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Modal content padding adjustments */
+[data-radix-alert-dialog-content],
+[data-radix-dialog-content] {
+  padding: 1.5rem;
+}
+
+@media (min-width: 640px) {
+  [data-radix-alert-dialog-content],
+  [data-radix-dialog-content] {
+    padding: 2rem;
+  }
+}
+
+/* Icon container in confirmation modals */
+.confirm-icon-container {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 3rem;
+  height: 3rem;
+  border-radius: 9999px;
+  animation: iconBounce 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Hover effects for modal buttons */
+[data-radix-alert-dialog-action]:hover:not([disabled]),
+[data-radix-dialog-action]:hover:not([disabled]) {
+  transform: translateY(-1px);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: all 0.2s ease;
+}
+
+[data-radix-alert-dialog-cancel]:hover:not([disabled]),
+[data-radix-dialog-cancel]:hover:not([disabled]) {
+  background-color: var(--muted);
+  transition: background-color 0.2s ease;
+}
+
+/* Active state for buttons */
+[data-radix-alert-dialog-action]:active:not([disabled]),
+[data-radix-dialog-action]:active:not([disabled]) {
+  transform: translateY(0);
+}

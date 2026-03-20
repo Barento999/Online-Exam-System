@@ -4,6 +4,7 @@
 @import "./mobile-drawer.css";
 @import "./responsive-table.css";
 @import "./toast.css";
+@import "./modals.css";
 
 /* Page transition animations */
 @keyframes progress-bar {
