@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "@/components/common/Loader";
+import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
 import {
   Select,
   SelectContent,
@@ -257,8 +258,14 @@ export const Analytics = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader size="lg" />
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-semibold">Advanced Analytics</h1>
+            <p className="text-muted-foreground">
+              Comprehensive performance insights
+            </p>
+          </div>
+          <DashboardSkeleton />
         </div>
       </Layout>
     );

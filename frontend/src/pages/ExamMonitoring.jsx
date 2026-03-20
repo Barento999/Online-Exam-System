@@ -4,6 +4,7 @@ import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/common/Loader";
+import { CardListSkeleton } from "@/components/skeletons/TableSkeleton";
 import { LiveExamMonitor } from "@/components/common/LiveExamMonitor";
 import { examsApi, questionsApi } from "@/services/api";
 import { ArrowLeft, Eye } from "lucide-react";
@@ -41,8 +42,12 @@ export const ExamMonitoring = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader size="lg" />
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-semibold">Exam Monitoring</h1>
+            <p className="text-muted-foreground">Monitor live exam sessions</p>
+          </div>
+          <CardListSkeleton count={3} />
         </div>
       </Layout>
     );

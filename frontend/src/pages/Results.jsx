@@ -20,6 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Loader } from "@/components/common/Loader";
+import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { resultsApi, examsApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -179,8 +180,14 @@ export const Results = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader size="lg" />
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-semibold">Exam Results</h1>
+            <p className="text-muted-foreground">
+              View and manage exam results
+            </p>
+          </div>
+          <TableSkeleton rows={5} columns={7} />
         </div>
       </Layout>
     );

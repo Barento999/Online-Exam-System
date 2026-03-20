@@ -1,10 +1,20 @@
-import { useState, useEffect } from 'react';
-import { Layout } from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader } from '@/components/common/Loader';
-import { dashboardApi } from '@/services/api';
-import { Users, GraduationCap, FileText, BookOpen } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { useState, useEffect } from "react";
+import { Layout } from "@/components/layout/Layout";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader } from "@/components/common/Loader";
+import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
+import { dashboardApi } from "@/services/api";
+import { Users, GraduationCap, FileText, BookOpen } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
 
 export const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -19,7 +29,7 @@ export const AdminDashboard = () => {
       const response = await dashboardApi.getAdminStats();
       setStats(response.data);
     } catch (error) {
-      console.error('Error loading stats:', error);
+      console.error("Error loading stats:", error);
     } finally {
       setLoading(false);
     }
@@ -28,8 +38,14 @@ export const AdminDashboard = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader size="lg" />
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-semibold">Admin Dashboard</h1>
+            <p className="text-muted-foreground">
+              System overview and statistics
+            </p>
+          </div>
+          <DashboardSkeleton />
         </div>
       </Layout>
     );
@@ -37,32 +53,32 @@ export const AdminDashboard = () => {
 
   const statCards = [
     {
-      title: 'Total Students',
+      title: "Total Students",
       value: stats?.totalStudents || 0,
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/20',
+      color: "text-blue-600",
+      bgColor: "bg-blue-100 dark:bg-blue-900/20",
     },
     {
-      title: 'Total Teachers',
+      title: "Total Teachers",
       value: stats?.totalTeachers || 0,
       icon: GraduationCap,
-      color: 'text-green-600',
-      bgColor: 'bg-green-100 dark:bg-green-900/20',
+      color: "text-green-600",
+      bgColor: "bg-green-100 dark:bg-green-900/20",
     },
     {
-      title: 'Total Exams',
+      title: "Total Exams",
       value: stats?.totalExams || 0,
       icon: FileText,
-      color: 'text-orange-600',
-      bgColor: 'bg-orange-100 dark:bg-orange-900/20',
+      color: "text-orange-600",
+      bgColor: "bg-orange-100 dark:bg-orange-900/20",
     },
     {
-      title: 'Total Courses',
+      title: "Total Courses",
       value: stats?.totalCourses || 0,
       icon: BookOpen,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-100 dark:bg-purple-900/20',
+      color: "text-purple-600",
+      bgColor: "bg-purple-100 dark:bg-purple-900/20",
     },
   ];
 
@@ -84,10 +100,15 @@ export const AdminDashboard = () => {
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">{stat.title}</p>
-                      <p className="text-3xl font-semibold mt-2">{stat.value}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {stat.title}
+                      </p>
+                      <p className="text-3xl font-semibold mt-2">
+                        {stat.value}
+                      </p>
                     </div>
-                    <div className={`h-12 w-12 rounded-full ${stat.bgColor} flex items-center justify-center`}>
+                    <div
+                      className={`h-12 w-12 rounded-full ${stat.bgColor} flex items-center justify-center`}>
                       <Icon className={`h-6 w-6 ${stat.color}`} />
                     </div>
                   </div>
@@ -124,7 +145,9 @@ export const AdminDashboard = () => {
             <CardContent>
               <div className="space-y-4">
                 {stats?.recentActivity?.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-4 pb-4 border-b last:border-0">
+                  <div
+                    key={activity.id}
+                    className="flex items-start gap-4 pb-4 border-b last:border-0">
                     <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
                       <span className="text-primary text-sm font-medium">
                         {activity.user.charAt(0)}
@@ -132,8 +155,12 @@ export const AdminDashboard = () => {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium">{activity.action}</p>
-                      <p className="text-sm text-muted-foreground">{activity.user}</p>
-                      <p className="text-xs text-muted-foreground mt-1">{activity.time}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {activity.user}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {activity.time}
+                      </p>
                     </div>
                   </div>
                 ))}

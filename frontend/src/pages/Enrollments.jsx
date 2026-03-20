@@ -29,6 +29,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
+import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { enrollmentsApi, coursesApi, usersApi } from "@/services/api";
 import { Plus, Trash2, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
@@ -127,8 +128,14 @@ export const Enrollments = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader size="lg" />
+        <div className="space-y-6">
+          <div>
+            <h1 className="text-3xl font-semibold">Enrollments Management</h1>
+            <p className="text-muted-foreground">
+              Manage student course enrollments
+            </p>
+          </div>
+          <TableSkeleton rows={5} columns={4} />
         </div>
       </Layout>
     );
