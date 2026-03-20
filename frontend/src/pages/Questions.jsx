@@ -33,6 +33,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
+import { CardListSkeleton } from "@/components/skeletons/TableSkeleton";
 import { MultiStepQuestionForm } from "@/components/forms/MultiStepQuestionForm";
 import { questionsApi, examsApi } from "@/services/api";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
@@ -519,8 +520,25 @@ export const Questions = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader size="lg" />
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-semibold">Question Bank</h1>
+              <p className="text-muted-foreground">Manage exam questions</p>
+            </div>
+          </div>
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <div className="h-10 bg-muted animate-pulse rounded" />
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <CardListSkeleton count={5} />
+            </CardContent>
+          </Card>
         </div>
       </Layout>
     );

@@ -40,6 +40,7 @@ import { Switch } from "@/components/ui/switch";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
+import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { MultiStepExamForm } from "@/components/forms/MultiStepExamForm";
 import { examsApi, coursesApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
@@ -398,8 +399,18 @@ export const Exams = () => {
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader size="lg" />
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-semibold">Exams Management</h1>
+              <p className="text-muted-foreground">
+                {user?.role === "student"
+                  ? "View and take available exams"
+                  : "Manage all exams"}
+              </p>
+            </div>
+          </div>
+          <TableSkeleton rows={5} columns={7} />
         </div>
       </Layout>
     );

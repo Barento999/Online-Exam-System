@@ -40,6 +40,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { Loader } from "@/components/common/Loader";
+import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { MultiStepUserForm } from "@/components/forms/MultiStepUserForm";
 import { usersApi } from "@/services/api";
 import { usePageNotifications } from "@/hooks/usePageNotifications";
@@ -412,8 +413,14 @@ Admin User,admin@example.com,password123,admin,active`;
   if (loading) {
     return (
       <Layout>
-        <div className="flex items-center justify-center h-96">
-          <Loader size="lg" />
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-semibold">Users Management</h1>
+              <p className="text-muted-foreground">Manage all system users</p>
+            </div>
+          </div>
+          <TableSkeleton rows={5} columns={5} />
         </div>
       </Layout>
     );
