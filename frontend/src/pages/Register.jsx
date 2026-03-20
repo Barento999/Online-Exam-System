@@ -57,9 +57,6 @@ export const Register = () => {
     } else if (formData.password.length < 6) {
       newErrors.password = "Password must be at least 6 characters";
     }
-    if (!formData.role) {
-      newErrors.role = "Role is required";
-    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -139,7 +136,7 @@ export const Register = () => {
             Create Account
           </CardTitle>
           <CardDescription className="text-base animate-in fade-in duration-500 delay-400">
-            Register to get started with the exam system
+            Register as a student to access exams and courses
           </CardDescription>
         </CardHeader>
         <CardContent className="animate-in fade-in duration-500 delay-500">
@@ -232,43 +229,23 @@ export const Register = () => {
               </p>
             </div>
 
+            {/* Role is fixed as student for self-registration */}
             <div className="space-y-2">
-              <Label htmlFor="role" className="text-sm font-medium">
-                I am a
-              </Label>
-              <Select
-                value={formData.role}
-                onValueChange={(value) =>
-                  setFormData({ ...formData, role: value })
-                }>
-                <SelectTrigger
-                  className={`transition-all duration-200 ${
-                    errors.role
-                      ? "border-destructive focus-visible:ring-destructive"
-                      : "focus-visible:ring-2 focus-visible:ring-green-500"
-                  }`}>
-                  <SelectValue placeholder="Select your role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="student">
-                    <div className="flex items-center gap-2">
-                      <span>🎓</span>
-                      <span>Student</span>
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="teacher">
-                    <div className="flex items-center gap-2">
-                      <span>👨‍🏫</span>
-                      <span>Teacher</span>
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-              {errors.role && (
-                <p className="text-sm text-destructive animate-in slide-in-from-top-1 duration-200">
-                  {errors.role}
-                </p>
-              )}
+              <div className="flex items-center justify-between p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900/40 flex items-center justify-center">
+                    <span className="text-2xl">🎓</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-green-900 dark:text-green-100">
+                      Registering as Student
+                    </p>
+                    <p className="text-xs text-green-700 dark:text-green-300">
+                      Teachers are created by administrators
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <Button

@@ -31,7 +31,7 @@ export const Layout = ({ children }) => {
           // Only apply margin on desktop
           !isMobile && (isCollapsed ? "lg:ml-20" : "lg:ml-64"),
         )}>
-        <Navbar />
+        <Navbar isCollapsed={isCollapsed} isMobile={isMobile} />
         <main className="pt-16">
           <div className="p-4 md:p-6">
             <Breadcrumbs />

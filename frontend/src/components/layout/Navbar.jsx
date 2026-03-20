@@ -29,6 +29,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import {
   DropdownMenu,
@@ -42,7 +43,7 @@ import { notificationService } from "@/services/notificationService";
 import { searchService } from "@/services/searchService";
 import toast from "react-hot-toast";
 
-export const Navbar = () => {
+export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(false);
@@ -491,7 +492,12 @@ export const Navbar = () => {
   };
 
   return (
-    <div className="h-16 bg-card/95 backdrop-blur-sm border-b border-border/50 flex items-center justify-between px-4 md:px-6 fixed top-0 left-0 lg:left-64 right-0 z-10 shadow-sm">
+    <div
+      className={cn(
+        "h-16 bg-card/95 backdrop-blur-sm border-b border-border/50 flex items-center justify-between px-4 md:px-6 fixed top-0 right-0 z-10 shadow-sm transition-all duration-300 ease-out",
+        // Adjust left position based on sidebar state
+        isMobile ? "left-0" : isCollapsed ? "left-20" : "left-64",
+      )}>
       <div className="flex items-center gap-4 ml-16 lg:ml-0">
         <h2 className="text-lg md:text-xl font-semibold">
           Welcome back, {user?.name?.split(" ")[0]}!
