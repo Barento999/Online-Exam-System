@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PageTransitionLoader } from "@/components/common/PageTransitionLoader";
 import { ShieldAlert } from "lucide-react";
 
 export const Unauthorized = () => {
@@ -9,7 +8,6 @@ export const Unauthorized = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <PageTransitionLoader />
       <Card className="w-full max-w-md">
         <CardContent className="p-8 text-center">
           <div className="flex justify-center mb-4">
