@@ -25,11 +25,19 @@ export default function App() {
                     background: "var(--card)",
                     color: "var(--card-foreground)",
                     border: "1px solid var(--border)",
+                    boxShadow:
+                      "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+                    borderRadius: "0.5rem",
+                    padding: "1rem",
+                    maxWidth: "420px",
                   },
                   success: {
                     iconTheme: {
                       primary: "#22C55E",
                       secondary: "#FFFFFF",
+                    },
+                    style: {
+                      border: "1px solid #22C55E",
                     },
                   },
                   error: {
@@ -37,8 +45,18 @@ export default function App() {
                       primary: "#EF4444",
                       secondary: "#FFFFFF",
                     },
+                    style: {
+                      border: "1px solid #EF4444",
+                    },
                   },
                 }}
+                containerStyle={{
+                  top: 80,
+                  right: 20,
+                  bottom: 20,
+                  left: 20,
+                }}
+                containerClassName="toast-container"
               />
             </BreadcrumbProvider>
           </NotificationProvider>
