@@ -5,6 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { PageTransitionLoader } from "@/components/common/PageTransitionLoader";
 import { User, Mail, Calendar, Shield, Edit, Save, X } from "lucide-react";
 import { useState } from "react";
 import toast from "react-hot-toast";
@@ -49,6 +50,7 @@ export const Profile = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
+      <PageTransitionLoader />
       <div className="mb-6">
         <h1 className="text-3xl font-bold">Profile</h1>
         <p className="text-muted-foreground">

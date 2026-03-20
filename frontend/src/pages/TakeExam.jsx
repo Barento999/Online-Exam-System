@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Loader } from "@/components/common/Loader";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import { PageTransitionLoader } from "@/components/common/PageTransitionLoader";
 import { examsApi, questionsApi } from "@/services/api";
 import { useExamSession } from "@/hooks/useExamSession";
 import { useAntiCheat } from "@/hooks/useAntiCheat";
@@ -202,6 +203,7 @@ export const TakeExam = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageTransitionLoader />
       {/* Header */}
       <div className="bg-card border-b border-border sticky top-0 z-10">
         <div className="container mx-auto px-4 py-4">

@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PageTransitionLoader } from "@/components/common/PageTransitionLoader";
 import {
   AlertCircle,
   CheckCircle,
@@ -76,6 +77,7 @@ export const RichTextCursorTest = () => {
 
   return (
     <div className="container mx-auto p-6 space-y-6">
+      <PageTransitionLoader />
       <div className="text-center">
         <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
           <TestTube className="h-8 w-8 text-primary" />

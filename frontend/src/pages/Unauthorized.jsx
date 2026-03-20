@@ -1,13 +1,15 @@
-import { useNavigate } from 'react-router';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
-import { ShieldAlert } from 'lucide-react';
+import { useNavigate } from "react-router";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { PageTransitionLoader } from "@/components/common/PageTransitionLoader";
+import { ShieldAlert } from "lucide-react";
 
 export const Unauthorized = () => {
   const navigate = useNavigate();
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
+      <PageTransitionLoader />
       <Card className="w-full max-w-md">
         <CardContent className="p-8 text-center">
           <div className="flex justify-center mb-4">
@@ -19,7 +21,9 @@ export const Unauthorized = () => {
           <p className="text-muted-foreground mb-6">
             You don't have permission to access this page.
           </p>
-          <Button onClick={() => navigate('/dashboard')}>Go to Dashboard</Button>
+          <Button onClick={() => navigate("/dashboard")}>
+            Go to Dashboard
+          </Button>
         </CardContent>
       </Card>
     </div>
