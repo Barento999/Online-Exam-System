@@ -4,7 +4,6 @@ import { SocketProvider } from "./context/SocketContext.jsx";
 import { NotificationProvider } from "./context/NotificationContext.jsx";
 import { BreadcrumbProvider } from "./context/BreadcrumbContext.jsx";
 import { NotificationLoader } from "./components/layout/NotificationExample.jsx";
-import { PageTransitionLoader } from "./components/common/PageTransitionLoader.jsx";
 import { Toaster } from "react-hot-toast";
 import { router } from "./routes.jsx";
 
@@ -14,7 +13,6 @@ export default function App() {
       <SocketProvider>
         <NotificationProvider>
           <BreadcrumbProvider>
-            <PageTransitionLoader />
             <NotificationLoader />
             <RouterProvider router={router} />
             <Toaster

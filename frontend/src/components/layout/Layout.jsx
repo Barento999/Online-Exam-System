@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Sidebar } from "./Sidebar";
 import { Navbar } from "./Navbar";
 import { Breadcrumbs } from "@/components/common/Breadcrumbs";
+import { PageTransitionLoader } from "@/components/common/PageTransitionLoader";
 import { cn } from "@/lib/utils";
 
 export const Layout = ({ children }) => {
@@ -22,6 +23,7 @@ export const Layout = ({ children }) => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageTransitionLoader />
       <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       <div
         className={cn(
