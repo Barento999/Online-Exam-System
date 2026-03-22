@@ -282,7 +282,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "lg:hidden fixed top-2 left-1 z-50 h-12 w-14 flex items-center justify-center mobile-menu-button rounded-lg",
+          "lg:hidden fixed top-3 left-2 z-50 h-10 w-12 flex items-center justify-center mobile-menu-button rounded-lg",
           "bg-sidebar/95 backdrop-blur-sm text-sidebar-foreground",
           "border border-sidebar-border/50 shadow-lg",
           "hover:bg-sidebar-accent transition-all duration-300",
