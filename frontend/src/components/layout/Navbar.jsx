@@ -516,7 +516,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
       </div>
 
       {/* Search Bar - Hidden on mobile, shown on tablet+ */}
-      <div className="flex-1 max-w-xs sm:max-w-md mx-2 sm:mx-4 relative hidden md:block">
+      <div className="flex-1 max-w-[240px] sm:max-w-xs mx-2 sm:mx-4 relative hidden md:block">
         <div className="relative">
           <div
             className="flex items-center w-full h-10 px-3 rounded-md border-2 border-border bg-background hover:bg-accent/50 transition-colors cursor-text focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
@@ -559,7 +559,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
 
       {/* Desktop Search Dropdown - Only for desktop search bar */}
       <div className="hidden md:block absolute top-full left-1/2 -translate-x-1/2 w-full max-w-md mt-2 z-50">
-        {isSearchOpen && (searchQuery || searchResults.length > 0) && (
+        {isSearchOpen && (
           <div
             className="bg-card border-2 border-border rounded-lg shadow-xl max-h-96 overflow-hidden"
             onMouseDown={(e) => e.preventDefault()}>
@@ -610,27 +610,29 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
                   </p>
                 </div>
               ) : (
-                <div className="p-4 text-center text-muted-foreground">
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Quick Search</p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="h-3 w-3" />
-                        Exams
+                <div className="p-4">
+                  <div className="space-y-3">
+                    <p className="text-sm font-semibold text-foreground">
+                      Quick Search
+                    </p>
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors cursor-default">
+                        <BookOpen className="h-4 w-4 text-primary" />
+                        <span className="text-sm">Exams</span>
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Hash className="h-3 w-3" />
-                        Questions
+                      <div className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors cursor-default">
+                        <Hash className="h-4 w-4 text-primary" />
+                        <span className="text-sm">Questions</span>
                       </div>
                       {user?.role !== "student" && (
                         <>
-                          <div className="flex items-center gap-2">
-                            <User className="h-3 w-3" />
-                            Users
+                          <div className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors cursor-default">
+                            <User className="h-4 w-4 text-primary" />
+                            <span className="text-sm">Users</span>
                           </div>
-                          <div className="flex items-center gap-2">
-                            <GraduationCap className="h-3 w-3" />
-                            Courses
+                          <div className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors cursor-default">
+                            <GraduationCap className="h-4 w-4 text-primary" />
+                            <span className="text-sm">Courses</span>
                           </div>
                         </>
                       )}
@@ -718,27 +720,29 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
                     </p>
                   </div>
                 ) : (
-                  <div className="p-4 text-center text-muted-foreground">
-                    <div className="space-y-2">
-                      <p className="text-sm font-medium">Quick Search</p>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="flex items-center gap-2">
-                          <BookOpen className="h-3 w-3" />
-                          Exams
+                  <div className="p-4">
+                    <div className="space-y-3">
+                      <p className="text-sm font-semibold text-foreground">
+                        Quick Search
+                      </p>
+                      <div className="grid grid-cols-2 gap-2">
+                        <div className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors cursor-default">
+                          <BookOpen className="h-4 w-4 text-primary" />
+                          <span className="text-sm">Exams</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <Hash className="h-3 w-3" />
-                          Questions
+                        <div className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors cursor-default">
+                          <Hash className="h-4 w-4 text-primary" />
+                          <span className="text-sm">Questions</span>
                         </div>
                         {user?.role !== "student" && (
                           <>
-                            <div className="flex items-center gap-2">
-                              <User className="h-3 w-3" />
-                              Users
+                            <div className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors cursor-default">
+                              <User className="h-4 w-4 text-primary" />
+                              <span className="text-sm">Users</span>
                             </div>
-                            <div className="flex items-center gap-2">
-                              <GraduationCap className="h-3 w-3" />
-                              Courses
+                            <div className="flex items-center gap-2 p-2 rounded-md hover:bg-accent transition-colors cursor-default">
+                              <GraduationCap className="h-4 w-4 text-primary" />
+                              <span className="text-sm">Courses</span>
                             </div>
                           </>
                         )}
