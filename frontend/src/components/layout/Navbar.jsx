@@ -134,6 +134,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
         setIsSearchOpen(false);
         setSearchQuery("");
         setSearchResults([]);
+        searchInputRef.current?.blur();
       }
     };
 
@@ -511,7 +512,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
       <div className="flex-1 max-w-xs sm:max-w-md mx-2 sm:mx-4 relative hidden md:block">
         <div className="relative">
           <div
-            className="flex items-center w-full h-10 px-3 rounded-md border border-input bg-background hover:bg-accent/50 transition-colors cursor-text"
+            className="flex items-center w-full h-10 px-3 rounded-md border-2 border-input bg-background hover:bg-accent/50 transition-colors cursor-text"
             onClick={() => searchInputRef.current?.focus()}>
             <Search className="mr-2 h-4 w-4 text-muted-foreground flex-shrink-0" />
             <Input
@@ -553,7 +554,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
       <div className="hidden md:block absolute top-full left-1/2 -translate-x-1/2 w-full max-w-md mt-2 z-50">
         {isSearchOpen && (searchQuery || searchResults.length > 0) && (
           <div
-            className="bg-card border rounded-lg shadow-lg max-h-96 overflow-hidden"
+            className="bg-card border-2 border-border rounded-lg shadow-xl max-h-96 overflow-hidden"
             onMouseDown={(e) => e.preventDefault()}>
             <div className="max-h-80 overflow-y-auto">
               {isSearching ? (
