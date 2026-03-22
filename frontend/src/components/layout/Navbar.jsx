@@ -127,14 +127,21 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setIsSearchOpen(true);
-        setTimeout(() => searchInputRef.current?.focus(), 100);
+        // Focus the input after a short delay to ensure it's rendered
+        setTimeout(() => {
+          if (searchInputRef.current) {
+            searchInputRef.current.focus();
+          }
+        }, 150);
       }
       // Escape to close search
       if (e.key === "Escape" && isSearchOpen) {
         setIsSearchOpen(false);
         setSearchQuery("");
         setSearchResults([]);
-        searchInputRef.current?.blur();
+        if (searchInputRef.current) {
+          searchInputRef.current.blur();
+        }
       }
     };
 
@@ -512,7 +519,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
       <div className="flex-1 max-w-xs sm:max-w-md mx-2 sm:mx-4 relative hidden md:block">
         <div className="relative">
           <div
-            className="flex items-center w-full h-10 px-3 rounded-md border-2 border-border bg-background hover:bg-accent/50 transition-colors cursor-text"
+            className="flex items-center w-full h-10 px-3 rounded-md border-2 border-border bg-background hover:bg-accent/50 transition-colors cursor-text focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20"
             onClick={() => searchInputRef.current?.focus()}>
             <Search className="mr-2 h-4 w-4 text-muted-foreground flex-shrink-0" />
             <Input
