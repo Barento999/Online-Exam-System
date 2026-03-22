@@ -498,14 +498,17 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
         // Adjust left position based on sidebar state
         isMobile ? "left-0" : isCollapsed ? "left-20" : "left-64",
       )}>
-      <div className="flex items-center gap-4 ml-16 lg:ml-0">
-        <h2 className="text-lg md:text-xl font-semibold">
+      <div className="flex items-center gap-2 lg:gap-4">
+        <h2 className="text-sm md:text-lg lg:text-xl font-semibold hidden sm:block">
           Welcome back, {user?.name?.split(" ")[0]}!
+        </h2>
+        <h2 className="text-sm font-semibold sm:hidden">
+          Hi, {user?.name?.split(" ")[0]}!
         </h2>
       </div>
 
       {/* Search Bar */}
-      <div className="flex-1 max-w-md mx-4 relative">
+      <div className="flex-1 max-w-xs sm:max-w-md mx-2 sm:mx-4 relative hidden md:block">
         <div className="relative">
           <Button
             variant="outline"
@@ -523,8 +526,8 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
 
           {/* Search Modal/Dropdown */}
           {isSearchOpen && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-card border rounded-lg shadow-lg z-50 max-h-96 overflow-hidden">
-              <div className="p-3 border-b">
+            <div className="fixed md:absolute top-16 md:top-full left-0 right-0 md:left-auto md:right-auto md:w-full mt-0 md:mt-2 bg-card border-t md:border md:rounded-lg shadow-lg z-50 max-h-[calc(100vh-4rem)] md:max-h-96 overflow-hidden">
+              <div className="p-3 border-b sticky top-0 bg-card z-10">
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -545,7 +548,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
                 </div>
               </div>
 
-              <div className="max-h-80 overflow-y-auto">
+              <div className="max-h-[calc(100vh-12rem)] md:max-h-80 overflow-y-auto">
                 {isSearching ? (
                   <div className="p-4 text-center text-muted-foreground">
                     <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
@@ -630,13 +633,23 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
         {/* Backdrop */}
         {isSearchOpen && (
           <div
-            className="fixed inset-0 bg-black/20 z-40"
+            className="fixed inset-0 bg-black/20 md:bg-black/10 z-40"
             onClick={() => setIsSearchOpen(false)}
           />
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1 sm:gap-2">
+        {/* Mobile Search Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={openSearch}
+          className="rounded-full hover:bg-accent transition-colors md:hidden"
+          title="Search">
+          <Search className="h-5 w-5" />
+        </Button>
+
         {/* Theme Toggle */}
         <Button
           variant="ghost"
@@ -645,9 +658,9 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
           className="rounded-full hover:bg-accent transition-colors"
           title={`Switch to ${isDark ? "light" : "dark"} mode`}>
           {isDark ? (
-            <Sun className="h-5 w-5 text-yellow-500" />
+            <Sun className="h-4 w-4 sm:h-5 sm:w-5 text-yellow-500" />
           ) : (
-            <Moon className="h-5 w-5 text-slate-600" />
+            <Moon className="h-4 w-4 sm:h-5 sm:w-5 text-slate-600" />
           )}
         </Button>
 
@@ -658,17 +671,17 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
               variant="ghost"
               size="icon"
               className="rounded-full relative hover:bg-accent transition-colors">
-              <Bell className="h-5 w-5" />
+              <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
               {unreadCount > 0 && (
                 <Badge
                   variant="destructive"
-                  className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-xs">
-                  {unreadCount > 99 ? "99+" : unreadCount}
+                  className="absolute -top-1 -right-1 h-4 w-4 sm:h-5 sm:w-5 flex items-center justify-center p-0 text-[10px] sm:text-xs">
+                  {unreadCount > 9 ? "9+" : unreadCount}
                 </Badge>
               )}
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-80">
+          <DropdownMenuContent align="end" className="w-72 sm:w-80">
             <DropdownMenuLabel className="flex items-center justify-between">
               <span className="flex items-center gap-2">
                 <BellRing className="h-4 w-4" />
@@ -747,16 +760,18 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
         {/* Enhanced User Profile Dropdown with Quick Actions */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="relative h-10 w-10 rounded-full">
-              <Avatar className="h-10 w-10">
+            <Button
+              variant="ghost"
+              className="relative h-8 w-8 sm:h-10 sm:w-10 rounded-full">
+              <Avatar className="h-8 w-8 sm:h-10 sm:w-10">
                 <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback className="bg-primary text-primary-foreground">
+                <AvatarFallback className="bg-primary text-primary-foreground text-xs sm:text-sm">
                   {getInitials(user?.name)}
                 </AvatarFallback>
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-80" align="end" forceMount>
+          <DropdownMenuContent className="w-72 sm:w-80" align="end" forceMount>
             {/* User Info Header */}
             <DropdownMenuLabel className="font-normal p-4">
               <div className="flex items-center space-x-3">
