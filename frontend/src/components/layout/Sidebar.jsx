@@ -283,12 +283,13 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
           "lg:hidden fixed top-3 left-2 z-50 h-10 w-12 flex items-center justify-center mobile-menu-button rounded-lg",
-          "bg-sidebar/95 backdrop-blur-sm text-sidebar-foreground",
-          "border border-sidebar-border/50 shadow-lg",
-          "hover:bg-sidebar-accent transition-all duration-300",
+          "bg-white/80 dark:bg-sidebar/95 backdrop-blur-sm",
+          "text-gray-700 dark:text-sidebar-foreground",
+          "border border-gray-200 dark:border-sidebar-border/50 shadow-lg",
+          "hover:bg-gray-100 dark:hover:bg-sidebar-accent transition-all duration-300",
           "hover:scale-105 active:scale-95 haptic-feedback",
-          "focus:outline-none focus:ring-2 focus:ring-sidebar-primary/50",
-          isOpen && "bg-sidebar-accent",
+          "focus:outline-none focus:ring-2 focus:ring-primary/50",
+          isOpen && "bg-gray-100 dark:bg-sidebar-accent",
         )}>
         <div className="relative">
           {isOpen ? (
