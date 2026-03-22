@@ -513,24 +513,30 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <Input
             ref={searchInputRef}
-            placeholder="Search exams, questions, users..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onFocus={() => setIsSearchOpen(true)}
-            className="pl-10 pr-10"
+            className="pl-10 pr-20 h-9"
           />
-          {searchQuery && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-              onClick={() => {
-                setSearchQuery("");
-                setSearchResults([]);
-              }}>
-              <X className="h-3 w-3" />
-            </Button>
-          )}
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+            {searchQuery ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => {
+                  setSearchQuery("");
+                  setSearchResults([]);
+                }}>
+                <X className="h-3 w-3" />
+              </Button>
+            ) : (
+              <kbd className="hidden lg:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground pointer-events-none">
+                <Command className="h-3 w-3" />K
+              </kbd>
+            )}
+          </div>
         </div>
       </div>
 
