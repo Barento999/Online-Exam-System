@@ -526,116 +526,235 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
         </div>
       </div>
 
-      {/* Search Modal/Dropdown - Moved outside to work on mobile */}
-      {isSearchOpen && (
-        <>
-          <div className="fixed md:absolute top-16 md:top-full left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[600px] mt-0 md:mt-2 bg-card border-t md:border md:rounded-lg shadow-lg z-50 max-h-[calc(100vh-4rem)] md:max-h-96 overflow-hidden">
-            <div className="p-3 border-b sticky top-0 bg-card z-10">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  ref={searchInputRef}
-                  placeholder="Search exams, questions, users..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 pr-4"
-                  autoFocus
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                  onClick={() => setIsSearchOpen(false)}>
-                  <X className="h-3 w-3" />
-                </Button>
+      {/* Desktop Search Dropdown - Only for desktop search bar */}
+      <div className="hidden md:block">
+        {isSearchOpen && (
+          <>
+            <div className="fixed md:absolute top-16 md:top-full left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[600px] mt-0 md:mt-2 bg-card border-t md:border md:rounded-lg shadow-lg z-50 max-h-[calc(100vh-4rem)] md:max-h-96 overflow-hidden">
+              <div className="p-3 border-b sticky top-0 bg-card z-10">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    ref={searchInputRef}
+                    placeholder="Search exams, questions, users..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4"
+                    autoFocus
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                    onClick={() => setIsSearchOpen(false)}>
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="max-h-[calc(100vh-12rem)] md:max-h-80 overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                    Searching...
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div className="py-2">
+                    {searchResults.map((result) => {
+                      const IconComponent = result.icon;
+                      return (
+                        <button
+                          key={result.id}
+                          className="w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-3 group"
+                          onClick={() => handleSearchSelect(result)}>
+                          <div className="flex-shrink-0">
+                            <IconComponent className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium truncate">
+                                {result.title}
+                              </p>
+                              <Badge
+                                variant="secondary"
+                                className="text-xs ml-2">
+                                {result.category}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate mt-1">
+                              {result.description}
+                            </p>
+                          </div>
+                          <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : searchQuery.trim() ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">
+                      No results found for "{searchQuery}"
+                    </p>
+                    <p className="text-xs mt-1">
+                      Try different keywords or check spelling
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Quick Search</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="h-3 w-3" />
+                          Exams
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Hash className="h-3 w-3" />
+                          Questions
+                        </div>
+                        {user?.role !== "student" && (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3" />
+                              Users
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <GraduationCap className="h-3 w-3" />
+                              Courses
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
-            <div className="max-h-[calc(100vh-12rem)] md:max-h-80 overflow-y-auto">
-              {isSearching ? (
-                <div className="p-4 text-center text-muted-foreground">
-                  <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
-                  Searching...
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/10 z-40"
+              onClick={() => setIsSearchOpen(false)}
+            />
+          </>
+        )}
+      </div>
+
+      {/* Mobile Search Modal - Only for mobile search button */}
+      <div className="md:hidden">
+        {isSearchOpen && (
+          <>
+            <div className="fixed top-16 left-0 right-0 bg-card border-t shadow-lg z-50 max-h-[calc(100vh-4rem)] overflow-hidden">
+              <div className="p-3 border-b sticky top-0 bg-card z-10">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    ref={searchInputRef}
+                    placeholder="Search exams, questions, users..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 pr-4"
+                    autoFocus
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+                    onClick={() => setIsSearchOpen(false)}>
+                    <X className="h-3 w-3" />
+                  </Button>
                 </div>
-              ) : searchResults.length > 0 ? (
-                <div className="py-2">
-                  {searchResults.map((result) => {
-                    const IconComponent = result.icon;
-                    return (
-                      <button
-                        key={result.id}
-                        className="w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-3 group"
-                        onClick={() => handleSearchSelect(result)}>
-                        <div className="flex-shrink-0">
-                          <IconComponent className="h-4 w-4 text-muted-foreground" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium truncate">
-                              {result.title}
+              </div>
+
+              <div className="max-h-[calc(100vh-12rem)] overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
+                    Searching...
+                  </div>
+                ) : searchResults.length > 0 ? (
+                  <div className="py-2">
+                    {searchResults.map((result) => {
+                      const IconComponent = result.icon;
+                      return (
+                        <button
+                          key={result.id}
+                          className="w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-3 group"
+                          onClick={() => handleSearchSelect(result)}>
+                          <div className="flex-shrink-0">
+                            <IconComponent className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center justify-between">
+                              <p className="text-sm font-medium truncate">
+                                {result.title}
+                              </p>
+                              <Badge
+                                variant="secondary"
+                                className="text-xs ml-2">
+                                {result.category}
+                              </Badge>
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate mt-1">
+                              {result.description}
                             </p>
-                            <Badge variant="secondary" className="text-xs ml-2">
-                              {result.category}
-                            </Badge>
                           </div>
-                          <p className="text-xs text-muted-foreground truncate mt-1">
-                            {result.description}
-                          </p>
+                          <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : searchQuery.trim() ? (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
+                    <p className="text-sm">
+                      No results found for "{searchQuery}"
+                    </p>
+                    <p className="text-xs mt-1">
+                      Try different keywords or check spelling
+                    </p>
+                  </div>
+                ) : (
+                  <div className="p-4 text-center text-muted-foreground">
+                    <div className="space-y-2">
+                      <p className="text-sm font-medium">Quick Search</p>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="flex items-center gap-2">
+                          <BookOpen className="h-3 w-3" />
+                          Exams
                         </div>
-                        <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : searchQuery.trim() ? (
-                <div className="p-4 text-center text-muted-foreground">
-                  <Search className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                  <p className="text-sm">
-                    No results found for "{searchQuery}"
-                  </p>
-                  <p className="text-xs mt-1">
-                    Try different keywords or check spelling
-                  </p>
-                </div>
-              ) : (
-                <div className="p-4 text-center text-muted-foreground">
-                  <div className="space-y-2">
-                    <p className="text-sm font-medium">Quick Search</p>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="flex items-center gap-2">
-                        <BookOpen className="h-3 w-3" />
-                        Exams
+                        <div className="flex items-center gap-2">
+                          <Hash className="h-3 w-3" />
+                          Questions
+                        </div>
+                        {user?.role !== "student" && (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <User className="h-3 w-3" />
+                              Users
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <GraduationCap className="h-3 w-3" />
+                              Courses
+                            </div>
+                          </>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Hash className="h-3 w-3" />
-                        Questions
-                      </div>
-                      {user?.role !== "student" && (
-                        <>
-                          <div className="flex items-center gap-2">
-                            <User className="h-3 w-3" />
-                            Users
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <GraduationCap className="h-3 w-3" />
-                            Courses
-                          </div>
-                        </>
-                      )}
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
 
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 bg-black/20 md:bg-black/10 z-40"
-            onClick={() => setIsSearchOpen(false)}
-          />
-        </>
-      )}
+            {/* Backdrop */}
+            <div
+              className="fixed inset-0 bg-black/20 z-40"
+              onClick={() => setIsSearchOpen(false)}
+            />
+          </>
+        )}
+      </div>
 
       {/* Action Buttons - Compact on mobile */}
       <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
