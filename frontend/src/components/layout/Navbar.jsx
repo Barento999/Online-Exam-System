@@ -498,12 +498,11 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
         // Adjust left position based on sidebar state
         isMobile ? "left-0" : isCollapsed ? "left-20" : "left-64",
       )}>
-      <div className="flex items-center gap-2 lg:gap-4">
-        <h2 className="text-sm md:text-lg lg:text-xl font-semibold hidden sm:block">
-          Welcome back, {user?.name?.split(" ")[0]}!
-        </h2>
-        <h2 className="text-sm font-semibold sm:hidden">
-          Hi, {user?.name?.split(" ")[0]}!
+      <div className="flex items-center">
+        <h2 className="text-xs sm:text-sm md:text-lg lg:text-xl font-semibold truncate">
+          <span className="hidden sm:inline">Welcome back, </span>
+          <span className="sm:hidden">Hi, </span>
+          {user?.name?.split(" ")[0]}!
         </h2>
       </div>
 
