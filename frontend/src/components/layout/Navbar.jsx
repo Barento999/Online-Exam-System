@@ -510,49 +510,36 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
       {/* Search Bar - Hidden on mobile, shown on tablet+ */}
       <div className="flex-1 max-w-xs sm:max-w-md mx-2 sm:mx-4 relative hidden md:block">
         <div className="relative">
-          <Button
-            variant="outline"
-            className="w-full justify-start text-muted-foreground hover:bg-accent"
-            onClick={openSearch}>
-            <Search className="mr-2 h-4 w-4" />
-            <span className="hidden sm:inline">Search...</span>
-            <span className="sm:hidden">Search</span>
-            <div className="ml-auto hidden sm:flex items-center gap-1">
-              <kbd className="pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
-                <Command className="h-3 w-3" />K
-              </kbd>
-            </div>
-          </Button>
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+          <Input
+            ref={searchInputRef}
+            placeholder="Search exams, questions, users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onFocus={() => setIsSearchOpen(true)}
+            className="pl-10 pr-10"
+          />
+          {searchQuery && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
+              onClick={() => {
+                setSearchQuery("");
+                setSearchResults([]);
+              }}>
+              <X className="h-3 w-3" />
+            </Button>
+          )}
         </div>
       </div>
 
       {/* Desktop Search Dropdown - Only for desktop search bar */}
-      <div className="hidden md:block">
+      <div className="hidden md:block absolute top-full left-1/2 -translate-x-1/2 w-full max-w-md mt-2 z-50">
         {isSearchOpen && (
           <>
-            <div className="fixed md:absolute top-16 md:top-full left-0 right-0 md:left-1/2 md:-translate-x-1/2 md:w-[600px] mt-0 md:mt-2 bg-card border-t md:border md:rounded-lg shadow-lg z-50 max-h-[calc(100vh-4rem)] md:max-h-96 overflow-hidden">
-              <div className="p-3 border-b sticky top-0 bg-card z-10">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    ref={searchInputRef}
-                    placeholder="Search exams, questions, users..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-10 pr-4"
-                    autoFocus
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-1 top-1/2 transform -translate-y-1/2 h-6 w-6 p-0"
-                    onClick={() => setIsSearchOpen(false)}>
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-
-              <div className="max-h-[calc(100vh-12rem)] md:max-h-80 overflow-y-auto">
+            <div className="bg-card border rounded-lg shadow-lg max-h-96 overflow-hidden">
+              <div className="max-h-80 overflow-y-auto">
                 {isSearching ? (
                   <div className="p-4 text-center text-muted-foreground">
                     <div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full mx-auto mb-2"></div>
