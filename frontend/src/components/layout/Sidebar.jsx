@@ -278,15 +278,15 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
 
   return (
     <>
-      {/* Enhanced Mobile Menu Button */}
+      {/* Enhanced Mobile Menu Button - Centered in Navbar */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className={cn(
-          "lg:hidden fixed top-4 left-4 z-50 p-3 rounded-xl mobile-menu-button",
+          "lg:hidden fixed top-0 left-0 z-50 h-16 w-16 flex items-center justify-center mobile-menu-button",
           "bg-sidebar/95 backdrop-blur-sm text-sidebar-foreground",
-          "border border-sidebar-border/50 shadow-lg",
+          "border-r border-b border-sidebar-border/50 shadow-lg",
           "hover:bg-sidebar-accent transition-all duration-300",
-          "hover:scale-110 active:scale-95 haptic-feedback",
+          "hover:scale-105 active:scale-95 haptic-feedback",
           "focus:outline-none focus:ring-2 focus:ring-sidebar-primary/50",
           isOpen && "bg-sidebar-accent",
         )}>
