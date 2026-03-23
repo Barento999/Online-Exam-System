@@ -270,10 +270,22 @@ export const Exams = () => {
 
   const loadData = async () => {
     try {
-      const [examsRes, coursesRes] = await Promise.all([
-        examsApi.getAll(),
-        coursesApi.getAll(),
-      ]);
+      let examsRes, coursesRes;
+
+      if (user?.role === "student") {
+        // Students only see exams available to them
+        [examsRes, coursesRes] = await Promise.all([
+          examsApi.getAvailable(),
+          coursesApi.getAll(),
+        ]);
+      } else {
+        // Admin and teachers see all exams
+        [examsRes, coursesRes] = await Promise.all([
+          examsApi.getAll(),
+          coursesApi.getAll(),
+        ]);
+      }
+
       setExams(examsRes.data.exams || examsRes.data);
       setCourses(coursesRes.data.courses || coursesRes.data);
     } catch (error) {
@@ -637,45 +649,49 @@ export const Exams = () => {
             />
           </CardHeader>
           <CardContent className="p-0">
-            <BulkActionsBar
-              selectedCount={selectedCount}
-              onClearSelection={clearSelection}
-              actions={[
-                {
-                  label: "Delete Selected",
-                  icon: <Trash2 className="h-4 w-4" />,
-                  onClick: () => setBulkDeleteDialog(true),
-                  variant: "destructive",
-                },
-                {
-                  label: "Set Draft",
-                  onClick: () => handleBulkStatusChange("draft"),
-                  variant: "outline",
-                },
-                {
-                  label: "Set Published",
-                  onClick: () => handleBulkStatusChange("published"),
-                  variant: "outline",
-                },
-                {
-                  label: "Set Completed",
-                  onClick: () => handleBulkStatusChange("completed"),
-                  variant: "outline",
-                },
-              ]}
-            />
+            {canCreateEdit && (
+              <BulkActionsBar
+                selectedCount={selectedCount}
+                onClearSelection={clearSelection}
+                actions={[
+                  {
+                    label: "Delete Selected",
+                    icon: <Trash2 className="h-4 w-4" />,
+                    onClick: () => setBulkDeleteDialog(true),
+                    variant: "destructive",
+                  },
+                  {
+                    label: "Set Draft",
+                    onClick: () => handleBulkStatusChange("draft"),
+                    variant: "outline",
+                  },
+                  {
+                    label: "Set Published",
+                    onClick: () => handleBulkStatusChange("published"),
+                    variant: "outline",
+                  },
+                  {
+                    label: "Set Completed",
+                    onClick: () => handleBulkStatusChange("completed"),
+                    variant: "outline",
+                  },
+                ]}
+              />
+            )}
             <div className="rounded-md border overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={isAllSelected}
-                        onCheckedChange={toggleAll}
-                        aria-label="Select all"
-                        className={isSomeSelected ? "opacity-50" : ""}
-                      />
-                    </TableHead>
+                    {canCreateEdit && (
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={isAllSelected}
+                          onCheckedChange={toggleAll}
+                          aria-label="Select all"
+                          className={isSomeSelected ? "opacity-50" : ""}
+                        />
+                      </TableHead>
+                    )}
                     <SortableTableHead
                       field="title"
                       label="Exam Name"
@@ -745,13 +761,15 @@ export const Exams = () => {
                   ) : (
                     paginatedData.map((exam) => (
                       <TableRow key={exam._id}>
-                        <TableCell>
-                          <Checkbox
-                            checked={isSelected(exam._id)}
-                            onCheckedChange={() => toggleRow(exam._id)}
-                            aria-label={`Select ${exam.title}`}
-                          />
-                        </TableCell>
+                        {canCreateEdit && (
+                          <TableCell>
+                            <Checkbox
+                              checked={isSelected(exam._id)}
+                              onCheckedChange={() => toggleRow(exam._id)}
+                              aria-label={`Select ${exam.title}`}
+                            />
+                          </TableCell>
+                        )}
                         <TableCell className="font-medium">
                           {exam.title}
                         </TableCell>
