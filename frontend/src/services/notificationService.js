@@ -94,8 +94,16 @@ export const notificationService = {
 
       // Results notifications - show ungraded or recent results
       try {
-        const response = await resultsApi.getAll();
-        const results = response.data?.results || [];
+        let response;
+        if (userRole === "student") {
+          // Students use their own endpoint
+          response = await resultsApi.getByStudent(userId);
+        } else {
+          // Admin and teachers can access all results
+          response = await resultsApi.getAll();
+        }
+
+        const results = response.data?.results || response.data || [];
 
         if (userRole === "student") {
           // For students, show results from the last 3 days
@@ -216,10 +224,16 @@ export const notificationService = {
     }
   },
 
-  async getResultNotifications(userRole) {
+  async getResultNotifications(userRole, userId) {
     try {
-      const response = await resultsApi.getAll();
-      const results = response.data?.results || [];
+      let response;
+      if (userRole === "student") {
+        response = await resultsApi.getByStudent(userId);
+      } else {
+        response = await resultsApi.getAll();
+      }
+
+      const results = response.data?.results || response.data || [];
 
       if (userRole === "student") {
         const threeDaysAgo = new Date();
