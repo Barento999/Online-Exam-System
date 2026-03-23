@@ -740,20 +740,40 @@ export const Exams = () => {
                 <TableBody>
                   {paginatedData.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={8} className="h-96">
+                      <TableCell
+                        colSpan={canCreateEdit ? 8 : 7}
+                        className="h-96">
                         {exams.length === 0 ? (
                           <EmptyState
                             illustration="exams"
-                            title="No exams yet"
-                            description="Create your first exam to get started. You can add questions, set time limits, and assign it to students."
-                            action={() => setIsMultiStepOpen(true)}
-                            actionLabel="Create First Exam"
+                            title={
+                              user?.role === "student"
+                                ? "No exams available"
+                                : "No exams yet"
+                            }
+                            description={
+                              user?.role === "student"
+                                ? "You don't have any exams assigned to you at the moment. Check back later or contact your instructor."
+                                : "Create your first exam to get started. You can add questions, set time limits, and assign it to students."
+                            }
+                            action={
+                              canCreateEdit
+                                ? () => setIsMultiStepOpen(true)
+                                : undefined
+                            }
+                            actionLabel={
+                              canCreateEdit ? "Create First Exam" : undefined
+                            }
                           />
                         ) : (
                           <EmptyState
                             illustration="exams"
                             title="No exams found"
-                            description="No exams match your current filters. Try adjusting your search or filter criteria."
+                            description={
+                              user?.role === "student"
+                                ? "No exams match your current search or filter criteria."
+                                : "No exams match your current filters. Try adjusting your search or filter criteria."
+                            }
                           />
                         )}
                       </TableCell>
