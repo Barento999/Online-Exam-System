@@ -400,13 +400,42 @@ export const Exams = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
+  const getStatusBadge = (exam) => {
+    // For students, show more detailed status based on metadata
+    if (user?.role === "student") {
+      if (exam.isTaken) {
+        return (
+          <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800">
+            Completed
+          </Badge>
+        );
+      }
+      if (exam.isActive) {
+        return (
+          <Badge variant="default" className="bg-green-600">
+            Active - Take Now
+          </Badge>
+        );
+      }
+      if (exam.isUpcoming) {
+        return <Badge variant="secondary">Upcoming</Badge>;
+      }
+      if (exam.isPast) {
+        return <Badge variant="outline">Expired</Badge>;
+      }
+    }
+
+    // For admin/teacher, show exam status
     const variants = {
       draft: "secondary",
       published: "default",
       completed: "outline",
     };
-    return <Badge variant={variants[status] || "secondary"}>{status}</Badge>;
+    return (
+      <Badge variant={variants[exam.status] || "secondary"}>
+        {exam.status}
+      </Badge>
+    );
   };
 
   if (loading) {
@@ -799,21 +828,48 @@ export const Exams = () => {
                         <TableCell>
                           {new Date(exam.startTime).toLocaleDateString()}
                         </TableCell>
-                        <TableCell>{getStatusBadge(exam.status)}</TableCell>
+                        <TableCell>{getStatusBadge(exam)}</TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
-                            {user?.role === "student" &&
-                              exam.status === "published" && (
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() =>
-                                    navigate(`/exams/${exam._id}/take`)
-                                  }>
-                                  <Play className="h-4 w-4 mr-1" />
-                                  Take Exam
-                                </Button>
-                              )}
+                            {user?.role === "student" && (
+                              <>
+                                {exam.isActive && !exam.isTaken ? (
+                                  <Button
+                                    variant="default"
+                                    size="sm"
+                                    onClick={() =>
+                                      navigate(`/exams/${exam._id}/take`)
+                                    }
+                                    className="bg-green-600 hover:bg-green-700">
+                                    <Play className="h-4 w-4 mr-1" />
+                                    Take Exam
+                                  </Button>
+                                ) : exam.isTaken ? (
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => navigate(`/results`)}
+                                    disabled={!exam.isTaken}>
+                                    View Result
+                                  </Button>
+                                ) : exam.isUpcoming ? (
+                                  <Badge
+                                    variant="secondary"
+                                    className="px-3 py-1">
+                                    Starts{" "}
+                                    {new Date(
+                                      exam.startTime,
+                                    ).toLocaleDateString()}
+                                  </Badge>
+                                ) : (
+                                  <Badge
+                                    variant="outline"
+                                    className="px-3 py-1">
+                                    Expired
+                                  </Badge>
+                                )}
+                              </>
+                            )}
                             {canCreateEdit && (
                               <>
                                 {exam.status === "published" && (
