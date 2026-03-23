@@ -20,6 +20,7 @@ export const NotificationLoader = () => {
         const notifications =
           await enhancedNotificationService.getNotificationCounts(
             user.role,
+            user._id,
             notificationService,
           );
 

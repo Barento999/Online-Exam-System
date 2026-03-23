@@ -36,11 +36,11 @@ export const fallbackNotificationService = {
 
 // Enhanced notification service that tries real data first, then falls back to demo data
 export const enhancedNotificationService = {
-  async getNotificationCounts(userRole, realNotificationService) {
+  async getNotificationCounts(userRole, userId, realNotificationService) {
     try {
       // Try to get real data first
       const realNotifications =
-        await realNotificationService.getNotificationCounts(userRole);
+        await realNotificationService.getNotificationCounts(userRole, userId);
 
       // If we have real data, use it
       if (Object.keys(realNotifications).length > 0) {

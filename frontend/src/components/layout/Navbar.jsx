@@ -82,7 +82,10 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
       if (user?.role) {
         try {
           const notificationCounts =
-            await notificationService.getNotificationCounts(user.role);
+            await notificationService.getNotificationCounts(
+              user.role,
+              user._id,
+            );
 
           // Convert notification counts to notification items
           const notificationItems = Object.entries(notificationCounts).map(

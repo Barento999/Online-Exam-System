@@ -8,7 +8,7 @@ import {
 
 export const notificationService = {
   // Get notification counts for all menu items
-  async getNotificationCounts(userRole) {
+  async getNotificationCounts(userRole, userId) {
     try {
       const notifications = {};
 
