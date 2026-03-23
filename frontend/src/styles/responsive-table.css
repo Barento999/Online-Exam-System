@@ -15,15 +15,6 @@
     padding-bottom: 0.5rem;
     font-size: 0.875rem;
   }
-
-  /* Sticky first column (checkbox) on mobile */
-  .overflow-x-auto th:first-child,
-  .overflow-x-auto td:first-child {
-    position: sticky;
-    left: 0;
-    background-color: hsl(var(--background));
-    z-index: 10;
-  }
 }
 
 /* Compact table on tablets */
