@@ -231,89 +231,87 @@ export const Enrollments = () => {
                 />
               </div>
             ) : (
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="min-w-[180px]">Student</TableHead>
-                      <TableHead className="min-w-[150px]">Course</TableHead>
-                      <TableHead className="min-w-[120px]">Teacher</TableHead>
-                      <TableHead className="min-w-[120px]">
-                        Enrolled Date
-                      </TableHead>
-                      <TableHead className="min-w-[100px]">Status</TableHead>
-                      <TableHead className="text-right min-w-[80px]">
-                        Actions
-                      </TableHead>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="min-w-[180px]">Student</TableHead>
+                    <TableHead className="min-w-[150px]">Course</TableHead>
+                    <TableHead className="min-w-[120px]">Teacher</TableHead>
+                    <TableHead className="min-w-[120px]">
+                      Enrolled Date
+                    </TableHead>
+                    <TableHead className="min-w-[100px]">Status</TableHead>
+                    <TableHead className="text-right min-w-[80px]">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {enrollments.map((enrollment) => (
+                    <TableRow key={enrollment._id}>
+                      <TableCell className="min-w-[180px]">
+                        <div>
+                          <div
+                            className="font-medium truncate max-w-[160px]"
+                            title={enrollment.studentId?.name}>
+                            {enrollment.studentId?.name}
+                          </div>
+                          <div
+                            className="text-sm text-muted-foreground truncate max-w-[160px]"
+                            title={enrollment.studentId?.email}>
+                            {enrollment.studentId?.email}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell className="min-w-[150px]">
+                        <div
+                          className="truncate max-w-[200px]"
+                          title={enrollment.courseId?.name}>
+                          {enrollment.courseId?.name}
+                        </div>
+                      </TableCell>
+                      <TableCell className="min-w-[120px]">
+                        <div
+                          className="truncate max-w-[150px]"
+                          title={enrollment.courseId?.teacherName}>
+                          {enrollment.courseId?.teacherName}
+                        </div>
+                      </TableCell>
+                      <TableCell className="min-w-[120px] whitespace-nowrap">
+                        {new Date(enrollment.enrolledAt).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="min-w-[100px]">
+                        <Badge
+                          variant={
+                            enrollment.status === "active"
+                              ? "default"
+                              : enrollment.status === "completed"
+                                ? "secondary"
+                                : "destructive"
+                          }
+                          className="whitespace-nowrap">
+                          {enrollment.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right min-w-[80px]">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 w-8 p-0"
+                          title="Remove enrollment"
+                          onClick={() =>
+                            setDeleteDialog({
+                              open: true,
+                              enrollmentId: enrollment._id,
+                            })
+                          }>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {enrollments.map((enrollment) => (
-                      <TableRow key={enrollment._id}>
-                        <TableCell className="min-w-[180px]">
-                          <div>
-                            <div
-                              className="font-medium truncate max-w-[160px]"
-                              title={enrollment.studentId?.name}>
-                              {enrollment.studentId?.name}
-                            </div>
-                            <div
-                              className="text-sm text-muted-foreground truncate max-w-[160px]"
-                              title={enrollment.studentId?.email}>
-                              {enrollment.studentId?.email}
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="min-w-[150px]">
-                          <div
-                            className="truncate max-w-[200px]"
-                            title={enrollment.courseId?.name}>
-                            {enrollment.courseId?.name}
-                          </div>
-                        </TableCell>
-                        <TableCell className="min-w-[120px]">
-                          <div
-                            className="truncate max-w-[150px]"
-                            title={enrollment.courseId?.teacherName}>
-                            {enrollment.courseId?.teacherName}
-                          </div>
-                        </TableCell>
-                        <TableCell className="min-w-[120px] whitespace-nowrap">
-                          {new Date(enrollment.enrolledAt).toLocaleDateString()}
-                        </TableCell>
-                        <TableCell className="min-w-[100px]">
-                          <Badge
-                            variant={
-                              enrollment.status === "active"
-                                ? "default"
-                                : enrollment.status === "completed"
-                                  ? "secondary"
-                                  : "destructive"
-                            }
-                            className="whitespace-nowrap">
-                            {enrollment.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right min-w-[80px]">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            title="Remove enrollment"
-                            onClick={() =>
-                              setDeleteDialog({
-                                open: true,
-                                enrollmentId: enrollment._id,
-                              })
-                            }>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                  ))}
+                </TableBody>
+              </Table>
             )}
           </CardContent>
         </Card>

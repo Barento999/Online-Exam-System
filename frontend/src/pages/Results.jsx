@@ -357,150 +357,139 @@ export const Results = () => {
             )}
           </CardHeader>
           <CardContent>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[150px]">Exam Name</TableHead>
-                    {user?.role !== "student" && (
-                      <TableHead className="min-w-[120px]">Student</TableHead>
-                    )}
-                    <TableHead className="min-w-[80px]">Score</TableHead>
-                    <TableHead className="min-w-[100px]">Total Marks</TableHead>
-                    <TableHead className="min-w-[100px]">Percentage</TableHead>
-                    <TableHead className="min-w-[100px]">Status</TableHead>
-                    {user?.role !== "student" && (
-                      <TableHead className="min-w-[120px]">Published</TableHead>
-                    )}
-                    <TableHead className="min-w-[150px]">
-                      Submitted At
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="min-w-[150px]">Exam Name</TableHead>
+                  {user?.role !== "student" && (
+                    <TableHead className="min-w-[120px]">Student</TableHead>
+                  )}
+                  <TableHead className="min-w-[80px]">Score</TableHead>
+                  <TableHead className="min-w-[100px]">Total Marks</TableHead>
+                  <TableHead className="min-w-[100px]">Percentage</TableHead>
+                  <TableHead className="min-w-[100px]">Status</TableHead>
+                  {user?.role !== "student" && (
+                    <TableHead className="min-w-[120px]">Published</TableHead>
+                  )}
+                  <TableHead className="min-w-[150px]">Submitted At</TableHead>
+                  {user?.role !== "student" && (
+                    <TableHead className="text-right min-w-[80px]">
+                      Actions
                     </TableHead>
-                    {user?.role !== "student" && (
-                      <TableHead className="text-right min-w-[80px]">
-                        Actions
-                      </TableHead>
-                    )}
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredResults.length === 0 ? (
+                  <TableRow>
+                    <TableCell
+                      colSpan={user?.role === "student" ? 6 : 9}
+                      className="h-96">
+                      {results.length === 0 ? (
+                        <EmptyState
+                          illustration="results"
+                          title="No results yet"
+                          description="Results will appear here once students complete exams and teachers publish the grades."
+                        />
+                      ) : (
+                        <EmptyState
+                          illustration="results"
+                          title="No results found"
+                          description="No results match your current filters. Try adjusting your search or filter criteria."
+                        />
+                      )}
+                    </TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredResults.length === 0 ? (
-                    <TableRow>
-                      <TableCell
-                        colSpan={user?.role === "student" ? 6 : 9}
-                        className="h-96">
-                        {results.length === 0 ? (
-                          <EmptyState
-                            illustration="results"
-                            title="No results yet"
-                            description="Results will appear here once students complete exams and teachers publish the grades."
-                          />
-                        ) : (
-                          <EmptyState
-                            illustration="results"
-                            title="No results found"
-                            description="No results match your current filters. Try adjusting your search or filter criteria."
-                          />
-                        )}
+                ) : (
+                  filteredResults.map((result) => (
+                    <TableRow key={result._id}>
+                      <TableCell className="font-medium min-w-[150px]">
+                        <div
+                          className="truncate max-w-[200px]"
+                          title={result.examName}>
+                          {result.examName}
+                        </div>
                       </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredResults.map((result) => (
-                      <TableRow key={result._id}>
-                        <TableCell className="font-medium min-w-[150px]">
+                      {user?.role !== "student" && (
+                        <TableCell className="min-w-[120px]">
                           <div
-                            className="truncate max-w-[200px]"
-                            title={result.examName}>
-                            {result.examName}
+                            className="truncate max-w-[150px]"
+                            title={result.studentName}>
+                            {result.studentName}
                           </div>
                         </TableCell>
-                        {user?.role !== "student" && (
-                          <TableCell className="min-w-[120px]">
-                            <div
-                              className="truncate max-w-[150px]"
-                              title={result.studentName}>
-                              {result.studentName}
-                            </div>
-                          </TableCell>
-                        )}
-                        <TableCell className="min-w-[80px]">
-                          {result.score}
-                        </TableCell>
-                        <TableCell className="min-w-[80px]">
-                          {result.totalMarks}
-                        </TableCell>
-                        <TableCell className="min-w-[100px]">
-                          <span
-                            className={`font-medium whitespace-nowrap ${
-                              result.percentage >= 70
-                                ? "text-green-600"
-                                : result.percentage >= 40
-                                  ? "text-orange-600"
-                                  : "text-red-600"
-                            }`}>
-                            {result.percentage}%
-                          </span>
-                        </TableCell>
-                        <TableCell className="min-w-[100px]">
+                      )}
+                      <TableCell className="min-w-[80px]">
+                        {result.score}
+                      </TableCell>
+                      <TableCell className="min-w-[80px]">
+                        {result.totalMarks}
+                      </TableCell>
+                      <TableCell className="min-w-[100px]">
+                        <span
+                          className={`font-medium whitespace-nowrap ${
+                            result.percentage >= 70
+                              ? "text-green-600"
+                              : result.percentage >= 40
+                                ? "text-orange-600"
+                                : "text-red-600"
+                          }`}>
+                          {result.percentage}%
+                        </span>
+                      </TableCell>
+                      <TableCell className="min-w-[100px]">
+                        <Badge
+                          variant={
+                            result.status === "passed"
+                              ? "default"
+                              : "destructive"
+                          }
+                          className="whitespace-nowrap">
+                          {result.status}
+                        </Badge>
+                      </TableCell>
+                      {user?.role !== "student" && (
+                        <TableCell className="min-w-[120px]">
                           <Badge
-                            variant={
-                              result.status === "passed"
-                                ? "default"
-                                : "destructive"
-                            }
+                            variant={result.published ? "default" : "secondary"}
                             className="whitespace-nowrap">
-                            {result.status}
+                            {result.published ? (
+                              <Eye className="h-3 w-3 mr-1" />
+                            ) : (
+                              <EyeOff className="h-3 w-3 mr-1" />
+                            )}
+                            {result.published ? "Published" : "Hidden"}
                           </Badge>
                         </TableCell>
-                        {user?.role !== "student" && (
-                          <TableCell className="min-w-[120px]">
-                            <Badge
-                              variant={
-                                result.published ? "default" : "secondary"
-                              }
-                              className="whitespace-nowrap">
-                              {result.published ? (
-                                <Eye className="h-3 w-3 mr-1" />
-                              ) : (
-                                <EyeOff className="h-3 w-3 mr-1" />
-                              )}
-                              {result.published ? "Published" : "Hidden"}
-                            </Badge>
-                          </TableCell>
-                        )}
-                        <TableCell className="min-w-[150px]">
-                          <div className="text-sm whitespace-nowrap">
-                            {new Date(result.submittedAt).toLocaleString()}
-                          </div>
+                      )}
+                      <TableCell className="min-w-[150px]">
+                        <div className="text-sm whitespace-nowrap">
+                          {new Date(result.submittedAt).toLocaleString()}
+                        </div>
+                      </TableCell>
+                      {user?.role !== "student" && (
+                        <TableCell className="text-right min-w-[80px]">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              handleTogglePublish(result._id, result.published)
+                            }
+                            className="h-8 w-8 p-0"
+                            title={result.published ? "Unpublish" : "Publish"}>
+                            {result.published ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Send className="h-4 w-4" />
+                            )}
+                          </Button>
                         </TableCell>
-                        {user?.role !== "student" && (
-                          <TableCell className="text-right min-w-[80px]">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() =>
-                                handleTogglePublish(
-                                  result._id,
-                                  result.published,
-                                )
-                              }
-                              className="h-8 w-8 p-0"
-                              title={
-                                result.published ? "Unpublish" : "Publish"
-                              }>
-                              {result.published ? (
-                                <EyeOff className="h-4 w-4" />
-                              ) : (
-                                <Send className="h-4 w-4" />
-                              )}
-                            </Button>
-                          </TableCell>
-                        )}
-                      </TableRow>
-                    ))
-                  )}
-                </TableBody>
-              </Table>
-            </div>
+                      )}
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
           </CardContent>
         </Card>
 
