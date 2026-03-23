@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +30,12 @@ import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
+import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
+import { SortableTableHead } from "@/components/ui/sortable-table-head";
+import { TablePagination } from "@/components/ui/table-pagination";
+import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
+import { useTableSort } from "@/hooks/useTableSort";
+import { usePagination } from "@/hooks/usePagination";
 import { enrollmentsApi, coursesApi, usersApi } from "@/services/api";
 import { Trash2, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
@@ -49,6 +55,60 @@ export const Enrollments = () => {
     studentId: "",
     courseId: "",
   });
+
+  // Filtering, sorting, and pagination
+  const {
+    filters,
+    handleFilterChange,
+    handleClearFilters,
+    activeFiltersCount,
+  } = useAdvancedFilter({
+    search: "",
+    course: "all",
+    status: "all",
+  });
+
+  const { sortField, sortDirection, handleSort, sortData } = useTableSort(
+    "enrolledAt",
+    "desc",
+  );
+
+  const {
+    currentPage,
+    pageSize,
+    handlePageChange,
+    handlePageSizeChange,
+    paginateData,
+  } = usePagination();
+
+  // Filter and sort data
+  const filteredAndSortedEnrollments = useMemo(() => {
+    let filtered = enrollments.filter((enrollment) => {
+      const matchesSearch =
+        !filters.search ||
+        enrollment.studentId?.name
+          ?.toLowerCase()
+          .includes(filters.search.toLowerCase()) ||
+        enrollment.studentId?.email
+          ?.toLowerCase()
+          .includes(filters.search.toLowerCase()) ||
+        enrollment.courseId?.name
+          ?.toLowerCase()
+          .includes(filters.search.toLowerCase());
+
+      const matchesCourse =
+        filters.course === "all" || enrollment.courseId?._id === filters.course;
+
+      const matchesStatus =
+        filters.status === "all" || enrollment.status === filters.status;
+
+      return matchesSearch && matchesCourse && matchesStatus;
+    });
+
+    return sortData(filtered);
+  }, [enrollments, filters, sortData]);
+
+  const paginatedEnrollments = paginateData(filteredAndSortedEnrollments);
 
   useEffect(() => {
     loadData();
@@ -217,101 +277,186 @@ export const Enrollments = () => {
 
         <Card>
           <CardHeader>
-            <CardTitle>All Enrollments</CardTitle>
+            <AdvancedTableFilter
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onClearFilters={handleClearFilters}
+              activeFiltersCount={activeFiltersCount}
+              searchPlaceholder="Search by student name, email, or course..."
+              additionalFilters={
+                <>
+                  <Select
+                    value={filters.course}
+                    onValueChange={(value) =>
+                      handleFilterChange("course", value)
+                    }>
+                    <SelectTrigger className="w-full sm:w-48">
+                      <SelectValue placeholder="All Courses" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Courses</SelectItem>
+                      {courses.map((course) => (
+                        <SelectItem key={course._id} value={course._id}>
+                          {course.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select
+                    value={filters.status}
+                    onValueChange={(value) =>
+                      handleFilterChange("status", value)
+                    }>
+                    <SelectTrigger className="w-full sm:w-40">
+                      <SelectValue placeholder="All Status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Status</SelectItem>
+                      <SelectItem value="active">Active</SelectItem>
+                      <SelectItem value="completed">Completed</SelectItem>
+                      <SelectItem value="dropped">Dropped</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </>
+              }
+            />
           </CardHeader>
           <CardContent>
-            {enrollments.length === 0 ? (
+            {filteredAndSortedEnrollments.length === 0 ? (
               <div className="flex items-center justify-center h-96">
-                <EmptyState
-                  illustration="courses"
-                  title="No enrollments yet"
-                  description="Start enrolling students in courses to track their progress and manage their learning journey."
-                  action={() => setIsDialogOpen(true)}
-                  actionLabel="Create First Enrollment"
-                />
+                {enrollments.length === 0 ? (
+                  <EmptyState
+                    illustration="courses"
+                    title="No enrollments yet"
+                    description="Start enrolling students in courses to track their progress and manage their learning journey."
+                    action={() => setIsDialogOpen(true)}
+                    actionLabel="Create First Enrollment"
+                  />
+                ) : (
+                  <EmptyState
+                    illustration="courses"
+                    title="No enrollments found"
+                    description="No enrollments match your current filters. Try adjusting your search or filter criteria."
+                  />
+                )}
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="min-w-[180px]">Student</TableHead>
-                    <TableHead className="min-w-[150px]">Course</TableHead>
-                    <TableHead className="min-w-[120px]">Teacher</TableHead>
-                    <TableHead className="min-w-[120px]">
-                      Enrolled Date
-                    </TableHead>
-                    <TableHead className="min-w-[100px]">Status</TableHead>
-                    <TableHead className="text-right min-w-[80px]">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {enrollments.map((enrollment) => (
-                    <TableRow key={enrollment._id}>
-                      <TableCell className="min-w-[180px]">
-                        <div>
-                          <div
-                            className="font-medium truncate max-w-[160px]"
-                            title={enrollment.studentId?.name}>
-                            {enrollment.studentId?.name}
-                          </div>
-                          <div
-                            className="text-sm text-muted-foreground truncate max-w-[160px]"
-                            title={enrollment.studentId?.email}>
-                            {enrollment.studentId?.email}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell className="min-w-[150px]">
-                        <div
-                          className="truncate max-w-[200px]"
-                          title={enrollment.courseId?.name}>
-                          {enrollment.courseId?.name}
-                        </div>
-                      </TableCell>
-                      <TableCell className="min-w-[120px]">
-                        <div
-                          className="truncate max-w-[150px]"
-                          title={enrollment.courseId?.teacherName}>
-                          {enrollment.courseId?.teacherName}
-                        </div>
-                      </TableCell>
-                      <TableCell className="min-w-[120px] whitespace-nowrap">
-                        {new Date(enrollment.enrolledAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="min-w-[100px]">
-                        <Badge
-                          variant={
-                            enrollment.status === "active"
-                              ? "default"
-                              : enrollment.status === "completed"
-                                ? "secondary"
-                                : "destructive"
-                          }
-                          className="whitespace-nowrap">
-                          {enrollment.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right min-w-[80px]">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0"
-                          title="Remove enrollment"
-                          onClick={() =>
-                            setDeleteDialog({
-                              open: true,
-                              enrollmentId: enrollment._id,
-                            })
-                          }>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </TableCell>
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <SortableTableHead
+                        field="studentId.name"
+                        label="Student"
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        className="min-w-[180px]"
+                      />
+                      <SortableTableHead
+                        field="courseId.name"
+                        label="Course"
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        className="min-w-[150px]"
+                      />
+                      <TableHead className="min-w-[120px]">Teacher</TableHead>
+                      <SortableTableHead
+                        field="enrolledAt"
+                        label="Enrolled Date"
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        className="min-w-[120px]"
+                      />
+                      <SortableTableHead
+                        field="status"
+                        label="Status"
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        className="min-w-[100px]"
+                      />
+                      <TableHead className="text-right min-w-[80px]">
+                        Actions
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedEnrollments.map((enrollment) => (
+                      <TableRow key={enrollment._id}>
+                        <TableCell className="min-w-[180px]">
+                          <div>
+                            <div
+                              className="font-medium truncate max-w-[160px]"
+                              title={enrollment.studentId?.name}>
+                              {enrollment.studentId?.name}
+                            </div>
+                            <div
+                              className="text-sm text-muted-foreground truncate max-w-[160px]"
+                              title={enrollment.studentId?.email}>
+                              {enrollment.studentId?.email}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="min-w-[150px]">
+                          <div
+                            className="truncate max-w-[200px]"
+                            title={enrollment.courseId?.name}>
+                            {enrollment.courseId?.name}
+                          </div>
+                        </TableCell>
+                        <TableCell className="min-w-[120px]">
+                          <div
+                            className="truncate max-w-[150px]"
+                            title={enrollment.courseId?.teacherName}>
+                            {enrollment.courseId?.teacherName}
+                          </div>
+                        </TableCell>
+                        <TableCell className="min-w-[120px] whitespace-nowrap">
+                          {new Date(enrollment.enrolledAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="min-w-[100px]">
+                          <Badge
+                            variant={
+                              enrollment.status === "active"
+                                ? "default"
+                                : enrollment.status === "completed"
+                                  ? "secondary"
+                                  : "destructive"
+                            }
+                            className="whitespace-nowrap">
+                            {enrollment.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right min-w-[80px]">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            title="Remove enrollment"
+                            onClick={() =>
+                              setDeleteDialog({
+                                open: true,
+                                enrollmentId: enrollment._id,
+                              })
+                            }>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <TablePagination
+                  currentPage={currentPage}
+                  pageSize={pageSize}
+                  totalItems={filteredAndSortedEnrollments.length}
+                  onPageChange={handlePageChange}
+                  onPageSizeChange={handlePageSizeChange}
+                />
+              </>
             )}
           </CardContent>
         </Card>
