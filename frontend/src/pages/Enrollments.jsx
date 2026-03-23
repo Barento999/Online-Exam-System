@@ -28,11 +28,10 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
-import { Loader } from "@/components/common/Loader";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { enrollmentsApi, coursesApi, usersApi } from "@/services/api";
-import { Plus, Trash2, UserPlus } from "lucide-react";
+import { Trash2, UserPlus } from "lucide-react";
 import toast from "react-hot-toast";
 
 export const Enrollments = () => {
@@ -145,7 +144,7 @@ export const Enrollments = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">Enrollments Management</h1>
             <p className="text-muted-foreground">
@@ -154,12 +153,12 @@ export const Enrollments = () => {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <UserPlus className="mr-2 h-4 w-4" />
                 Enroll Student
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>Enroll Student in Course</DialogTitle>
               </DialogHeader>
@@ -208,14 +207,17 @@ export const Enrollments = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex justify-end gap-2">
+                <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => handleDialogClose(false)}>
+                    onClick={() => handleDialogClose(false)}
+                    className="w-full sm:w-auto">
                     Cancel
                   </Button>
-                  <Button type="submit">Enroll</Button>
+                  <Button type="submit" className="w-full sm:w-auto">
+                    Enroll
+                  </Button>
                 </div>
               </form>
             </DialogContent>
@@ -238,53 +240,77 @@ export const Enrollments = () => {
                 />
               </div>
             ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Student</TableHead>
-                    <TableHead>Course</TableHead>
-                    <TableHead>Teacher</TableHead>
-                    <TableHead>Enrolled Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {enrollments.map((enrollment) => (
-                    <TableRow key={enrollment._id}>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">
-                            {enrollment.studentId?.name}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {enrollment.studentId?.email}
-                          </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>{enrollment.courseId?.name}</TableCell>
-                      <TableCell>{enrollment.courseId?.teacherName}</TableCell>
-                      <TableCell>
-                        {new Date(enrollment.enrolledAt).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell>{getStatusBadge(enrollment.status)}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() =>
-                            setDeleteDialog({
-                              open: true,
-                              enrollmentId: enrollment._id,
-                            })
-                          }>
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
-                      </TableCell>
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="min-w-[180px]">Student</TableHead>
+                      <TableHead className="min-w-[150px]">Course</TableHead>
+                      <TableHead className="min-w-[120px]">Teacher</TableHead>
+                      <TableHead className="min-w-[120px]">
+                        Enrolled Date
+                      </TableHead>
+                      <TableHead className="min-w-[100px]">Status</TableHead>
+                      <TableHead className="text-right min-w-[80px]">
+                        Actions
+                      </TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {enrollments.map((enrollment) => (
+                      <TableRow key={enrollment._id}>
+                        <TableCell className="min-w-[180px]">
+                          <div>
+                            <div
+                              className="font-medium truncate max-w-[160px]"
+                              title={enrollment.studentId?.name}>
+                              {enrollment.studentId?.name}
+                            </div>
+                            <div
+                              className="text-sm text-muted-foreground truncate max-w-[160px]"
+                              title={enrollment.studentId?.email}>
+                              {enrollment.studentId?.email}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell
+                          className="min-w-[150px] truncate max-w-[200px]"
+                          title={enrollment.courseId?.name}>
+                          {enrollment.courseId?.name}
+                        </TableCell>
+                        <TableCell
+                          className="min-w-[120px] truncate max-w-[150px]"
+                          title={enrollment.courseId?.teacherName}>
+                          {enrollment.courseId?.teacherName}
+                        </TableCell>
+                        <TableCell className="min-w-[120px] whitespace-nowrap">
+                          {new Date(enrollment.enrolledAt).toLocaleDateString()}
+                        </TableCell>
+                        <TableCell className="min-w-[100px]">
+                          <div className="whitespace-nowrap">
+                            {getStatusBadge(enrollment.status)}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-right min-w-[80px]">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            title="Remove enrollment"
+                            onClick={() =>
+                              setDeleteDialog({
+                                open: true,
+                                enrollmentId: enrollment._id,
+                              })
+                            }>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             )}
           </CardContent>
         </Card>

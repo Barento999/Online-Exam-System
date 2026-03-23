@@ -274,19 +274,21 @@ export const Analytics = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold">Advanced Analytics</h1>
-            <p className="text-muted-foreground">
+            <h1 className="text-2xl sm:text-3xl font-semibold">
+              Advanced Analytics
+            </h1>
+            <p className="text-sm sm:text-base text-muted-foreground">
               Comprehensive performance insights and statistics
             </p>
           </div>
         </div>
 
         {/* Filters */}
-        <div className="flex gap-4">
+        <div className="flex flex-col sm:flex-row gap-4">
           <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-            <SelectTrigger className="w-64">
+            <SelectTrigger className="w-full sm:w-64">
               <SelectValue placeholder="Filter by course" />
             </SelectTrigger>
             <SelectContent>
@@ -300,7 +302,7 @@ export const Analytics = () => {
           </Select>
 
           <Select value={selectedExam} onValueChange={setSelectedExam}>
-            <SelectTrigger className="w-64">
+            <SelectTrigger className="w-full sm:w-64">
               <SelectValue placeholder="Filter by exam" />
             </SelectTrigger>
             <SelectContent>
@@ -317,56 +319,58 @@ export const Analytics = () => {
         {/* Key Statistics */}
         {analytics && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         Total Results
                       </p>
-                      <p className="text-3xl font-semibold mt-2">
+                      <p className="text-2xl sm:text-3xl font-semibold mt-2">
                         {analytics.stats.totalResults}
                       </p>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
-                      <Users className="h-6 w-6 text-blue-600" />
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-blue-100 dark:bg-blue-900/20 flex items-center justify-center">
+                      <Users className="h-5 w-5 sm:h-6 sm:w-6 text-blue-600" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         Average Score
                       </p>
-                      <p className="text-3xl font-semibold mt-2">
+                      <p className="text-2xl sm:text-3xl font-semibold mt-2">
                         {analytics.stats.avgScore}%
                       </p>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
-                      <Target className="h-6 w-6 text-green-600" />
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-green-100 dark:bg-green-900/20 flex items-center justify-center">
+                      <Target className="h-5 w-5 sm:h-6 sm:w-6 text-green-600" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">Pass Rate</p>
-                      <p className="text-3xl font-semibold mt-2">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
+                        Pass Rate
+                      </p>
+                      <p className="text-2xl sm:text-3xl font-semibold mt-2">
                         {analytics.stats.passRate}%
                       </p>
                       <div className="flex items-center gap-1 mt-1">
                         {analytics.stats.passRate >= 70 ? (
-                          <TrendingUp className="h-4 w-4 text-green-600" />
+                          <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-green-600" />
                         ) : (
-                          <TrendingDown className="h-4 w-4 text-red-600" />
+                          <TrendingDown className="h-3 w-3 sm:h-4 sm:w-4 text-red-600" />
                         )}
                         <span className="text-xs text-muted-foreground">
                           {analytics.stats.passed} passed,{" "}
@@ -374,21 +378,21 @@ export const Analytics = () => {
                         </span>
                       </div>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
-                      <Award className="h-6 w-6 text-purple-600" />
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-purple-100 dark:bg-purple-900/20 flex items-center justify-center">
+                      <Award className="h-5 w-5 sm:h-6 sm:w-6 text-purple-600" />
                     </div>
                   </div>
                 </CardContent>
               </Card>
 
               <Card>
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm text-muted-foreground">
+                      <p className="text-xs sm:text-sm text-muted-foreground">
                         Score Range
                       </p>
-                      <p className="text-3xl font-semibold mt-2">
+                      <p className="text-2xl sm:text-3xl font-semibold mt-2">
                         {analytics.stats.lowestScore}-
                         {analytics.stats.highestScore}
                       </p>
@@ -396,8 +400,8 @@ export const Analytics = () => {
                         Lowest to Highest
                       </p>
                     </div>
-                    <div className="h-12 w-12 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
-                      <Activity className="h-6 w-6 text-orange-600" />
+                    <div className="h-10 w-10 sm:h-12 sm:w-12 rounded-full bg-orange-100 dark:bg-orange-900/20 flex items-center justify-center">
+                      <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-orange-600" />
                     </div>
                   </div>
                 </CardContent>
@@ -406,11 +410,21 @@ export const Analytics = () => {
 
             {/* Charts */}
             <Tabs defaultValue="distribution" className="space-y-6">
-              <TabsList>
-                <TabsTrigger value="distribution">Distribution</TabsTrigger>
-                <TabsTrigger value="performance">Performance</TabsTrigger>
-                <TabsTrigger value="trends">Trends</TabsTrigger>
-                <TabsTrigger value="top">Top Performers</TabsTrigger>
+              <TabsList className="w-full sm:w-auto grid grid-cols-2 sm:flex">
+                <TabsTrigger
+                  value="distribution"
+                  className="text-xs sm:text-sm">
+                  Distribution
+                </TabsTrigger>
+                <TabsTrigger value="performance" className="text-xs sm:text-sm">
+                  Performance
+                </TabsTrigger>
+                <TabsTrigger value="trends" className="text-xs sm:text-sm">
+                  Trends
+                </TabsTrigger>
+                <TabsTrigger value="top" className="text-xs sm:text-sm">
+                  Top Performers
+                </TabsTrigger>
               </TabsList>
 
               <TabsContent value="distribution" className="space-y-6">
@@ -423,8 +437,8 @@ export const Analytics = () => {
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={analytics.scoreDistribution}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="range" />
-                          <YAxis />
+                          <XAxis dataKey="range" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 12 }} />
                           <Tooltip />
                           <Bar dataKey="count" fill="#3B82F6" />
                         </BarChart>
@@ -468,20 +482,22 @@ export const Analytics = () => {
                       <ResponsiveContainer width="100%" height={300}>
                         <BarChart data={analytics.gradeDistribution}>
                           <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="grade" />
-                          <YAxis />
+                          <XAxis dataKey="grade" tick={{ fontSize: 12 }} />
+                          <YAxis tick={{ fontSize: 12 }} />
                           <Tooltip />
                           <Legend />
                           <Bar dataKey="count" fill="#10B981" name="Students" />
                         </BarChart>
                       </ResponsiveContainer>
-                      <div className="mt-4 grid grid-cols-5 gap-4">
+                      <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2 sm:gap-4">
                         {analytics.gradeDistribution.map((grade) => (
                           <div
                             key={grade.grade}
-                            className="text-center p-3 rounded-lg bg-accent">
-                            <p className="text-2xl font-bold">{grade.grade}</p>
-                            <p className="text-sm text-muted-foreground">
+                            className="text-center p-2 sm:p-3 rounded-lg bg-accent">
+                            <p className="text-xl sm:text-2xl font-bold">
+                              {grade.grade}
+                            </p>
+                            <p className="text-xs sm:text-sm text-muted-foreground">
                               {grade.count} students
                             </p>
                             <p className="text-xs text-muted-foreground">
@@ -504,8 +520,8 @@ export const Analytics = () => {
                     <ResponsiveContainer width="100%" height={400}>
                       <BarChart data={analytics.examPerformance}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
+                        <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
                         <Tooltip />
                         <Legend />
                         <Bar
@@ -533,8 +549,8 @@ export const Analytics = () => {
                     <ResponsiveContainer width="100%" height={400}>
                       <AreaChart data={analytics.performanceTrend}>
                         <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="exam" />
-                        <YAxis />
+                        <XAxis dataKey="exam" tick={{ fontSize: 12 }} />
+                        <YAxis tick={{ fontSize: 12 }} />
                         <Tooltip />
                         <Legend />
                         <Area
@@ -557,27 +573,29 @@ export const Analytics = () => {
                     <CardTitle>Top 5 Performers</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       {analytics.topPerformers.map((performer, index) => (
                         <div
                           key={index}
-                          className="flex items-center justify-between p-4 rounded-lg bg-accent">
-                          <div className="flex items-center gap-4">
-                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary">
+                          className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 sm:p-4 rounded-lg bg-accent gap-3 sm:gap-0">
+                          <div className="flex items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                            <div className="h-8 w-8 sm:h-10 sm:w-10 rounded-full bg-primary/10 flex items-center justify-center font-bold text-primary text-sm sm:text-base">
                               #{index + 1}
                             </div>
-                            <div>
-                              <p className="font-medium">{performer.student}</p>
-                              <p className="text-sm text-muted-foreground">
+                            <div className="min-w-0 flex-1">
+                              <p className="font-medium text-sm sm:text-base truncate">
+                                {performer.student}
+                              </p>
+                              <p className="text-xs sm:text-sm text-muted-foreground truncate">
                                 {performer.exam}
                               </p>
                             </div>
                           </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold text-green-600">
+                          <div className="text-left sm:text-right w-full sm:w-auto">
+                            <p className="text-xl sm:text-2xl font-bold text-green-600">
                               {performer.score}%
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-xs sm:text-sm text-muted-foreground">
                               Grade: {performer.grade}
                             </p>
                           </div>
