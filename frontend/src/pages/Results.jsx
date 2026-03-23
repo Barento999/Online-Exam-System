@@ -408,7 +408,7 @@ export const Results = () => {
                   ) : (
                     filteredResults.map((result) => (
                       <TableRow key={result._id}>
-                        <TableCell className="font-medium min-w-[150px]">
+                        <TableCell className="sticky left-0 z-10 bg-background font-medium min-w-[150px]">
                           <div
                             className="truncate max-w-[200px]"
                             title={result.examName}>

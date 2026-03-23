@@ -235,7 +235,9 @@ export const Enrollments = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="min-w-[180px]">Student</TableHead>
+                      <TableHead className="sticky left-0 z-10 bg-background min-w-[180px]">
+                        Student
+                      </TableHead>
                       <TableHead className="min-w-[150px]">Course</TableHead>
                       <TableHead className="min-w-[120px]">Teacher</TableHead>
                       <TableHead className="min-w-[120px]">
@@ -250,7 +252,7 @@ export const Enrollments = () => {
                   <TableBody>
                     {enrollments.map((enrollment) => (
                       <TableRow key={enrollment._id}>
-                        <TableCell className="min-w-[180px]">
+                        <TableCell className="sticky left-0 z-10 bg-background min-w-[180px]">
                           <div>
                             <div
                               className="font-medium truncate max-w-[160px]"
