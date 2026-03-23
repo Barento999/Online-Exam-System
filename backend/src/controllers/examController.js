@@ -340,22 +340,35 @@ export const getAvailableExams = async (req, res, next) => {
     });
     const enrolledCourseIds = enrollments.map((e) => e.courseId);
 
+    // Get all published exams for enrolled courses (past, present, and future)
     const exams = await Exam.find({
       status: "published",
-      startTime: { $lte: now },
-      endTime: { $gte: now },
       courseId: { $in: enrolledCourseIds },
-    }).populate("courseId", "name description");
+    })
+      .populate("courseId", "name description")
+      .sort({ startTime: -1 }); // Sort by start time, newest first
 
-    // Filter out exams already taken by student
+    // Get student's results to mark which exams are taken
     const results = await Result.find({ studentId: req.user._id });
     const takenExamIds = results.map((r) => r.examId.toString());
 
-    const availableExams = exams.filter(
-      (exam) => !takenExamIds.includes(exam._id.toString()),
-    );
+    // Add metadata to each exam
+    const examsWithMetadata = exams.map((exam) => {
+      const examObj = exam.toObject();
+      const isTaken = takenExamIds.includes(exam._id.toString());
+      const hasStarted = new Date(exam.startTime) <= now;
+      const hasEnded = new Date(exam.endTime) < now;
 
-    res.json(availableExams);
+      return {
+        ...examObj,
+        isTaken,
+        isActive: hasStarted && !hasEnded && !isTaken,
+        isUpcoming: !hasStarted,
+        isPast: hasEnded,
+      };
+    });
+
+    res.json({ exams: examsWithMetadata });
   } catch (error) {
     next(error);
   }
