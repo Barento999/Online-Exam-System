@@ -140,7 +140,7 @@ export const Courses = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">Courses Management</h1>
             <p className="text-muted-foreground">
@@ -149,12 +149,12 @@ export const Courses = () => {
           </div>
           <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="w-full sm:w-auto">
                 <Plus className="mr-2 h-4 w-4" />
                 Add Course
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingCourse ? "Edit Course" : "Add New Course"}
@@ -207,14 +207,15 @@ export const Courses = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex justify-end gap-2">
+                <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={() => handleDialogClose(false)}>
+                    onClick={() => handleDialogClose(false)}
+                    className="w-full sm:w-auto">
                     Cancel
                   </Button>
-                  <Button type="submit">
+                  <Button type="submit" className="w-full sm:w-auto">
                     {editingCourse ? "Update" : "Create"}
                   </Button>
                 </div>
@@ -238,22 +239,26 @@ export const Courses = () => {
             </Card>
           ) : (
             courses.map((course) => (
-              <Card key={course._id}>
-                <CardHeader>
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Card key={course._id} className="flex flex-col">
+                <CardHeader className="pb-3">
+                  <div className="flex flex-col sm:flex-row items-start justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
                         <BookOpen className="h-5 w-5 text-primary" />
                       </div>
-                      <div>
-                        <CardTitle className="text-lg">{course.name}</CardTitle>
+                      <div className="min-w-0 flex-1">
+                        <CardTitle className="text-lg truncate">
+                          {course.name}
+                        </CardTitle>
                       </div>
                     </div>
-                    <div className="flex gap-1">
+                    <div className="flex gap-1 self-end sm:self-start">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => handleEdit(course)}>
+                        onClick={() => handleEdit(course)}
+                        className="h-8 w-8 p-0"
+                        title="Edit">
                         <Pencil className="h-4 w-4" />
                       </Button>
                       <Button
@@ -261,31 +266,41 @@ export const Courses = () => {
                         size="sm"
                         onClick={() =>
                           setDeleteDialog({ open: true, courseId: course._id })
-                        }>
+                        }
+                        className="h-8 w-8 p-0"
+                        title="Delete">
                         <Trash2 className="h-4 w-4 text-destructive" />
                       </Button>
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
+                <CardContent className="flex-1">
+                  <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
                     {course.description}
                   </p>
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Teacher:</span>
-                      <span className="font-medium">{course.teacherName}</span>
+                    <div className="flex items-center justify-between text-sm gap-2">
+                      <span className="text-muted-foreground flex-shrink-0">
+                        Teacher:
+                      </span>
+                      <span className="font-medium truncate text-right">
+                        {course.teacherName}
+                      </span>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Students:</span>
-                      <Badge variant="secondary">
+                      <Badge variant="secondary" className="whitespace-nowrap">
                         <Users className="h-3 w-3 mr-1" />
                         {course.studentsCount}
                       </Badge>
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-muted-foreground">Created:</span>
-                      <span>{course.createdAt}</span>
+                    <div className="flex items-center justify-between text-sm gap-2">
+                      <span className="text-muted-foreground flex-shrink-0">
+                        Created:
+                      </span>
+                      <span className="truncate text-right">
+                        {course.createdAt}
+                      </span>
                     </div>
                   </div>
                 </CardContent>
