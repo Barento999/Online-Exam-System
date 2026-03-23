@@ -508,7 +508,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
       )}>
       {/* Welcome Message - Visible on all screens */}
       <div className="flex items-center min-w-0 flex-shrink pl-14 lg:pl-0">
-        <h2 className="text-xs sm:text-sm md:text-lg lg:text-xl font-semibold truncate">
+        <h2 className="text-sm sm:text-base md:text-lg lg:text-xl font-semibold truncate bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
           <span className="hidden sm:inline">Welcome back, </span>
           <span className="sm:hidden">Hi, </span>
           {user?.name?.split(" ")[0]}!
