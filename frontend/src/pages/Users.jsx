@@ -528,7 +528,7 @@ Admin User,admin@example.com,password123,admin,active`;
                   Quick Add User
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle>
                     {editingUser ? "Edit User" : "Add New User"}
@@ -572,47 +572,50 @@ Admin User,admin@example.com,password123,admin,active`;
                       required={!editingUser}
                     />
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="role">Role</Label>
-                    <Select
-                      value={formData.role}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, role: value })
-                      }>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="student">Student</SelectItem>
-                        <SelectItem value="teacher">Teacher</SelectItem>
-                        <SelectItem value="admin">Admin</SelectItem>
-                      </SelectContent>
-                    </Select>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="role">Role</Label>
+                      <Select
+                        value={formData.role}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, role: value })
+                        }>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="student">Student</SelectItem>
+                          <SelectItem value="teacher">Teacher</SelectItem>
+                          <SelectItem value="admin">Admin</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="status">Status</Label>
+                      <Select
+                        value={formData.status}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, status: value })
+                        }>
+                        <SelectTrigger>
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="inactive">Inactive</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="status">Status</Label>
-                    <Select
-                      value={formData.status}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, status: value })
-                      }>
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="inactive">Inactive</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="flex justify-end gap-2">
+                  <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
                     <Button
                       type="button"
                       variant="outline"
-                      onClick={() => handleDialogClose(false)}>
+                      onClick={() => handleDialogClose(false)}
+                      className="w-full sm:w-auto">
                       Cancel
                     </Button>
-                    <Button type="submit">
+                    <Button type="submit" className="w-full sm:w-auto">
                       {editingUser ? "Update" : "Create"}
                     </Button>
                   </div>
@@ -724,44 +727,59 @@ Admin User,admin@example.com,password123,admin,active`;
                   ) : (
                     paginatedData.map((user) => (
                       <TableRow key={user._id}>
-                        <TableCell>
+                        <TableCell className="w-12">
                           <Checkbox
                             checked={isSelected(user._id)}
                             onCheckedChange={() => toggleRow(user._id)}
                             aria-label={`Select ${user.name}`}
                           />
                         </TableCell>
-                        <TableCell className="font-medium">
-                          {user.name}
+                        <TableCell className="font-medium min-w-[150px]">
+                          <div
+                            className="truncate max-w-[200px]"
+                            title={user.name}>
+                            {user.name}
+                          </div>
                         </TableCell>
-                        <TableCell>{user.email}</TableCell>
-                        <TableCell>
-                          <Badge variant="outline" className="capitalize">
+                        <TableCell className="min-w-[200px]">
+                          <div
+                            className="truncate max-w-[250px]"
+                            title={user.email}>
+                            {user.email}
+                          </div>
+                        </TableCell>
+                        <TableCell className="min-w-[100px]">
+                          <Badge
+                            variant="outline"
+                            className="capitalize whitespace-nowrap">
                             {user.role}
                           </Badge>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="min-w-[100px]">
                           <Badge
                             variant={
                               user.status === "active" ? "default" : "secondary"
-                            }>
+                            }
+                            className="whitespace-nowrap">
                             {user.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                        <TableCell className="text-right min-w-[140px]">
+                          <div className="flex justify-end gap-1">
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleEdit(user)}
-                              title="Quick Edit">
+                              title="Quick Edit"
+                              className="h-8 w-8 p-0">
                               <Pencil className="h-4 w-4" />
                             </Button>
                             <Button
                               variant="ghost"
                               size="sm"
                               onClick={() => handleMultiStepEdit(user)}
-                              title="Advanced Edit">
+                              title="Advanced Edit"
+                              className="h-8 w-8 p-0">
                               <UserPlus className="h-4 w-4 text-primary" />
                             </Button>
                             <Button
@@ -772,7 +790,9 @@ Admin User,admin@example.com,password123,admin,active`;
                                   open: true,
                                   userId: user._id,
                                 })
-                              }>
+                              }
+                              title="Delete"
+                              className="h-8 w-8 p-0">
                               <Trash2 className="h-4 w-4 text-destructive" />
                             </Button>
                           </div>
