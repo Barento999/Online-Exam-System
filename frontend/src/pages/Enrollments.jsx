@@ -116,15 +116,6 @@ export const Enrollments = () => {
     }
   };
 
-  const getStatusBadge = (status) => {
-    const variants = {
-      active: "default",
-      completed: "secondary",
-      dropped: "destructive",
-    };
-    return <Badge variant={variants[status]}>{status}</Badge>;
-  };
-
   if (loading) {
     return (
       <Layout>
@@ -273,23 +264,35 @@ export const Enrollments = () => {
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell
-                          className="min-w-[150px] truncate max-w-[200px]"
-                          title={enrollment.courseId?.name}>
-                          {enrollment.courseId?.name}
+                        <TableCell className="min-w-[150px]">
+                          <div
+                            className="truncate max-w-[200px]"
+                            title={enrollment.courseId?.name}>
+                            {enrollment.courseId?.name}
+                          </div>
                         </TableCell>
-                        <TableCell
-                          className="min-w-[120px] truncate max-w-[150px]"
-                          title={enrollment.courseId?.teacherName}>
-                          {enrollment.courseId?.teacherName}
+                        <TableCell className="min-w-[120px]">
+                          <div
+                            className="truncate max-w-[150px]"
+                            title={enrollment.courseId?.teacherName}>
+                            {enrollment.courseId?.teacherName}
+                          </div>
                         </TableCell>
                         <TableCell className="min-w-[120px] whitespace-nowrap">
                           {new Date(enrollment.enrolledAt).toLocaleDateString()}
                         </TableCell>
                         <TableCell className="min-w-[100px]">
-                          <div className="whitespace-nowrap">
-                            {getStatusBadge(enrollment.status)}
-                          </div>
+                          <Badge
+                            variant={
+                              enrollment.status === "active"
+                                ? "default"
+                                : enrollment.status === "completed"
+                                  ? "secondary"
+                                  : "destructive"
+                            }
+                            className="whitespace-nowrap">
+                            {enrollment.status}
+                          </Badge>
                         </TableCell>
                         <TableCell className="text-right min-w-[80px]">
                           <Button

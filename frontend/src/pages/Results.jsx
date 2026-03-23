@@ -357,21 +357,31 @@ export const Results = () => {
             )}
           </CardHeader>
           <CardContent>
-            <div className="rounded-md border">
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Exam Name</TableHead>
-                    {user?.role !== "student" && <TableHead>Student</TableHead>}
-                    <TableHead>Score</TableHead>
-                    <TableHead>Total Marks</TableHead>
-                    <TableHead>Percentage</TableHead>
-                    <TableHead>Status</TableHead>
+                    <TableHead className="sticky left-0 z-10 bg-background min-w-[150px]">
+                      Exam Name
+                    </TableHead>
                     {user?.role !== "student" && (
-                      <TableHead>Published</TableHead>
+                      <TableHead className="min-w-[120px]">Student</TableHead>
                     )}
-                    <TableHead>Submitted At</TableHead>
-                    {user?.role !== "student" && <TableHead>Actions</TableHead>}
+                    <TableHead className="min-w-[80px]">Score</TableHead>
+                    <TableHead className="min-w-[100px]">Total Marks</TableHead>
+                    <TableHead className="min-w-[100px]">Percentage</TableHead>
+                    <TableHead className="min-w-[100px]">Status</TableHead>
+                    {user?.role !== "student" && (
+                      <TableHead className="min-w-[120px]">Published</TableHead>
+                    )}
+                    <TableHead className="min-w-[150px]">
+                      Submitted At
+                    </TableHead>
+                    {user?.role !== "student" && (
+                      <TableHead className="text-right min-w-[80px]">
+                        Actions
+                      </TableHead>
+                    )}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -465,7 +475,7 @@ export const Results = () => {
                           </div>
                         </TableCell>
                         {user?.role !== "student" && (
-                          <TableCell className="min-w-[80px]">
+                          <TableCell className="text-right min-w-[80px]">
                             <Button
                               variant="ghost"
                               size="sm"
