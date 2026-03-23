@@ -741,7 +741,7 @@ export const Questions = () => {
                     )}
                   </div>
 
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="optionA">Option A</Label>
                       <Input
@@ -787,7 +787,7 @@ export const Questions = () => {
                       />
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="correctAnswer">Correct Answer</Label>
                       <Select
@@ -912,50 +912,57 @@ export const Questions = () => {
 
                   return (
                     <Card key={question._id}>
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between mb-4">
-                          <div className="flex items-center gap-2">
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-start gap-4">
+                          <div className="flex items-start gap-3 flex-1">
                             <Checkbox
                               checked={isSelected(question._id)}
                               onCheckedChange={() => toggleRow(question._id)}
                               aria-label={`Select question ${startIndex + index}`}
+                              className="mt-1"
                             />
-                          </div>
-                          <div className="flex-1 ml-4">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant="outline">
-                                Q{startIndex + index}
-                              </Badge>
-                              <Badge>{examTitle || "Unknown Exam"}</Badge>
-                              <Badge variant="secondary">
-                                {question.marks} marks
-                              </Badge>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-wrap items-center gap-2 mb-2">
+                                <Badge variant="outline">
+                                  Q{startIndex + index}
+                                </Badge>
+                                <Badge className="truncate max-w-[200px]">
+                                  {examTitle || "Unknown Exam"}
+                                </Badge>
+                                <Badge variant="secondary">
+                                  {question.marks} marks
+                                </Badge>
+                              </div>
+                              <p className="font-medium mb-4 break-words">
+                                <span
+                                  dangerouslySetInnerHTML={{
+                                    __html: parseMarkdown(
+                                      question.questionText,
+                                    ),
+                                  }}
+                                />
+                              </p>
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                                {["A", "B", "C", "D"].map((option) => (
+                                  <div
+                                    key={option}
+                                    className={`p-2 sm:p-3 rounded-lg border text-sm ${
+                                      question.correctAnswer === option
+                                        ? "bg-green-50 dark:bg-green-900/20 border-green-500"
+                                        : "bg-muted"
+                                    }`}>
+                                    <span className="font-medium">
+                                      {option}.{" "}
+                                    </span>
+                                    <span className="break-words">
+                                      {question[`option${option}`]}
+                                    </span>
+                                  </div>
+                                ))}
+                              </div>
                             </div>
-                            <p className="font-medium mb-4">
-                              <span
-                                dangerouslySetInnerHTML={{
-                                  __html: parseMarkdown(question.questionText),
-                                }}
-                              />
-                            </p>
-                            <div className="grid grid-cols-2 gap-3">
-                              {["A", "B", "C", "D"].map((option) => (
-                                <div
-                                  key={option}
-                                  className={`p-3 rounded-lg border ${
-                                    question.correctAnswer === option
-                                      ? "bg-green-50 dark:bg-green-900/20 border-green-500"
-                                      : "bg-muted"
-                                  }`}>
-                                  <span className="font-medium">
-                                    {option}.{" "}
-                                  </span>
-                                  {question[`option${option}`]}
-                                </div>
-                              ))}
-                            </div>
                           </div>
-                          <div className="flex gap-2 ml-4">
+                          <div className="flex sm:flex-col gap-2 justify-end sm:justify-start">
                             <Button
                               variant="ghost"
                               size="sm"
