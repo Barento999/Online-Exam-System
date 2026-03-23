@@ -361,9 +361,7 @@ export const Results = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="sticky left-0 z-10 bg-background min-w-[150px]">
-                      Exam Name
-                    </TableHead>
+                    <TableHead className="min-w-[150px]">Exam Name</TableHead>
                     {user?.role !== "student" && (
                       <TableHead className="min-w-[120px]">Student</TableHead>
                     )}
@@ -408,7 +406,7 @@ export const Results = () => {
                   ) : (
                     filteredResults.map((result) => (
                       <TableRow key={result._id}>
-                        <TableCell className="sticky left-0 z-10 bg-background font-medium min-w-[150px]">
+                        <TableCell className="font-medium min-w-[150px]">
                           <div
                             className="truncate max-w-[200px]"
                             title={result.examName}>
