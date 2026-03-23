@@ -197,7 +197,7 @@ export const Results = () => {
   return (
     <Layout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-3xl font-semibold">Exam Results</h1>
             <p className="text-muted-foreground">
@@ -207,7 +207,7 @@ export const Results = () => {
             </p>
           </div>
           {user?.role !== "student" && (
-            <Button onClick={exportToCSV}>
+            <Button onClick={exportToCSV} className="w-full sm:w-auto">
               <Download className="mr-2 h-4 w-4" />
               Export CSV
             </Button>
@@ -215,7 +215,7 @@ export const Results = () => {
         </div>
 
         {user?.role !== "student" && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-center justify-between">
@@ -325,7 +325,7 @@ export const Results = () => {
               </Select>
             </div>
             {user?.role !== "student" && filterExam !== "all" && (
-              <div className="flex gap-2 mt-4">
+              <div className="flex flex-col sm:flex-row gap-2 mt-4">
                 <Button
                   onClick={() =>
                     setPublishDialog({
@@ -334,7 +334,8 @@ export const Results = () => {
                       action: "publish",
                     })
                   }
-                  size="sm">
+                  size="sm"
+                  className="w-full sm:w-auto">
                   <Send className="mr-2 h-4 w-4" />
                   Publish All Results
                 </Button>
@@ -347,7 +348,8 @@ export const Results = () => {
                     })
                   }
                   variant="outline"
-                  size="sm">
+                  size="sm"
+                  className="w-full sm:w-auto">
                   <EyeOff className="mr-2 h-4 w-4" />
                   Unpublish All Results
                 </Button>
@@ -396,17 +398,31 @@ export const Results = () => {
                   ) : (
                     filteredResults.map((result) => (
                       <TableRow key={result._id}>
-                        <TableCell className="font-medium">
-                          {result.examName}
+                        <TableCell className="font-medium min-w-[150px]">
+                          <div
+                            className="truncate max-w-[200px]"
+                            title={result.examName}>
+                            {result.examName}
+                          </div>
                         </TableCell>
                         {user?.role !== "student" && (
-                          <TableCell>{result.studentName}</TableCell>
+                          <TableCell className="min-w-[120px]">
+                            <div
+                              className="truncate max-w-[150px]"
+                              title={result.studentName}>
+                              {result.studentName}
+                            </div>
+                          </TableCell>
                         )}
-                        <TableCell>{result.score}</TableCell>
-                        <TableCell>{result.totalMarks}</TableCell>
-                        <TableCell>
+                        <TableCell className="min-w-[80px]">
+                          {result.score}
+                        </TableCell>
+                        <TableCell className="min-w-[80px]">
+                          {result.totalMarks}
+                        </TableCell>
+                        <TableCell className="min-w-[100px]">
                           <span
-                            className={`font-medium ${
+                            className={`font-medium whitespace-nowrap ${
                               result.percentage >= 70
                                 ? "text-green-600"
                                 : result.percentage >= 40
@@ -416,22 +432,24 @@ export const Results = () => {
                             {result.percentage}%
                           </span>
                         </TableCell>
-                        <TableCell>
+                        <TableCell className="min-w-[100px]">
                           <Badge
                             variant={
                               result.status === "passed"
                                 ? "default"
                                 : "destructive"
-                            }>
+                            }
+                            className="whitespace-nowrap">
                             {result.status}
                           </Badge>
                         </TableCell>
                         {user?.role !== "student" && (
-                          <TableCell>
+                          <TableCell className="min-w-[120px]">
                             <Badge
                               variant={
                                 result.published ? "default" : "secondary"
-                              }>
+                              }
+                              className="whitespace-nowrap">
                               {result.published ? (
                                 <Eye className="h-3 w-3 mr-1" />
                               ) : (
@@ -441,11 +459,13 @@ export const Results = () => {
                             </Badge>
                           </TableCell>
                         )}
-                        <TableCell>
-                          {new Date(result.submittedAt).toLocaleString()}
+                        <TableCell className="min-w-[150px]">
+                          <div className="text-sm whitespace-nowrap">
+                            {new Date(result.submittedAt).toLocaleString()}
+                          </div>
                         </TableCell>
                         {user?.role !== "student" && (
-                          <TableCell>
+                          <TableCell className="min-w-[80px]">
                             <Button
                               variant="ghost"
                               size="sm"
@@ -454,6 +474,10 @@ export const Results = () => {
                                   result._id,
                                   result.published,
                                 )
+                              }
+                              className="h-8 w-8 p-0"
+                              title={
+                                result.published ? "Unpublish" : "Publish"
                               }>
                               {result.published ? (
                                 <EyeOff className="h-4 w-4" />
