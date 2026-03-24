@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -30,14 +31,12 @@ import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
-import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { SortableTableHead } from "@/components/ui/sortable-table-head";
 import { TablePagination } from "@/components/ui/table-pagination";
-import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
 import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
 import { enrollmentsApi, coursesApi, usersApi } from "@/services/api";
-import { Trash2, UserPlus } from "lucide-react";
+import { Trash2, UserPlus, Search, X } from "lucide-react";
 import toast from "react-hot-toast";
 
 export const Enrollments = () => {
@@ -56,59 +55,72 @@ export const Enrollments = () => {
     courseId: "",
   });
 
-  // Filtering, sorting, and pagination
-  const {
-    filters,
-    handleFilterChange,
-    handleClearFilters,
-    activeFiltersCount,
-  } = useAdvancedFilter({
-    search: "",
-    course: "all",
-    status: "all",
-  });
+  // Filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterCourse, setFilterCourse] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
 
-  const { sortField, sortDirection, handleSort, sortData } = useTableSort(
+  // Active filters count
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filterCourse !== "all") count++;
+    if (filterStatus !== "all") count++;
+    return count;
+  }, [filterCourse, filterStatus]);
+
+  // Clear filters
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setFilterCourse("all");
+    setFilterStatus("all");
+  };
+
+  // Filter data
+  const filteredEnrollments = useMemo(() => {
+    return enrollments.filter((enrollment) => {
+      const matchesSearch =
+        !searchTerm ||
+        enrollment.studentId?.name
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        enrollment.studentId?.email
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase()) ||
+        enrollment.courseId?.name
+          ?.toLowerCase()
+          .includes(searchTerm.toLowerCase());
+
+      const matchesCourse =
+        filterCourse === "all" || enrollment.courseId?._id === filterCourse;
+
+      const matchesStatus =
+        filterStatus === "all" || enrollment.status === filterStatus;
+
+      return matchesSearch && matchesCourse && matchesStatus;
+    });
+  }, [enrollments, searchTerm, filterCourse, filterStatus]);
+
+  // Sorting
+  const { sortedData, sortField, sortDirection, handleSort } = useTableSort(
+    filteredEnrollments,
     "enrolledAt",
     "desc",
   );
 
+  // Pagination
   const {
+    paginatedData,
     currentPage,
     pageSize,
-    handlePageChange,
-    handlePageSizeChange,
-    paginateData,
-  } = usePagination();
-
-  // Filter and sort data
-  const filteredAndSortedEnrollments = useMemo(() => {
-    let filtered = enrollments.filter((enrollment) => {
-      const matchesSearch =
-        !filters.search ||
-        enrollment.studentId?.name
-          ?.toLowerCase()
-          .includes(filters.search.toLowerCase()) ||
-        enrollment.studentId?.email
-          ?.toLowerCase()
-          .includes(filters.search.toLowerCase()) ||
-        enrollment.courseId?.name
-          ?.toLowerCase()
-          .includes(filters.search.toLowerCase());
-
-      const matchesCourse =
-        filters.course === "all" || enrollment.courseId?._id === filters.course;
-
-      const matchesStatus =
-        filters.status === "all" || enrollment.status === filters.status;
-
-      return matchesSearch && matchesCourse && matchesStatus;
-    });
-
-    return sortData(filtered);
-  }, [enrollments, filters, sortData]);
-
-  const paginatedEnrollments = paginateData(filteredAndSortedEnrollments);
+    totalPages,
+    totalItems,
+    startIndex,
+    endIndex,
+    goToPage,
+    changePageSize,
+    hasNextPage,
+    hasPreviousPage,
+  } = usePagination(sortedData, 10);
 
   useEffect(() => {
     loadData();
@@ -277,52 +289,62 @@ export const Enrollments = () => {
 
         <Card>
           <CardHeader>
-            <AdvancedTableFilter
-              filters={filters}
-              onFilterChange={handleFilterChange}
-              onClearFilters={handleClearFilters}
-              activeFiltersCount={activeFiltersCount}
-              searchPlaceholder="Search by student name, email, or course..."
-              additionalFilters={
-                <>
-                  <Select
-                    value={filters.course}
-                    onValueChange={(value) =>
-                      handleFilterChange("course", value)
-                    }>
-                    <SelectTrigger className="w-full sm:w-48">
-                      <SelectValue placeholder="All Courses" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Courses</SelectItem>
-                      {courses.map((course) => (
-                        <SelectItem key={course._id} value={course._id}>
-                          {course.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select
-                    value={filters.status}
-                    onValueChange={(value) =>
-                      handleFilterChange("status", value)
-                    }>
-                    <SelectTrigger className="w-full sm:w-40">
-                      <SelectValue placeholder="All Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Status</SelectItem>
-                      <SelectItem value="active">Active</SelectItem>
-                      <SelectItem value="completed">Completed</SelectItem>
-                      <SelectItem value="dropped">Dropped</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </>
-              }
-            />
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by student name, email, or course..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                <Select value={filterCourse} onValueChange={setFilterCourse}>
+                  <SelectTrigger className="w-full sm:w-48">
+                    <SelectValue placeholder="All Courses" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Courses</SelectItem>
+                    {courses.map((course) => (
+                      <SelectItem key={course._id} value={course._id}>
+                        {course.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-full sm:w-40">
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="active">Active</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="dropped">Dropped</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {activeFiltersCount > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {activeFiltersCount} filter
+                    {activeFiltersCount > 1 ? "s" : ""} active
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearFilters}
+                    className="h-8">
+                    <X className="h-4 w-4 mr-1" />
+                    Clear filters
+                  </Button>
+                </div>
+              )}
+            </div>
           </CardHeader>
           <CardContent>
-            {filteredAndSortedEnrollments.length === 0 ? (
+            {sortedData.length === 0 ? (
               <div className="flex items-center justify-center h-96">
                 {enrollments.length === 0 ? (
                   <EmptyState
@@ -384,7 +406,7 @@ export const Enrollments = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {paginatedEnrollments.map((enrollment) => (
+                    {paginatedData.map((enrollment) => (
                       <TableRow key={enrollment._id}>
                         <TableCell className="min-w-[180px]">
                           <div>
@@ -451,10 +473,15 @@ export const Enrollments = () => {
                 </Table>
                 <TablePagination
                   currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
                   pageSize={pageSize}
-                  totalItems={filteredAndSortedEnrollments.length}
-                  onPageChange={handlePageChange}
-                  onPageSizeChange={handlePageSizeChange}
+                  startIndex={startIndex}
+                  endIndex={endIndex}
+                  onPageChange={goToPage}
+                  onPageSizeChange={changePageSize}
+                  hasNextPage={hasNextPage}
+                  hasPreviousPage={hasPreviousPage}
                 />
               </>
             )}

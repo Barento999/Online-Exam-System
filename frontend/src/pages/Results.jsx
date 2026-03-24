@@ -1,7 +1,6 @@
-import { useState, useEffect } from "react";
-import { useLocation } from "react-router";
+import { useState, useEffect, useMemo } from "react";
 import { Layout } from "@/components/layout/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -19,19 +18,23 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Loader } from "@/components/common/Loader";
 import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
+import { SortableTableHead } from "@/components/ui/sortable-table-head";
+import { TablePagination } from "@/components/ui/table-pagination";
+import { useTableSort } from "@/hooks/useTableSort";
+import { usePagination } from "@/hooks/usePagination";
 import { resultsApi, examsApi } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import {
   Trophy,
   TrendingUp,
   Search,
-  Download,
   Send,
   Eye,
   EyeOff,
+  X,
+  Download,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
@@ -39,46 +42,84 @@ import toast from "react-hot-toast";
 
 export const Results = () => {
   const [results, setResults] = useState([]);
-  const [filteredResults, setFilteredResults] = useState([]);
   const [exams, setExams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterExam, setFilterExam] = useState("all");
+  const [filterPublished, setFilterPublished] = useState("all");
   const [publishDialog, setPublishDialog] = useState({
     open: false,
     examId: null,
     action: null,
   });
   const { user } = useAuth();
-  const location = useLocation();
-  const newResult = location.state?.result;
+
+  // Active filters count
+  const activeFiltersCount = useMemo(() => {
+    let count = 0;
+    if (filterExam !== "all") count++;
+    if (filterStatus !== "all") count++;
+    if (filterPublished !== "all" && user?.role !== "student") count++;
+    return count;
+  }, [filterExam, filterStatus, filterPublished, user]);
+
+  // Clear filters
+  const handleClearFilters = () => {
+    setSearchTerm("");
+    setFilterExam("all");
+    setFilterStatus("all");
+    setFilterPublished("all");
+  };
+
+  // Filter data
+  const filteredResults = useMemo(() => {
+    return results.filter((result) => {
+      const matchesSearch =
+        !searchTerm ||
+        result.examName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        result.studentName?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesStatus =
+        filterStatus === "all" || result.status === filterStatus;
+
+      const matchesExam =
+        filterExam === "all" || result.examId?._id === filterExam;
+
+      const matchesPublished =
+        filterPublished === "all" ||
+        (filterPublished === "published" && result.published) ||
+        (filterPublished === "unpublished" && !result.published);
+
+      return matchesSearch && matchesStatus && matchesExam && matchesPublished;
+    });
+  }, [results, searchTerm, filterStatus, filterExam, filterPublished]);
+
+  // Sorting
+  const { sortedData, sortField, sortDirection, handleSort } = useTableSort(
+    filteredResults,
+    "submittedAt",
+    "desc",
+  );
+
+  // Pagination
+  const {
+    paginatedData,
+    currentPage,
+    pageSize,
+    totalPages,
+    totalItems,
+    startIndex,
+    endIndex,
+    goToPage,
+    changePageSize,
+    hasNextPage,
+    hasPreviousPage,
+  } = usePagination(sortedData, 10);
 
   useEffect(() => {
     loadResults();
   }, []);
-
-  useEffect(() => {
-    let filtered = results;
-
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (result) =>
-          result.examName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          result.studentName?.toLowerCase().includes(searchTerm.toLowerCase()),
-      );
-    }
-
-    if (filterStatus !== "all") {
-      filtered = filtered.filter((result) => result.status === filterStatus);
-    }
-
-    if (filterExam !== "all") {
-      filtered = filtered.filter((result) => result.examId?._id === filterExam);
-    }
-
-    setFilteredResults(filtered);
-  }, [searchTerm, filterStatus, filterExam, results]);
 
   const loadResults = async () => {
     try {
@@ -90,7 +131,6 @@ export const Results = () => {
       }
       const resultsData = response.data.results || response.data;
       setResults(resultsData);
-      setFilteredResults(resultsData);
 
       // Load exams for teachers/admins
       if (user?.role !== "student") {
@@ -288,41 +328,73 @@ export const Results = () => {
 
         <Card>
           <CardHeader>
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search exams or students..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-              {user?.role !== "student" && (
-                <Select value={filterExam} onValueChange={setFilterExam}>
-                  <SelectTrigger className="w-full md:w-64">
-                    <SelectValue placeholder="Filter by exam" />
+            <div className="flex flex-col gap-4">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Search by exam or student name..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+                {user?.role !== "student" && (
+                  <Select value={filterExam} onValueChange={setFilterExam}>
+                    <SelectTrigger className="w-full sm:w-48">
+                      <SelectValue placeholder="All Exams" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Exams</SelectItem>
+                      {exams.map((exam) => (
+                        <SelectItem key={exam._id} value={exam._id}>
+                          {exam.title}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+                <Select value={filterStatus} onValueChange={setFilterStatus}>
+                  <SelectTrigger className="w-full sm:w-40">
+                    <SelectValue placeholder="All Status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Exams</SelectItem>
-                    {exams.map((exam) => (
-                      <SelectItem key={exam._id} value={exam._id}>
-                        {exam.title}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="all">All Results</SelectItem>
+                    <SelectItem value="passed">Passed</SelectItem>
+                    <SelectItem value="failed">Failed</SelectItem>
                   </SelectContent>
                 </Select>
+                {user?.role !== "student" && (
+                  <Select
+                    value={filterPublished}
+                    onValueChange={setFilterPublished}>
+                    <SelectTrigger className="w-full sm:w-40">
+                      <SelectValue placeholder="All" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All</SelectItem>
+                      <SelectItem value="published">Published</SelectItem>
+                      <SelectItem value="unpublished">Unpublished</SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+              </div>
+              {activeFiltersCount > 0 && (
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-muted-foreground">
+                    {activeFiltersCount} filter
+                    {activeFiltersCount > 1 ? "s" : ""} active
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleClearFilters}
+                    className="h-8">
+                    <X className="h-4 w-4 mr-1" />
+                    Clear filters
+                  </Button>
+                </div>
               )}
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-full md:w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Results</SelectItem>
-                  <SelectItem value="passed">Passed</SelectItem>
-                  <SelectItem value="failed">Failed</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             {user?.role !== "student" && filterExam !== "all" && (
               <div className="flex flex-col sm:flex-row gap-2 mt-4">
@@ -357,139 +429,202 @@ export const Results = () => {
             )}
           </CardHeader>
           <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="min-w-[150px]">Exam Name</TableHead>
-                  {user?.role !== "student" && (
-                    <TableHead className="min-w-[120px]">Student</TableHead>
-                  )}
-                  <TableHead className="min-w-[80px]">Score</TableHead>
-                  <TableHead className="min-w-[100px]">Total Marks</TableHead>
-                  <TableHead className="min-w-[100px]">Percentage</TableHead>
-                  <TableHead className="min-w-[100px]">Status</TableHead>
-                  {user?.role !== "student" && (
-                    <TableHead className="min-w-[120px]">Published</TableHead>
-                  )}
-                  <TableHead className="min-w-[150px]">Submitted At</TableHead>
-                  {user?.role !== "student" && (
-                    <TableHead className="text-right min-w-[80px]">
-                      Actions
-                    </TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredResults.length === 0 ? (
-                  <TableRow>
-                    <TableCell
-                      colSpan={user?.role === "student" ? 6 : 9}
-                      className="h-96">
-                      {results.length === 0 ? (
-                        <EmptyState
-                          illustration="results"
-                          title="No results yet"
-                          description="Results will appear here once students complete exams and teachers publish the grades."
-                        />
-                      ) : (
-                        <EmptyState
-                          illustration="results"
-                          title="No results found"
-                          description="No results match your current filters. Try adjusting your search or filter criteria."
-                        />
-                      )}
-                    </TableCell>
-                  </TableRow>
+            {sortedData.length === 0 ? (
+              <div className="flex items-center justify-center h-96">
+                {results.length === 0 ? (
+                  <EmptyState
+                    illustration="results"
+                    title="No results yet"
+                    description="Results will appear here once students complete exams and teachers publish the grades."
+                  />
                 ) : (
-                  filteredResults.map((result) => (
-                    <TableRow key={result._id}>
-                      <TableCell className="font-medium min-w-[150px]">
-                        <div
-                          className="truncate max-w-[200px]"
-                          title={result.examName}>
-                          {result.examName}
-                        </div>
-                      </TableCell>
+                  <EmptyState
+                    illustration="results"
+                    title="No results found"
+                    description="No results match your current filters. Try adjusting your search or filter criteria."
+                  />
+                )}
+              </div>
+            ) : (
+              <>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <SortableTableHead
+                        field="examName"
+                        label="Exam Name"
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        className="min-w-[150px]"
+                      />
                       {user?.role !== "student" && (
-                        <TableCell className="min-w-[120px]">
-                          <div
-                            className="truncate max-w-[150px]"
-                            title={result.studentName}>
-                            {result.studentName}
-                          </div>
-                        </TableCell>
+                        <SortableTableHead
+                          field="studentName"
+                          label="Student"
+                          sortField={sortField}
+                          sortDirection={sortDirection}
+                          onSort={handleSort}
+                          className="min-w-[120px]"
+                        />
                       )}
-                      <TableCell className="min-w-[80px]">
-                        {result.score}
-                      </TableCell>
-                      <TableCell className="min-w-[80px]">
-                        {result.totalMarks}
-                      </TableCell>
-                      <TableCell className="min-w-[100px]">
-                        <span
-                          className={`font-medium whitespace-nowrap ${
-                            result.percentage >= 70
-                              ? "text-green-600"
-                              : result.percentage >= 40
-                                ? "text-orange-600"
-                                : "text-red-600"
-                          }`}>
-                          {result.percentage}%
-                        </span>
-                      </TableCell>
-                      <TableCell className="min-w-[100px]">
-                        <Badge
-                          variant={
-                            result.status === "passed"
-                              ? "default"
-                              : "destructive"
-                          }
-                          className="whitespace-nowrap">
-                          {result.status}
-                        </Badge>
-                      </TableCell>
+                      <SortableTableHead
+                        field="score"
+                        label="Score"
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        className="min-w-[80px]"
+                      />
+                      <TableHead className="min-w-[100px]">
+                        Total Marks
+                      </TableHead>
+                      <SortableTableHead
+                        field="percentage"
+                        label="Percentage"
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        className="min-w-[100px]"
+                      />
+                      <SortableTableHead
+                        field="status"
+                        label="Status"
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        className="min-w-[100px]"
+                      />
                       {user?.role !== "student" && (
-                        <TableCell className="min-w-[120px]">
-                          <Badge
-                            variant={result.published ? "default" : "secondary"}
-                            className="whitespace-nowrap">
-                            {result.published ? (
-                              <Eye className="h-3 w-3 mr-1" />
-                            ) : (
-                              <EyeOff className="h-3 w-3 mr-1" />
-                            )}
-                            {result.published ? "Published" : "Hidden"}
-                          </Badge>
-                        </TableCell>
+                        <TableHead className="min-w-[120px]">
+                          Published
+                        </TableHead>
                       )}
-                      <TableCell className="min-w-[150px]">
-                        <div className="text-sm whitespace-nowrap">
-                          {new Date(result.submittedAt).toLocaleString()}
-                        </div>
-                      </TableCell>
+                      <SortableTableHead
+                        field="submittedAt"
+                        label="Submitted At"
+                        sortField={sortField}
+                        sortDirection={sortDirection}
+                        onSort={handleSort}
+                        className="min-w-[150px]"
+                      />
                       {user?.role !== "student" && (
-                        <TableCell className="text-right min-w-[80px]">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() =>
-                              handleTogglePublish(result._id, result.published)
-                            }
-                            className="h-8 w-8 p-0"
-                            title={result.published ? "Unpublish" : "Publish"}>
-                            {result.published ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Send className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </TableCell>
+                        <TableHead className="text-right min-w-[80px]">
+                          Actions
+                        </TableHead>
                       )}
                     </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {paginatedData.map((result) => (
+                      <TableRow key={result._id}>
+                        <TableCell className="font-medium min-w-[150px]">
+                          <div
+                            className="truncate max-w-[200px]"
+                            title={result.examName}>
+                            {result.examName}
+                          </div>
+                        </TableCell>
+                        {user?.role !== "student" && (
+                          <TableCell className="min-w-[120px]">
+                            <div
+                              className="truncate max-w-[150px]"
+                              title={result.studentName}>
+                              {result.studentName}
+                            </div>
+                          </TableCell>
+                        )}
+                        <TableCell className="min-w-[80px]">
+                          {result.score}
+                        </TableCell>
+                        <TableCell className="min-w-[80px]">
+                          {result.totalMarks}
+                        </TableCell>
+                        <TableCell className="min-w-[100px]">
+                          <span
+                            className={`font-medium whitespace-nowrap ${
+                              result.percentage >= 70
+                                ? "text-green-600"
+                                : result.percentage >= 40
+                                  ? "text-orange-600"
+                                  : "text-red-600"
+                            }`}>
+                            {result.percentage}%
+                          </span>
+                        </TableCell>
+                        <TableCell className="min-w-[100px]">
+                          <Badge
+                            variant={
+                              result.status === "passed"
+                                ? "default"
+                                : "destructive"
+                            }
+                            className="whitespace-nowrap">
+                            {result.status}
+                          </Badge>
+                        </TableCell>
+                        {user?.role !== "student" && (
+                          <TableCell className="min-w-[120px]">
+                            <Badge
+                              variant={
+                                result.published ? "default" : "secondary"
+                              }
+                              className="whitespace-nowrap">
+                              {result.published ? (
+                                <Eye className="h-3 w-3 mr-1" />
+                              ) : (
+                                <EyeOff className="h-3 w-3 mr-1" />
+                              )}
+                              {result.published ? "Published" : "Hidden"}
+                            </Badge>
+                          </TableCell>
+                        )}
+                        <TableCell className="min-w-[150px]">
+                          <div className="text-sm whitespace-nowrap">
+                            {new Date(result.submittedAt).toLocaleString()}
+                          </div>
+                        </TableCell>
+                        {user?.role !== "student" && (
+                          <TableCell className="text-right min-w-[80px]">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() =>
+                                handleTogglePublish(
+                                  result._id,
+                                  result.published,
+                                )
+                              }
+                              className="h-8 w-8 p-0"
+                              title={
+                                result.published ? "Unpublish" : "Publish"
+                              }>
+                              {result.published ? (
+                                <EyeOff className="h-4 w-4" />
+                              ) : (
+                                <Send className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+                <TablePagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  totalItems={totalItems}
+                  pageSize={pageSize}
+                  startIndex={startIndex}
+                  endIndex={endIndex}
+                  onPageChange={goToPage}
+                  onPageSizeChange={changePageSize}
+                  hasNextPage={hasNextPage}
+                  hasPreviousPage={hasPreviousPage}
+                />
+              </>
+            )}
           </CardContent>
         </Card>
 

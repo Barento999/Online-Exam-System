@@ -120,12 +120,14 @@ export const TablePagination = ({
         <div className="flex items-center gap-1">
           {getPageNumbers().map((page, index) =>
             page === "..." ? (
-              <span key={`ellipsis-${index}`} className="px-2 text-sm">
+              <span
+                key={`ellipsis-${currentPage}-${index}`}
+                className="px-2 text-sm">
                 ...
               </span>
             ) : (
               <Button
-                key={page}
+                key={`page-${page}`}
                 variant={currentPage === page ? "default" : "outline"}
                 size="sm"
                 onClick={() => onPageChange(page)}
