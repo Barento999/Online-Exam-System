@@ -58,7 +58,9 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const searchInputRef = useRef(null);
+  const searchResultsRef = useRef([]);
 
   // Theme management
   useEffect(() => {
@@ -123,6 +125,16 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
     return () => clearInterval(interval);
   }, [user?.role]);
 
+  // Auto-scroll selected item into view
+  useEffect(() => {
+    if (selectedIndex >= 0 && searchResultsRef.current[selectedIndex]) {
+      searchResultsRef.current[selectedIndex]?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+    }
+  }, [selectedIndex]);
+
   // Search functionality
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -130,6 +142,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
         e.preventDefault();
         setIsSearchOpen(true);
+        setSelectedIndex(-1);
         // Focus the input after a short delay to ensure it's rendered
         setTimeout(() => {
           if (searchInputRef.current) {
@@ -142,25 +155,43 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
         setIsSearchOpen(false);
         setSearchQuery("");
         setSearchResults([]);
+        setSelectedIndex(-1);
         if (searchInputRef.current) {
           searchInputRef.current.blur();
+        }
+      }
+      // Arrow key navigation
+      if (isSearchOpen && searchResults.length > 0) {
+        if (e.key === "ArrowDown") {
+          e.preventDefault();
+          setSelectedIndex((prev) =>
+            prev < searchResults.length - 1 ? prev + 1 : prev,
+          );
+        } else if (e.key === "ArrowUp") {
+          e.preventDefault();
+          setSelectedIndex((prev) => (prev > 0 ? prev - 1 : -1));
+        } else if (e.key === "Enter" && selectedIndex >= 0) {
+          e.preventDefault();
+          handleSearchSelect(searchResults[selectedIndex]);
         }
       }
     };
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [isSearchOpen]);
+  }, [isSearchOpen, searchResults, selectedIndex]);
 
   // Debounced search
   useEffect(() => {
     if (!searchQuery.trim()) {
       setSearchResults([]);
       setIsSearching(false);
+      setSelectedIndex(-1);
       return;
     }
 
     setIsSearching(true);
+    setSelectedIndex(-1);
     const timeoutId = setTimeout(async () => {
       try {
         const results = await performSearch(searchQuery);
@@ -574,13 +605,19 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
                 </div>
               ) : searchResults.length > 0 ? (
                 <div className="py-2">
-                  {searchResults.map((result) => {
+                  {searchResults.map((result, index) => {
                     const IconComponent = result.icon;
+                    const isSelected = index === selectedIndex;
                     return (
                       <button
                         key={result.id}
-                        className="w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-3 group"
-                        onClick={() => handleSearchSelect(result)}>
+                        ref={(el) => (searchResultsRef.current[index] = el)}
+                        className={cn(
+                          "w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-3 group transition-colors",
+                          isSelected && "bg-accent",
+                        )}
+                        onClick={() => handleSearchSelect(result)}
+                        onMouseEnter={() => setSelectedIndex(index)}>
                         <div className="flex-shrink-0">
                           <IconComponent className="h-4 w-4 text-muted-foreground" />
                         </div>
@@ -597,7 +634,14 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
                             {result.description}
                           </p>
                         </div>
-                        <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ArrowRight
+                          className={cn(
+                            "h-3 w-3 text-muted-foreground transition-opacity",
+                            isSelected
+                              ? "opacity-100"
+                              : "opacity-0 group-hover:opacity-100",
+                          )}
+                        />
                       </button>
                     );
                   })}
@@ -682,13 +726,19 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
                   </div>
                 ) : searchResults.length > 0 ? (
                   <div className="py-2">
-                    {searchResults.map((result) => {
+                    {searchResults.map((result, index) => {
                       const IconComponent = result.icon;
+                      const isSelected = index === selectedIndex;
                       return (
                         <button
                           key={result.id}
-                          className="w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-3 group"
-                          onClick={() => handleSearchSelect(result)}>
+                          ref={(el) => (searchResultsRef.current[index] = el)}
+                          className={cn(
+                            "w-full px-3 py-2 text-left hover:bg-accent flex items-center gap-3 group transition-colors",
+                            isSelected && "bg-accent",
+                          )}
+                          onClick={() => handleSearchSelect(result)}
+                          onTouchStart={() => setSelectedIndex(index)}>
                           <div className="flex-shrink-0">
                             <IconComponent className="h-4 w-4 text-muted-foreground" />
                           </div>
@@ -707,7 +757,14 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
                               {result.description}
                             </p>
                           </div>
-                          <ArrowRight className="h-3 w-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <ArrowRight
+                            className={cn(
+                              "h-3 w-3 text-muted-foreground transition-opacity",
+                              isSelected
+                                ? "opacity-100"
+                                : "opacity-0 group-hover:opacity-100",
+                            )}
+                          />
                         </button>
                       );
                     })}
