@@ -22,10 +22,9 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
-import { Loader } from "@/components/common/Loader";
 import { CardListSkeleton } from "@/components/skeletons/TableSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
-import { coursesApi, usersApi } from "@/services/api";
+import { coursesApi, usersApi, enrollmentsApi } from "@/services/api";
 import { Plus, Pencil, Trash2, BookOpen, Users } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -48,12 +47,22 @@ export const Courses = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [user?.role]);
 
   const loadData = async () => {
     try {
-      const coursesRes = await coursesApi.getAll();
-      setCourses(coursesRes.data.courses || coursesRes.data);
+      let coursesRes;
+
+      // Students see only enrolled courses
+      if (user?.role === "student") {
+        coursesRes = await enrollmentsApi.getMyCourses();
+        // Backend returns courses array directly for students
+        setCourses(Array.isArray(coursesRes.data) ? coursesRes.data : []);
+      } else {
+        // Admins and teachers see all courses
+        coursesRes = await coursesApi.getAll();
+        setCourses(coursesRes.data.courses || coursesRes.data);
+      }
 
       // Only load users if admin (teachers can't access this endpoint)
       if (user?.role === "admin") {
@@ -142,86 +151,92 @@ export const Courses = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold">Courses Management</h1>
+            <h1 className="text-3xl font-semibold">
+              {user?.role === "student" ? "My Courses" : "Courses Management"}
+            </h1>
             <p className="text-muted-foreground">
-              Manage all courses in the system
+              {user?.role === "student"
+                ? "View your enrolled courses"
+                : "Manage all courses in the system"}
             </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
-                <Plus className="mr-2 h-4 w-4" />
-                Add Course
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>
-                  {editingCourse ? "Edit Course" : "Add New Course"}
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Course Name</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <UnifiedTextEditor
-                    value={formData.description}
-                    onChange={(value) =>
-                      setFormData({ ...formData, description: value })
-                    }
-                    placeholder="Enter course description... (Use markdown: **bold**, *italic*)"
-                    minHeight="120px"
-                    showWordCount={true}
-                    showToolbar={true}
-                    showPreview={true}
-                    label="Description"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="teacher">Assigned Teacher</Label>
-                  <Select
-                    value={formData.teacherId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, teacherId: value })
-                    }>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a teacher" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {teachers.map((teacher) => (
-                        <SelectItem
-                          key={teacher._id}
-                          value={teacher._id.toString()}>
-                          {teacher.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleDialogClose(false)}
-                    className="w-full sm:w-auto">
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="w-full sm:w-auto">
-                    {editingCourse ? "Update" : "Create"}
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          {user?.role !== "student" && (
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Course
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>
+                    {editingCourse ? "Edit Course" : "Add New Course"}
+                  </DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Course Name</Label>
+                    <Input
+                      id="name"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <UnifiedTextEditor
+                      value={formData.description}
+                      onChange={(value) =>
+                        setFormData({ ...formData, description: value })
+                      }
+                      placeholder="Enter course description... (Use markdown: **bold**, *italic*)"
+                      minHeight="120px"
+                      showWordCount={true}
+                      showToolbar={true}
+                      showPreview={true}
+                      label="Description"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="teacher">Assigned Teacher</Label>
+                    <Select
+                      value={formData.teacherId}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, teacherId: value })
+                      }>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a teacher" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {teachers.map((teacher) => (
+                          <SelectItem
+                            key={teacher._id}
+                            value={teacher._id.toString()}>
+                            {teacher.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleDialogClose(false)}
+                      className="w-full sm:w-auto">
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="w-full sm:w-auto">
+                      {editingCourse ? "Update" : "Create"}
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -230,10 +245,24 @@ export const Courses = () => {
               <CardContent className="flex items-center justify-center h-96 p-0">
                 <EmptyState
                   illustration="courses"
-                  title="No courses yet"
-                  description="Create your first course to organize your exams and track student progress. Courses help you structure your curriculum."
-                  action={() => setIsDialogOpen(true)}
-                  actionLabel="Create First Course"
+                  title={
+                    user?.role === "student"
+                      ? "No enrolled courses"
+                      : "No courses yet"
+                  }
+                  description={
+                    user?.role === "student"
+                      ? "You are not enrolled in any courses yet. Contact your administrator to get enrolled."
+                      : "Create your first course to organize your exams and track student progress. Courses help you structure your curriculum."
+                  }
+                  action={
+                    user?.role !== "student"
+                      ? () => setIsDialogOpen(true)
+                      : undefined
+                  }
+                  actionLabel={
+                    user?.role !== "student" ? "Create First Course" : undefined
+                  }
                 />
               </CardContent>
             </Card>
@@ -252,26 +281,31 @@ export const Courses = () => {
                         </CardTitle>
                       </div>
                     </div>
-                    <div className="flex gap-1 self-end sm:self-start">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(course)}
-                        className="h-8 w-8 p-0"
-                        title="Edit">
-                        <Pencil className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() =>
-                          setDeleteDialog({ open: true, courseId: course._id })
-                        }
-                        className="h-8 w-8 p-0"
-                        title="Delete">
-                        <Trash2 className="h-4 w-4 text-destructive" />
-                      </Button>
-                    </div>
+                    {user?.role !== "student" && (
+                      <div className="flex gap-1 self-end sm:self-start">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(course)}
+                          className="h-8 w-8 p-0"
+                          title="Edit">
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() =>
+                            setDeleteDialog({
+                              open: true,
+                              courseId: course._id,
+                            })
+                          }
+                          className="h-8 w-8 p-0"
+                          title="Delete">
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
+                    )}
                   </div>
                 </CardHeader>
                 <CardContent className="flex-1">
