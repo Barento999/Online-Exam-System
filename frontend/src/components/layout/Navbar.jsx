@@ -24,6 +24,8 @@ import {
   Hash,
   User,
   GraduationCap,
+  Clock,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -59,6 +61,7 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [recentSearches, setRecentSearches] = useState([]);
   const searchInputRef = useRef(null);
   const searchResultsRef = useRef([]);
 
@@ -124,6 +127,14 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
     const interval = setInterval(loadNotifications, 30000);
     return () => clearInterval(interval);
   }, [user?.role]);
+
+  // Load recent searches when search opens
+  useEffect(() => {
+    if (isSearchOpen) {
+      const recent = searchService.getRecentSearches();
+      setRecentSearches(recent);
+    }
+  }, [isSearchOpen]);
 
   // Auto-scroll selected item into view
   useEffect(() => {
@@ -318,6 +329,17 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
     setSearchQuery("");
     setSearchResults([]);
     toast.success(`Opening ${result.title}`);
+  };
+
+  const handleRecentSearchClick = (query) => {
+    setSearchQuery(query);
+    searchInputRef.current?.focus();
+  };
+
+  const handleClearRecentSearches = () => {
+    searchService.clearRecentSearches();
+    setRecentSearches([]);
+    toast.success("Recent searches cleared");
   };
 
   const openSearch = () => {
@@ -658,6 +680,35 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
                 </div>
               ) : (
                 <div className="p-4">
+                  {recentSearches.length > 0 && (
+                    <div className="space-y-3 mb-4 pb-4 border-b">
+                      <div className="flex items-center justify-between">
+                        <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                          <Clock className="h-4 w-4" />
+                          Recent Searches
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={handleClearRecentSearches}
+                          className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground">
+                          <Trash2 className="h-3 w-3 mr-1" />
+                          Clear
+                        </Button>
+                      </div>
+                      <div className="space-y-1">
+                        {recentSearches.slice(0, 5).map((query, index) => (
+                          <button
+                            key={index}
+                            onClick={() => handleRecentSearchClick(query)}
+                            className="w-full text-left px-2 py-1.5 rounded-md hover:bg-accent text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                            <Clock className="h-3 w-3 flex-shrink-0" />
+                            <span className="truncate">{query}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   <div className="space-y-3">
                     <p className="text-sm font-semibold text-foreground">
                       Quick Search
@@ -781,6 +832,35 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
                   </div>
                 ) : (
                   <div className="p-4">
+                    {recentSearches.length > 0 && (
+                      <div className="space-y-3 mb-4 pb-4 border-b">
+                        <div className="flex items-center justify-between">
+                          <p className="text-sm font-semibold text-foreground flex items-center gap-2">
+                            <Clock className="h-4 w-4" />
+                            Recent Searches
+                          </p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleClearRecentSearches}
+                            className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground">
+                            <Trash2 className="h-3 w-3 mr-1" />
+                            Clear
+                          </Button>
+                        </div>
+                        <div className="space-y-1">
+                          {recentSearches.slice(0, 5).map((query, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleRecentSearchClick(query)}
+                              className="w-full text-left px-2 py-1.5 rounded-md hover:bg-accent text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2">
+                              <Clock className="h-3 w-3 flex-shrink-0" />
+                              <span className="truncate">{query}</span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                     <div className="space-y-3">
                       <p className="text-sm font-semibold text-foreground">
                         Quick Search
