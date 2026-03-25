@@ -9,13 +9,22 @@
 /* Better touch targets for mobile */
 @media (max-width: 1023px) {
   .mobile-nav-item {
-    min-height: 48px;
+    min-height: 52px; /* Increased from 48px for better touch targets */
     touch-action: manipulation;
+    padding-top: 0.875rem; /* 14px */
+    padding-bottom: 0.875rem; /* 14px */
   }
 
   .mobile-menu-button {
     -webkit-tap-highlight-color: transparent;
     touch-action: manipulation;
+    min-width: 48px;
+    min-height: 48px;
+  }
+
+  /* Extra spacing between menu items on mobile */
+  .mobile-nav-item + .mobile-nav-item {
+    margin-top: 0.25rem;
   }
 }
 
@@ -77,6 +86,25 @@
 
 .swipe-indicator {
   animation: swipe-pulse 2s ease-in-out infinite;
+  transition: opacity 0.3s ease;
+}
+
+/* Hide swipe indicator when drawer is open */
+.swipe-indicator.hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Smooth drawer transitions */
+@media (max-width: 1023px) {
+  .mobile-drawer {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    will-change: transform;
+  }
+
+  .mobile-drawer.dragging {
+    transition: none;
+  }
 }
 /* Notification Badge Animations */
 @keyframes badge-pulse {
