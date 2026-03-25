@@ -193,9 +193,15 @@ export const Enrollments = () => {
       <Layout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-semibold">Enrollments Management</h1>
+            <h1 className="text-3xl font-semibold">
+              {user?.role === "student"
+                ? "My Enrollments"
+                : "Enrollments Management"}
+            </h1>
             <p className="text-muted-foreground">
-              Manage student course enrollments
+              {user?.role === "student"
+                ? "View your course enrollments"
+                : "Manage student course enrollments"}
             </p>
           </div>
           <TableSkeleton rows={5} columns={4} />
@@ -209,82 +215,90 @@ export const Enrollments = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-semibold">Enrollments Management</h1>
+            <h1 className="text-3xl font-semibold">
+              {user?.role === "student"
+                ? "My Enrollments"
+                : "Enrollments Management"}
+            </h1>
             <p className="text-muted-foreground">
-              Manage student course enrollments
+              {user?.role === "student"
+                ? "View your course enrollments"
+                : "Manage student course enrollments"}
             </p>
           </div>
-          <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
-            <DialogTrigger asChild>
-              <Button className="w-full sm:w-auto">
-                <UserPlus className="mr-2 h-4 w-4" />
-                Enroll Student
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-              <DialogHeader>
-                <DialogTitle>Enroll Student in Course</DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="student">Student</Label>
-                  <Select
-                    value={formData.studentId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, studentId: value })
-                    }
-                    required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a student" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {students.map((student) => (
-                        <SelectItem
-                          key={student._id}
-                          value={student._id.toString()}>
-                          {student.name} ({student.email})
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="course">Course</Label>
-                  <Select
-                    value={formData.courseId}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, courseId: value })
-                    }
-                    required>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a course" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {courses.map((course) => (
-                        <SelectItem
-                          key={course._id}
-                          value={course._id.toString()}>
-                          {course.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => handleDialogClose(false)}
-                    className="w-full sm:w-auto">
-                    Cancel
-                  </Button>
-                  <Button type="submit" className="w-full sm:w-auto">
-                    Enroll
-                  </Button>
-                </div>
-              </form>
-            </DialogContent>
-          </Dialog>
+          {user?.role !== "student" && (
+            <Dialog open={isDialogOpen} onOpenChange={handleDialogClose}>
+              <DialogTrigger asChild>
+                <Button className="w-full sm:w-auto">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Enroll Student
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Enroll Student in Course</DialogTitle>
+                </DialogHeader>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="student">Student</Label>
+                    <Select
+                      value={formData.studentId}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, studentId: value })
+                      }
+                      required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a student" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {students.map((student) => (
+                          <SelectItem
+                            key={student._id}
+                            value={student._id.toString()}>
+                            {student.name} ({student.email})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="course">Course</Label>
+                    <Select
+                      value={formData.courseId}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, courseId: value })
+                      }
+                      required>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a course" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {courses.map((course) => (
+                          <SelectItem
+                            key={course._id}
+                            value={course._id.toString()}>
+                            {course.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => handleDialogClose(false)}
+                      className="w-full sm:w-auto">
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="w-full sm:w-auto">
+                      Enroll
+                    </Button>
+                  </div>
+                </form>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
 
         <Card>
@@ -349,10 +363,26 @@ export const Enrollments = () => {
                 {enrollments.length === 0 ? (
                   <EmptyState
                     illustration="courses"
-                    title="No enrollments yet"
-                    description="Start enrolling students in courses to track their progress and manage their learning journey."
-                    action={() => setIsDialogOpen(true)}
-                    actionLabel="Create First Enrollment"
+                    title={
+                      user?.role === "student"
+                        ? "No enrollments yet"
+                        : "No enrollments yet"
+                    }
+                    description={
+                      user?.role === "student"
+                        ? "You are not enrolled in any courses yet. Contact your administrator to get enrolled in courses."
+                        : "Start enrolling students in courses to track their progress and manage their learning journey."
+                    }
+                    action={
+                      user?.role !== "student"
+                        ? () => setIsDialogOpen(true)
+                        : undefined
+                    }
+                    actionLabel={
+                      user?.role !== "student"
+                        ? "Create First Enrollment"
+                        : undefined
+                    }
                   />
                 ) : (
                   <EmptyState
@@ -367,14 +397,16 @@ export const Enrollments = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <SortableTableHead
-                        field="studentId.name"
-                        label="Student"
-                        sortField={sortField}
-                        sortDirection={sortDirection}
-                        onSort={handleSort}
-                        className="min-w-[180px]"
-                      />
+                      {user?.role !== "student" && (
+                        <SortableTableHead
+                          field="studentId.name"
+                          label="Student"
+                          sortField={sortField}
+                          sortDirection={sortDirection}
+                          onSort={handleSort}
+                          className="min-w-[180px]"
+                        />
+                      )}
                       <SortableTableHead
                         field="courseId.name"
                         label="Course"
@@ -400,28 +432,32 @@ export const Enrollments = () => {
                         onSort={handleSort}
                         className="min-w-[100px]"
                       />
-                      <TableHead className="text-right min-w-[80px]">
-                        Actions
-                      </TableHead>
+                      {user?.role !== "student" && (
+                        <TableHead className="text-right min-w-[80px]">
+                          Actions
+                        </TableHead>
+                      )}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {paginatedData.map((enrollment) => (
                       <TableRow key={enrollment._id}>
-                        <TableCell className="min-w-[180px]">
-                          <div>
-                            <div
-                              className="font-medium truncate max-w-[160px]"
-                              title={enrollment.studentId?.name}>
-                              {enrollment.studentId?.name}
+                        {user?.role !== "student" && (
+                          <TableCell className="min-w-[180px]">
+                            <div>
+                              <div
+                                className="font-medium truncate max-w-[160px]"
+                                title={enrollment.studentId?.name}>
+                                {enrollment.studentId?.name}
+                              </div>
+                              <div
+                                className="text-sm text-muted-foreground truncate max-w-[160px]"
+                                title={enrollment.studentId?.email}>
+                                {enrollment.studentId?.email}
+                              </div>
                             </div>
-                            <div
-                              className="text-sm text-muted-foreground truncate max-w-[160px]"
-                              title={enrollment.studentId?.email}>
-                              {enrollment.studentId?.email}
-                            </div>
-                          </div>
-                        </TableCell>
+                          </TableCell>
+                        )}
                         <TableCell className="min-w-[150px]">
                           <div
                             className="truncate max-w-[200px]"
@@ -452,21 +488,23 @@ export const Enrollments = () => {
                             {enrollment.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right min-w-[80px]">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 w-8 p-0"
-                            title="Remove enrollment"
-                            onClick={() =>
-                              setDeleteDialog({
-                                open: true,
-                                enrollmentId: enrollment._id,
-                              })
-                            }>
-                            <Trash2 className="h-4 w-4 text-destructive" />
-                          </Button>
-                        </TableCell>
+                        {user?.role !== "student" && (
+                          <TableCell className="text-right min-w-[80px]">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-8 w-8 p-0"
+                              title="Remove enrollment"
+                              onClick={() =>
+                                setDeleteDialog({
+                                  open: true,
+                                  enrollmentId: enrollment._id,
+                                })
+                              }>
+                              <Trash2 className="h-4 w-4 text-destructive" />
+                            </Button>
+                          </TableCell>
+                        )}
                       </TableRow>
                     ))}
                   </TableBody>

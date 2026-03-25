@@ -247,6 +247,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
   const studentMenuItems = [
     { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
     { icon: BookOpen, label: "My Courses", path: "/courses" },
+    { icon: UserPlus, label: "My Enrollments", path: "/enrollments" },
     { icon: FileText, label: "Available Exams", path: "/exams" },
     { icon: BarChart, label: "My Results", path: "/results" },
     { icon: TrendingUp, label: "My Analytics", path: "/analytics" },

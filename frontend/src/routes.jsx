@@ -92,7 +92,7 @@ export const router = createBrowserRouter([
   {
     path: "/enrollments",
     element: (
-      <ProtectedRoute allowedRoles={["admin", "teacher"]}>
+      <ProtectedRoute>
         <Enrollments />
       </ProtectedRoute>
     ),
