@@ -307,28 +307,37 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
   };
 
   const handleSearchSelect = (result) => {
-    // Store the selected item info for potential use on the target page
-    if (result.metadata) {
-      sessionStorage.setItem(
-        "searchSelectedItem",
-        JSON.stringify({
-          type: result.type,
-          id:
-            result.metadata.examId ||
-            result.metadata.questionId ||
-            result.metadata.userId ||
-            result.metadata.courseId,
-          title: result.title,
-          timestamp: Date.now(),
-        }),
-      );
-    }
+    // Store the selected item info for the target page to use
+    sessionStorage.setItem(
+      "searchSelectedItem",
+      JSON.stringify({
+        type: result.type,
+        id:
+          result.metadata?.examId ||
+          result.metadata?.questionId ||
+          result.metadata?.userId ||
+          result.metadata?.courseId ||
+          result.id,
+        title: result.title,
+        category: result.category,
+        timestamp: Date.now(),
+      }),
+    );
 
+    // Navigate to the result's path
     navigate(result.path);
+
+    // Close search and reset state
     setIsSearchOpen(false);
     setSearchQuery("");
     setSearchResults([]);
-    toast.success(`Opening ${result.title}`);
+    setSelectedIndex(-1);
+
+    // Show success message
+    toast.success(`Opening ${result.title}`, {
+      icon: "🔍",
+      duration: 2000,
+    });
   };
 
   const handleRecentSearchClick = (query) => {

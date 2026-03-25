@@ -68,7 +68,7 @@ export const searchService = {
           title: exam.title,
           description:
             exam.description || `${exam.subject} - ${exam.duration} minutes`,
-          path: `/exams`, // Navigate to exams list page
+          path: `/exams`, // Navigate to exams list page (items are managed there)
           category: "Exams",
           relevance: this.calculateRelevance(
             query,
@@ -80,7 +80,7 @@ export const searchService = {
             duration: exam.duration,
             status: exam.status,
             questions: exam.questionCount || 0,
-            examId: exam._id || exam.id, // Store ID for future use
+            examId: exam._id || exam.id,
           },
         }));
     } catch (error) {
