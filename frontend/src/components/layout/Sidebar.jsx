@@ -249,6 +249,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
     { icon: BookOpen, label: "My Courses", path: "/courses" },
     { icon: FileText, label: "Available Exams", path: "/exams" },
     { icon: BarChart, label: "My Results", path: "/results" },
+    { icon: TrendingUp, label: "My Analytics", path: "/analytics" },
     { icon: UserCircle, label: "Profile", path: "/profile" },
   ];
 

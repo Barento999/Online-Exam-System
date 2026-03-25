@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "@/context/AuthContext";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader } from "@/components/common/Loader";
@@ -53,6 +54,7 @@ const COLORS = [
 ];
 
 export const Analytics = () => {
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [results, setResults] = useState([]);
   const [exams, setExams] = useState([]);
@@ -73,17 +75,37 @@ export const Analytics = () => {
 
   const loadData = async () => {
     try {
-      const [resultsRes, examsRes, coursesRes] = await Promise.all([
-        resultsApi.getAll(),
-        examsApi.getAll(),
-        coursesApi.getAll(),
-      ]);
-      setResults(resultsRes.data.results || resultsRes.data || []);
-      setExams(examsRes.data.exams || examsRes.data || []);
-      setCourses(coursesRes.data.courses || coursesRes.data || []);
+      let resultsRes, examsRes, coursesRes;
+
+      if (user?.role === "student") {
+        // Students see only their own results
+        resultsRes = await resultsApi.getByStudent(user._id);
+        // Get exams from results
+        const studentResults = resultsRes.data.results || resultsRes.data || [];
+        setResults(studentResults);
+        // Extract unique exams from results
+        const uniqueExams = [
+          ...new Map(
+            studentResults
+              .filter((r) => r.examId)
+              .map((r) => [r.examId._id || r.examId, r.examId]),
+          ).values(),
+        ];
+        setExams(uniqueExams);
+        setCourses([]);
+      } else {
+        // Admins and teachers see all data
+        [resultsRes, examsRes, coursesRes] = await Promise.all([
+          resultsApi.getAll(),
+          examsApi.getAll(),
+          coursesApi.getAll(),
+        ]);
+        setResults(resultsRes.data.results || resultsRes.data || []);
+        setExams(examsRes.data.exams || examsRes.data || []);
+        setCourses(coursesRes.data.courses || coursesRes.data || []);
+      }
     } catch (error) {
       console.error("Error loading analytics data:", error);
-      // Don't fail completely, just show empty state
       setResults([]);
       setExams([]);
       setCourses([]);
@@ -260,9 +282,15 @@ export const Analytics = () => {
       <Layout>
         <div className="space-y-6">
           <div>
-            <h1 className="text-3xl font-semibold">Advanced Analytics</h1>
+            <h1 className="text-3xl font-semibold">
+              {user?.role === "student"
+                ? "My Performance Analytics"
+                : "Advanced Analytics"}
+            </h1>
             <p className="text-muted-foreground">
-              Comprehensive performance insights
+              {user?.role === "student"
+                ? "Track your exam performance"
+                : "Comprehensive performance insights"}
             </p>
           </div>
           <DashboardSkeleton />
@@ -277,43 +305,53 @@ export const Analytics = () => {
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div>
             <h1 className="text-2xl sm:text-3xl font-semibold">
-              Advanced Analytics
+              {user?.role === "student"
+                ? "My Performance Analytics"
+                : "Advanced Analytics"}
             </h1>
             <p className="text-sm sm:text-base text-muted-foreground">
-              Comprehensive performance insights and statistics
+              {user?.role === "student"
+                ? "Track your exam performance and progress"
+                : "Comprehensive performance insights and statistics"}
             </p>
           </div>
         </div>
 
-        {/* Filters */}
+        {/* Filters - Hide course filter for students */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <Select value={selectedCourse} onValueChange={setSelectedCourse}>
-            <SelectTrigger className="w-full sm:w-64">
-              <SelectValue placeholder="Filter by course" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Courses</SelectItem>
-              {courses.map((course) => (
-                <SelectItem key={course._id} value={course._id}>
-                  {course.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {user?.role !== "student" && courses.length > 0 && (
+            <Select value={selectedCourse} onValueChange={setSelectedCourse}>
+              <SelectTrigger className="w-full sm:w-64">
+                <SelectValue placeholder="Filter by course" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Courses</SelectItem>
+                {courses.map((course) => (
+                  <SelectItem key={course._id} value={course._id}>
+                    {course.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
 
-          <Select value={selectedExam} onValueChange={setSelectedExam}>
-            <SelectTrigger className="w-full sm:w-64">
-              <SelectValue placeholder="Filter by exam" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Exams</SelectItem>
-              {exams.map((exam) => (
-                <SelectItem key={exam._id} value={exam._id}>
-                  {exam.title}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          {exams.length > 0 && (
+            <Select value={selectedExam} onValueChange={setSelectedExam}>
+              <SelectTrigger className="w-full sm:w-64">
+                <SelectValue placeholder="Filter by exam" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Exams</SelectItem>
+                {exams.map((exam) => (
+                  <SelectItem
+                    key={exam._id || exam.id}
+                    value={exam._id || exam.id}>
+                    {exam.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
 
         {/* Key Statistics */}
@@ -570,7 +608,11 @@ export const Analytics = () => {
               <TabsContent value="top" className="space-y-6">
                 <Card>
                   <CardHeader>
-                    <CardTitle>Top 5 Performers</CardTitle>
+                    <CardTitle>
+                      {user?.role === "student"
+                        ? "Your Best Performances"
+                        : "Top 5 Performers"}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-3 sm:space-y-4">
@@ -583,9 +625,11 @@ export const Analytics = () => {
                               #{index + 1}
                             </div>
                             <div className="min-w-0 flex-1">
-                              <p className="font-medium text-sm sm:text-base truncate">
-                                {performer.student}
-                              </p>
+                              {user?.role !== "student" && (
+                                <p className="font-medium text-sm sm:text-base truncate">
+                                  {performer.student}
+                                </p>
+                              )}
                               <p className="text-xs sm:text-sm text-muted-foreground truncate">
                                 {performer.exam}
                               </p>
