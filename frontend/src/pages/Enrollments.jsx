@@ -35,6 +35,8 @@ import { SortableTableHead } from "@/components/ui/sortable-table-head";
 import { TablePagination } from "@/components/ui/table-pagination";
 import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
+import { useFormValidation, validationRules } from "@/hooks/useFormValidation";
+import { FormSelect } from "@/components/ui/form-field";
 import { enrollmentsApi, coursesApi, usersApi } from "@/services/api";
 import { Trash2, UserPlus, Search, X, Loader2 } from "lucide-react";
 import { getEnrollmentStatusVariant } from "@/utils/badgeUtils";
@@ -57,6 +59,23 @@ export const Enrollments = () => {
     studentId: "",
     courseId: "",
   });
+
+  // Form validation
+  const enrollmentValidationRules = () => ({
+    studentId: [validationRules.required("Please select a student")],
+    courseId: [validationRules.required("Please select a course")],
+  });
+
+  const {
+    values: validatedFormData,
+    errors: validationErrors,
+    touched: touchedFields,
+    handleChange: handleValidatedChange,
+    handleBlur: handleValidatedBlur,
+    validateAll,
+    resetForm: resetValidation,
+    setFormValues,
+  } = useFormValidation(formData, enrollmentValidationRules);
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -155,9 +174,19 @@ export const Enrollments = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate all fields
+    if (!validateAll()) {
+      toast.error("Please select both student and course");
+      return;
+    }
+
     setSubmitting(true);
     try {
-      await enrollmentsApi.enroll(formData.studentId, formData.courseId);
+      await enrollmentsApi.enroll(
+        validatedFormData.studentId,
+        validatedFormData.courseId,
+      );
       toast.success("Student enrolled successfully");
       setIsDialogOpen(false);
       resetForm();
@@ -184,10 +213,13 @@ export const Enrollments = () => {
   };
 
   const resetForm = () => {
-    setFormData({
+    const initialData = {
       studentId: "",
       courseId: "",
-    });
+    };
+    setFormData(initialData);
+    setFormValues(initialData);
+    resetValidation();
   };
 
   const handleDialogClose = (open) => {
@@ -248,14 +280,21 @@ export const Enrollments = () => {
                   <DialogTitle>Enroll Student in Course</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="student">Student</Label>
+                  <FormSelect
+                    label="Student"
+                    name="student"
+                    error={validationErrors.studentId}
+                    touched={touchedFields.studentId}
+                    required>
                     <Select
-                      value={formData.studentId}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, studentId: value })
-                      }
-                      required>
+                      value={validatedFormData.studentId}
+                      onValueChange={(value) => {
+                        handleValidatedChange("studentId", value);
+                        setFormData({ ...formData, studentId: value });
+                      }}
+                      onOpenChange={(open) => {
+                        if (!open) handleValidatedBlur("studentId");
+                      }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a student" />
                       </SelectTrigger>
@@ -269,15 +308,22 @@ export const Enrollments = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="course">Course</Label>
+                  </FormSelect>
+                  <FormSelect
+                    label="Course"
+                    name="course"
+                    error={validationErrors.courseId}
+                    touched={touchedFields.courseId}
+                    required>
                     <Select
-                      value={formData.courseId}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, courseId: value })
-                      }
-                      required>
+                      value={validatedFormData.courseId}
+                      onValueChange={(value) => {
+                        handleValidatedChange("courseId", value);
+                        setFormData({ ...formData, courseId: value });
+                      }}
+                      onOpenChange={(open) => {
+                        if (!open) handleValidatedBlur("courseId");
+                      }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select a course" />
                       </SelectTrigger>
@@ -291,7 +337,7 @@ export const Enrollments = () => {
                         ))}
                       </SelectContent>
                     </Select>
-                  </div>
+                  </FormSelect>
                   <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
                     <Button
                       type="button"

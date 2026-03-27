@@ -11,6 +11,8 @@ import { useAdvancedFilter } from "@/hooks/useAdvancedFilter";
 import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
 import { useRowSelection } from "@/hooks/useRowSelection";
+import { useFormValidation, validationRules } from "@/hooks/useFormValidation";
+import { FormField, FormSelect } from "@/components/ui/form-field";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { SortableTableHead } from "@/components/ui/sortable-table-head";
 import { TablePagination } from "@/components/ui/table-pagination";
@@ -102,6 +104,39 @@ export const Users = () => {
     error: uploadError,
     uploadSingleFile,
   } = useFileUpload();
+
+  // Form validation
+  const userValidationRules = (values) => ({
+    name: [
+      validationRules.required("Name is required"),
+      validationRules.minLength(2, "Name must be at least 2 characters"),
+      validationRules.maxLength(100, "Name must be less than 100 characters"),
+    ],
+    email: [
+      validationRules.required("Email is required"),
+      validationRules.email("Please enter a valid email address"),
+    ],
+    password: editingUser
+      ? [] // Password optional when editing
+      : [
+          validationRules.required("Password is required"),
+          validationRules.minLength(
+            6,
+            "Password must be at least 6 characters",
+          ),
+        ],
+  });
+
+  const {
+    values: validatedFormData,
+    errors: validationErrors,
+    touched: touchedFields,
+    handleChange: handleValidatedChange,
+    handleBlur: handleValidatedBlur,
+    validateAll,
+    resetForm: resetValidation,
+    setFormValues,
+  } = useFormValidation(formData, userValidationRules);
 
   // Advanced filtering configuration
   const filterConfig = [
@@ -314,13 +349,26 @@ export const Users = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // Validate all fields
+    if (!validateAll()) {
+      toast.error("Please fix the validation errors");
+      return;
+    }
+
     setSubmitting(true);
     try {
+      const submitData = { ...validatedFormData };
+      // Remove password if empty when editing
+      if (editingUser && !submitData.password) {
+        delete submitData.password;
+      }
+
       if (editingUser) {
-        await usersApi.update(editingUser._id, formData);
+        await usersApi.update(editingUser._id, submitData);
         toast.success("User updated successfully");
       } else {
-        await usersApi.create(formData);
+        await usersApi.create(submitData);
         toast.success("User created successfully");
       }
       setIsDialogOpen(false);
@@ -335,13 +383,15 @@ export const Users = () => {
 
   const handleEdit = (user) => {
     setEditingUser(user);
-    setFormData({
+    const userData = {
       name: user.name,
       email: user.email,
       password: "",
       role: user.role,
       status: user.status,
-    });
+    };
+    setFormData(userData);
+    setFormValues(userData);
     setIsDialogOpen(true);
   };
 
@@ -365,13 +415,16 @@ export const Users = () => {
   };
 
   const resetForm = () => {
-    setFormData({
+    const initialData = {
       name: "",
       email: "",
       password: "",
       role: "student",
       status: "active",
-    });
+    };
+    setFormData(initialData);
+    setFormValues(initialData);
+    resetValidation();
     setEditingUser(null);
   };
 
@@ -551,51 +604,61 @@ Admin User,admin@example.com,password123,admin,active`;
                   </DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={(e) =>
-                        setFormData({ ...formData, email: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">
-                      Password {editingUser && "(leave blank to keep current)"}
-                    </Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={formData.password}
-                      onChange={(e) =>
-                        setFormData({ ...formData, password: e.target.value })
-                      }
-                      required={!editingUser}
-                    />
-                  </div>
+                  <FormField
+                    label="Name"
+                    name="name"
+                    value={validatedFormData.name}
+                    onChange={handleValidatedChange}
+                    onBlur={handleValidatedBlur}
+                    error={validationErrors.name}
+                    touched={touchedFields.name}
+                    required
+                    placeholder="Enter full name"
+                    showValidIcon
+                  />
+                  <FormField
+                    label="Email"
+                    name="email"
+                    type="email"
+                    value={validatedFormData.email}
+                    onChange={handleValidatedChange}
+                    onBlur={handleValidatedBlur}
+                    error={validationErrors.email}
+                    touched={touchedFields.email}
+                    required
+                    placeholder="user@example.com"
+                    showValidIcon
+                  />
+                  <FormField
+                    label="Password"
+                    name="password"
+                    type="password"
+                    value={validatedFormData.password}
+                    onChange={handleValidatedChange}
+                    onBlur={handleValidatedBlur}
+                    error={validationErrors.password}
+                    touched={touchedFields.password}
+                    required={!editingUser}
+                    placeholder={
+                      editingUser
+                        ? "Leave blank to keep current password"
+                        : "Enter password (min 6 characters)"
+                    }
+                    helperText={
+                      editingUser
+                        ? "Leave blank to keep current password"
+                        : "Minimum 6 characters"
+                    }
+                    showValidIcon={!editingUser}
+                  />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="role">Role</Label>
+                    <FormSelect label="Role" name="role" required>
                       <Select
-                        value={formData.role}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, role: value })
-                        }>
+                        value={validatedFormData.role}
+                        onValueChange={(value) => {
+                          handleValidatedChange("role", value);
+                          setFormData({ ...formData, role: value });
+                        }}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -605,14 +668,14 @@ Admin User,admin@example.com,password123,admin,active`;
                           <SelectItem value="admin">Admin</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="status">Status</Label>
+                    </FormSelect>
+                    <FormSelect label="Status" name="status" required>
                       <Select
-                        value={formData.status}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, status: value })
-                        }>
+                        value={validatedFormData.status}
+                        onValueChange={(value) => {
+                          handleValidatedChange("status", value);
+                          setFormData({ ...formData, status: value });
+                        }}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -621,7 +684,7 @@ Admin User,admin@example.com,password123,admin,active`;
                           <SelectItem value="inactive">Inactive</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
+                    </FormSelect>
                   </div>
                   <div className="flex flex-col-reverse sm:flex-row justify-end gap-2">
                     <Button
