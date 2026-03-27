@@ -44,6 +44,7 @@ import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { MultiStepExamForm } from "@/components/forms/MultiStepExamForm";
 import { examsApi, coursesApi } from "@/services/api";
+import { getStatusBadgeProps } from "@/utils/badgeUtils";
 import { useAuth } from "@/context/AuthContext";
 import {
   exportToPDF,
