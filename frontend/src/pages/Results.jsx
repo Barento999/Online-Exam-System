@@ -38,6 +38,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/common/ConfirmDialog";
+import {
+  getResultStatusVariant,
+  getPublishedStatusVariant,
+} from "@/utils/badgeUtils";
 import toast from "react-hot-toast";
 
 export const Results = () => {
@@ -554,11 +558,7 @@ export const Results = () => {
                         </TableCell>
                         <TableCell className="min-w-[100px]">
                           <Badge
-                            variant={
-                              result.status === "passed"
-                                ? "default"
-                                : "destructive"
-                            }
+                            variant={getResultStatusVariant(result.status)}
                             className="whitespace-nowrap">
                             {result.status}
                           </Badge>
@@ -566,9 +566,9 @@ export const Results = () => {
                         {user?.role !== "student" && (
                           <TableCell className="min-w-[120px]">
                             <Badge
-                              variant={
-                                result.published ? "default" : "secondary"
-                              }
+                              variant={getPublishedStatusVariant(
+                                result.published,
+                              )}
                               className="whitespace-nowrap">
                               {result.published ? (
                                 <Eye className="h-3 w-3 mr-1" />

@@ -52,6 +52,7 @@ import {
   formatDateForExport,
 } from "@/utils/exportUtils";
 import { ExportDropdown } from "@/components/ui/export-dropdown";
+import { getUserStatusVariant } from "@/utils/badgeUtils";
 import {
   Plus,
   Pencil,
@@ -757,9 +758,7 @@ Admin User,admin@example.com,password123,admin,active`;
                         </TableCell>
                         <TableCell className="min-w-[100px]">
                           <Badge
-                            variant={
-                              user.status === "active" ? "default" : "secondary"
-                            }
+                            variant={getUserStatusVariant(user.status)}
                             className="whitespace-nowrap">
                             {user.status}
                           </Badge>

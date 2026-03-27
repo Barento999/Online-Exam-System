@@ -37,6 +37,7 @@ import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
 import { enrollmentsApi, coursesApi, usersApi } from "@/services/api";
 import { Trash2, UserPlus, Search, X } from "lucide-react";
+import { getEnrollmentStatusVariant } from "@/utils/badgeUtils";
 import toast from "react-hot-toast";
 
 export const Enrollments = () => {
@@ -477,13 +478,9 @@ export const Enrollments = () => {
                         </TableCell>
                         <TableCell className="min-w-[100px]">
                           <Badge
-                            variant={
-                              enrollment.status === "active"
-                                ? "default"
-                                : enrollment.status === "completed"
-                                  ? "secondary"
-                                  : "destructive"
-                            }
+                            variant={getEnrollmentStatusVariant(
+                              enrollment.status,
+                            )}
                             className="whitespace-nowrap">
                             {enrollment.status}
                           </Badge>

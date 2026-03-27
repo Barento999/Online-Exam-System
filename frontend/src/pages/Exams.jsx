@@ -44,6 +44,7 @@ import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { MultiStepExamForm } from "@/components/forms/MultiStepExamForm";
 import { examsApi, coursesApi } from "@/services/api";
+import { getExamStatusVariant, getBlueOutlineClass } from "@/utils/badgeUtils";
 import { useAuth } from "@/context/AuthContext";
 import {
   exportToPDF,
@@ -404,24 +405,20 @@ export const Exams = () => {
     // For students, show more detailed status based on metadata
     if (user?.role === "student") {
       if (exam.isTaken) {
-        return (
-          <Badge variant="outline" className="bg-gray-100 dark:bg-gray-800">
-            Completed
-          </Badge>
-        );
+        return <Badge variant="secondary">Completed</Badge>;
       }
       if (exam.isActive) {
+        return <Badge variant="default">Active - Take Now</Badge>;
+      }
+      if (exam.isUpcoming) {
         return (
-          <Badge variant="default" className="bg-green-600">
-            Active - Take Now
+          <Badge variant="outline" className={getBlueOutlineClass()}>
+            Upcoming
           </Badge>
         );
       }
-      if (exam.isUpcoming) {
-        return <Badge variant="secondary">Upcoming</Badge>;
-      }
       if (exam.isPast) {
-        return <Badge variant="outline">Expired</Badge>;
+        return <Badge variant="secondary">Expired</Badge>;
       }
     }
 
@@ -429,7 +426,7 @@ export const Exams = () => {
     const variants = {
       draft: "secondary",
       published: "default",
-      completed: "outline",
+      completed: "secondary",
     };
     return (
       <Badge variant={variants[exam.status] || "secondary"}>
