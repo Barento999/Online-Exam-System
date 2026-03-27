@@ -36,7 +36,7 @@ import { TablePagination } from "@/components/ui/table-pagination";
 import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
 import { enrollmentsApi, coursesApi, usersApi } from "@/services/api";
-import { Trash2, UserPlus, Search, X } from "lucide-react";
+import { Trash2, UserPlus, Search, X, Loader2 } from "lucide-react";
 import { getEnrollmentStatusVariant } from "@/utils/badgeUtils";
 import toast from "react-hot-toast";
 
@@ -51,6 +51,8 @@ export const Enrollments = () => {
     open: false,
     enrollmentId: null,
   });
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [formData, setFormData] = useState({
     studentId: "",
     courseId: "",
@@ -153,6 +155,7 @@ export const Enrollments = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       await enrollmentsApi.enroll(formData.studentId, formData.courseId);
       toast.success("Student enrolled successfully");
@@ -161,10 +164,13 @@ export const Enrollments = () => {
       loadData();
     } catch (error) {
       toast.error(error.response?.data?.message || "Enrollment failed");
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
+    setDeleting(true);
     try {
       await enrollmentsApi.delete(deleteDialog.enrollmentId);
       toast.success("Enrollment removed successfully");
@@ -172,6 +178,8 @@ export const Enrollments = () => {
       loadData();
     } catch (error) {
       toast.error("Failed to remove enrollment");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -289,11 +297,22 @@ export const Enrollments = () => {
                       type="button"
                       variant="outline"
                       onClick={() => handleDialogClose(false)}
+                      disabled={submitting}
                       className="w-full sm:w-auto">
                       Cancel
                     </Button>
-                    <Button type="submit" className="w-full sm:w-auto">
-                      Enroll
+                    <Button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full sm:w-auto">
+                      {submitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Enrolling...
+                        </>
+                      ) : (
+                        "Enroll"
+                      )}
                     </Button>
                   </div>
                 </form>
@@ -529,6 +548,7 @@ export const Enrollments = () => {
           title="Remove Enrollment"
           description="Are you sure you want to remove this enrollment? The student will lose access to this course."
           onConfirm={handleDelete}
+          loading={deleting}
         />
       </div>
     </Layout>

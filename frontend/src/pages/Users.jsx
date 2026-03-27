@@ -64,6 +64,7 @@ import {
   FileSpreadsheet,
   UserX,
   UserCheck,
+  Loader2,
 } from "lucide-react";
 import toast from "react-hot-toast";
 
@@ -90,6 +91,8 @@ export const Users = () => {
   });
   const [importDialog, setImportDialog] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const {
     files: importFiles,
     addFiles: addImportFiles,
@@ -180,6 +183,7 @@ export const Users = () => {
 
   // Bulk action handlers
   const handleBulkDelete = async () => {
+    setDeleting(true);
     try {
       const selectedItems = getSelectedItems();
       await Promise.all(selectedItems.map((user) => usersApi.delete(user._id)));
@@ -189,6 +193,8 @@ export const Users = () => {
       loadUsers();
     } catch (error) {
       toast.error("Failed to delete some users");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -282,6 +288,7 @@ export const Users = () => {
   };
 
   const handleMultiStepSubmit = async (userData) => {
+    setSubmitting(true);
     try {
       if (editingUser) {
         await usersApi.update(editingUser._id, userData);
@@ -295,6 +302,8 @@ export const Users = () => {
       loadUsers();
     } catch (error) {
       toast.error(error.message || "Operation failed");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -305,6 +314,7 @@ export const Users = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setSubmitting(true);
     try {
       if (editingUser) {
         await usersApi.update(editingUser._id, formData);
@@ -318,6 +328,8 @@ export const Users = () => {
       loadUsers();
     } catch (error) {
       toast.error(error.message || "Operation failed");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -339,6 +351,7 @@ export const Users = () => {
   };
 
   const handleDelete = async () => {
+    setDeleting(true);
     try {
       await usersApi.delete(deleteDialog.userId);
       toast.success("User deleted successfully");
@@ -346,6 +359,8 @@ export const Users = () => {
       loadUsers();
     } catch (error) {
       toast.error("Failed to delete user");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -613,11 +628,22 @@ Admin User,admin@example.com,password123,admin,active`;
                       type="button"
                       variant="outline"
                       onClick={() => handleDialogClose(false)}
+                      disabled={submitting}
                       className="w-full sm:w-auto">
                       Cancel
                     </Button>
-                    <Button type="submit" className="w-full sm:w-auto">
-                      {editingUser ? "Update" : "Create"}
+                    <Button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full sm:w-auto">
+                      {submitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {editingUser ? "Updating..." : "Creating..."}
+                        </>
+                      ) : (
+                        <>{editingUser ? "Update" : "Create"}</>
+                      )}
                     </Button>
                   </div>
                 </form>
@@ -823,6 +849,7 @@ Admin User,admin@example.com,password123,admin,active`;
           title="Delete User"
           description="Are you sure you want to delete this user? This action cannot be undone."
           onConfirm={handleDelete}
+          loading={deleting}
         />
 
         <ConfirmDialog
@@ -831,6 +858,7 @@ Admin User,admin@example.com,password123,admin,active`;
           title={`Delete ${selectedCount} User(s)`}
           description={`Are you sure you want to delete ${selectedCount} selected user(s)? This action cannot be undone.`}
           onConfirm={handleBulkDelete}
+          loading={deleting}
         />
 
         {/* Multi-Step User Form */}
