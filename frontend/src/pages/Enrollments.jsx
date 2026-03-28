@@ -36,6 +36,7 @@ import { TablePagination } from "@/components/ui/table-pagination";
 import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
 import { useFormValidation, validationRules } from "@/hooks/useFormValidation";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { FormSelect } from "@/components/ui/form-field";
 import { enrollmentsApi, coursesApi, usersApi } from "@/services/api";
 import { Trash2, UserPlus, Search, X, Loader2 } from "lucide-react";
@@ -76,6 +77,17 @@ export const Enrollments = () => {
     resetForm: resetValidation,
     setFormValues,
   } = useFormValidation(formData, enrollmentValidationRules);
+
+  // Unsaved changes warning
+  const {
+    showDialog: showUnsavedDialog,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedMessage,
+  } = useUnsavedChanges(
+    isDialogOpen && validatedFormData.isDirty,
+    "You have unsaved changes in the enrollment form. Are you sure you want to leave?",
+  );
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -223,6 +235,13 @@ export const Enrollments = () => {
   };
 
   const handleDialogClose = (open) => {
+    if (!open && validatedFormData.isDirty) {
+      // Show confirmation if there are unsaved changes
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to close?",
+      );
+      if (!confirmed) return;
+    }
     setIsDialogOpen(open);
     if (!open) {
       resetForm();
@@ -595,6 +614,20 @@ export const Enrollments = () => {
           description="Are you sure you want to remove this enrollment? The student will lose access to this course."
           onConfirm={handleDelete}
           loading={deleting}
+        />
+
+        {/* Unsaved Changes Warning */}
+        <ConfirmDialog
+          open={showUnsavedDialog}
+          onOpenChange={(open) => {
+            if (!open) cancelNavigation();
+          }}
+          title="Unsaved Changes"
+          description={unsavedMessage}
+          onConfirm={confirmNavigation}
+          confirmText="Leave Page"
+          cancelText="Stay"
+          variant="warning"
         />
       </div>
     </Layout>

@@ -12,6 +12,7 @@ import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
 import { useRowSelection } from "@/hooks/useRowSelection";
 import { useFormValidation, validationRules } from "@/hooks/useFormValidation";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { FormField, FormSelect } from "@/components/ui/form-field";
 import { AdvancedTableFilter } from "@/components/ui/advanced-table-filter";
 import { SortableTableHead } from "@/components/ui/sortable-table-head";
@@ -137,6 +138,17 @@ export const Users = () => {
     resetForm: resetValidation,
     setFormValues,
   } = useFormValidation(formData, userValidationRules);
+
+  // Unsaved changes warning
+  const {
+    showDialog: showUnsavedDialog,
+    confirmNavigation,
+    cancelNavigation,
+    message: unsavedMessage,
+  } = useUnsavedChanges(
+    isDialogOpen && validatedFormData.isDirty,
+    "You have unsaved changes in the user form. Are you sure you want to leave?",
+  );
 
   // Advanced filtering configuration
   const filterConfig = [
@@ -429,6 +441,13 @@ export const Users = () => {
   };
 
   const handleDialogClose = (open) => {
+    if (!open && validatedFormData.isDirty) {
+      // Show confirmation if there are unsaved changes
+      const confirmed = window.confirm(
+        "You have unsaved changes. Are you sure you want to close?",
+      );
+      if (!confirmed) return;
+    }
     setIsDialogOpen(open);
     if (!open) {
       resetForm();
@@ -922,6 +941,20 @@ Admin User,admin@example.com,password123,admin,active`;
           description={`Are you sure you want to delete ${selectedCount} selected user(s)? This action cannot be undone.`}
           onConfirm={handleBulkDelete}
           loading={deleting}
+        />
+
+        {/* Unsaved Changes Warning */}
+        <ConfirmDialog
+          open={showUnsavedDialog}
+          onOpenChange={(open) => {
+            if (!open) cancelNavigation();
+          }}
+          title="Unsaved Changes"
+          description={unsavedMessage}
+          onConfirm={confirmNavigation}
+          confirmText="Leave Page"
+          cancelText="Stay"
+          variant="warning"
         />
 
         {/* Multi-Step User Form */}
