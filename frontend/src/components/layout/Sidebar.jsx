@@ -324,7 +324,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
       )}
 
       {/* Enhanced Sidebar with drag support */}
-      <div
+      <aside
         ref={sidebarRef}
         className={cn(
           "h-screen bg-sidebar/95 backdrop-blur-sm text-sidebar-foreground flex flex-col",
@@ -341,7 +341,10 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         style={{
           transform: isDragging ? getDragTransform() : undefined,
           transition: isDragging ? "none" : undefined,
-        }}>
+        }}
+        role="complementary"
+        aria-label="Sidebar navigation"
+        aria-hidden={!isOpen && window.innerWidth < 1024}>
         {/* Header */}
         <div className="p-6 border-b border-sidebar-border">
           <div className="flex items-center gap-3 group">
@@ -390,8 +393,11 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
         </button>
 
         {/* Navigation */}
-        <nav className="flex-1 overflow-y-auto p-4 mobile-drawer-scroll scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent">
-          <ul className="space-y-1">
+        <nav
+          className="flex-1 overflow-y-auto p-4 mobile-drawer-scroll scrollbar-thin scrollbar-thumb-sidebar-border scrollbar-track-transparent"
+          aria-label="Main navigation"
+          role="navigation">
+          <ul className="space-y-1" role="list">
             {menuItems.map((item, index) => {
               const Icon = item.icon;
               const isActive = isPathActive(item);
@@ -654,7 +660,7 @@ export const Sidebar = ({ isCollapsed, setIsCollapsed }) => {
             )}
           </div>
         </div>
-      </div>
+      </aside>
     </>
   );
 };

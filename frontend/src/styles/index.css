@@ -713,3 +713,221 @@ body {
   font-style: italic;
   color: hsl(var(--muted-foreground));
 }
+
+/* ============================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================ */
+
+/* Enhanced focus indicators for better keyboard navigation */
+*:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  border-radius: 0.25rem;
+}
+
+/* High contrast focus for interactive elements */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+[role="link"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px hsl(var(--ring) / 0.2);
+}
+
+/* Screen reader only content */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Make sr-only content visible when focused */
+.sr-only:focus,
+.sr-only:active {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Skip link styles */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 8px 16px;
+  text-decoration: none;
+  border-radius: 0 0 4px 0;
+  z-index: 100;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* Ensure sufficient color contrast for text */
+.text-muted-foreground {
+  color: hsl(var(--muted-foreground));
+  /* Ensure minimum 4.5:1 contrast ratio */
+}
+
+/* Improve button accessibility */
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Keyboard navigation indicators for tables */
+table tr:focus-within {
+  background-color: hsl(var(--accent) / 0.5);
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: -2px;
+}
+
+/* Improve checkbox and radio button visibility */
+input[type="checkbox"]:focus-visible,
+input[type="radio"]:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px hsl(var(--ring) / 0.2);
+}
+
+/* Ensure icons have proper spacing for screen readers */
+.icon-with-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* Improve link visibility */
+a:not(.no-underline) {
+  text-decoration-skip-ink: auto;
+}
+
+a:hover:not(.no-underline) {
+  text-decoration: underline;
+}
+
+/* Ensure proper heading hierarchy is visually clear */
+h1 {
+  font-size: 2.25rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+h2 {
+  font-size: 1.875rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* Improve form label association */
+label {
+  cursor: pointer;
+}
+
+label[for] {
+  user-select: none;
+}
+
+/* Ensure error messages are clearly visible */
+[role="alert"],
+.error-message,
+.text-destructive {
+  font-weight: 500;
+}
+
+/* Improve loading state accessibility */
+[aria-busy="true"] {
+  cursor: wait;
+}
+
+/* Ensure modals trap focus properly */
+[role="dialog"],
+[role="alertdialog"] {
+  isolation: isolate;
+}
+
+/* Improve tooltip accessibility */
+[role="tooltip"] {
+  position: absolute;
+  z-index: 9999;
+  pointer-events: none;
+}
+
+/* Ensure proper spacing for touch targets (minimum 44x44px) */
+@media (pointer: coarse) {
+  button,
+  a,
+  input[type="checkbox"],
+  input[type="radio"],
+  [role="button"],
+  [role="link"] {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  * {
+    border-color: currentColor;
+  }
+
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Ensure live regions are properly announced */
+[aria-live="polite"],
+[aria-live="assertive"] {
+  position: relative;
+}
+
+/* Improve focus visibility in dark mode */
+.dark *:focus-visible {
+  outline-color: hsl(var(--ring));
+  box-shadow: 0 0 0 4px hsl(var(--ring) / 0.3);
+}
