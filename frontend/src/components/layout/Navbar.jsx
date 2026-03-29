@@ -31,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { KeyboardShortcutsHelp } from "@/components/common/KeyboardShortcutsHelp";
 import { cn } from "@/lib/utils";
 import { useState, useEffect, useRef } from "react";
 import {
@@ -922,6 +923,9 @@ export const Navbar = ({ isCollapsed = false, isMobile = false }) => {
           title="Search">
           <Search className="h-5 w-5" />
         </Button>
+
+        {/* Keyboard Shortcuts Help */}
+        <KeyboardShortcutsHelp />
 
         {/* Theme Toggle */}
         <Button
