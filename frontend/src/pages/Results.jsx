@@ -22,6 +22,10 @@ import { TableSkeleton } from "@/components/skeletons/TableSkeleton";
 import { EmptyState } from "@/components/common/EmptyState";
 import { SortableTableHead } from "@/components/ui/sortable-table-head";
 import { TablePagination } from "@/components/ui/table-pagination";
+import {
+  DateRangePicker,
+  useDateRange,
+} from "@/components/ui/date-range-picker";
 import { useTableSort } from "@/hooks/useTableSort";
 import { usePagination } from "@/hooks/usePagination";
 import { resultsApi, examsApi } from "@/services/api";
@@ -58,6 +62,7 @@ export const Results = () => {
     action: null,
   });
   const { user } = useAuth();
+  const { dateRange, setDateRange, filterByDateRange } = useDateRange();
 
   // Active filters count
   const activeFiltersCount = useMemo(() => {
@@ -65,8 +70,9 @@ export const Results = () => {
     if (filterExam !== "all") count++;
     if (filterStatus !== "all") count++;
     if (filterPublished !== "all" && user?.role !== "student") count++;
+    if (dateRange.start || dateRange.end) count++;
     return count;
-  }, [filterExam, filterStatus, filterPublished, user]);
+  }, [filterExam, filterStatus, filterPublished, dateRange, user]);
 
   // Clear filters
   const handleClearFilters = () => {
@@ -74,11 +80,17 @@ export const Results = () => {
     setFilterExam("all");
     setFilterStatus("all");
     setFilterPublished("all");
+    setDateRange({ start: null, end: null });
   };
 
   // Filter data
   const filteredResults = useMemo(() => {
-    return results.filter((result) => {
+    let filtered = results;
+
+    // Apply date range filter
+    filtered = filterByDateRange(filtered, "submittedAt");
+
+    return filtered.filter((result) => {
       const matchesSearch =
         !searchTerm ||
         result.examName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -97,7 +109,15 @@ export const Results = () => {
 
       return matchesSearch && matchesStatus && matchesExam && matchesPublished;
     });
-  }, [results, searchTerm, filterStatus, filterExam, filterPublished]);
+  }, [
+    results,
+    searchTerm,
+    filterStatus,
+    filterExam,
+    filterPublished,
+    dateRange,
+    filterByDateRange,
+  ]);
 
   // Sorting
   const { sortedData, sortField, sortDirection, handleSort } = useTableSort(
@@ -333,8 +353,8 @@ export const Results = () => {
         <Card>
           <CardHeader>
             <div className="flex flex-col gap-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="relative flex-1">
+              <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+                <div className="relative flex-1 min-w-[200px]">
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     placeholder="Search by exam or student name..."
@@ -343,6 +363,11 @@ export const Results = () => {
                     className="pl-10"
                   />
                 </div>
+                <DateRangePicker
+                  value={dateRange}
+                  onChange={setDateRange}
+                  className="w-full sm:w-auto"
+                />
                 {user?.role !== "student" && (
                   <Select value={filterExam} onValueChange={setFilterExam}>
                     <SelectTrigger className="w-full sm:w-48">

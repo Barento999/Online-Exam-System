@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Loader } from "@/components/common/Loader";
 import { DashboardSkeleton } from "@/components/skeletons/DashboardSkeleton";
 import {
@@ -12,7 +13,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  DateRangePicker,
+  useDateRange,
+} from "@/components/ui/date-range-picker";
 import { resultsApi, examsApi, coursesApi } from "@/services/api";
+import { exportToPDF, exportToExcel, exportToCSV } from "@/utils/exportUtils";
 import {
   BarChart,
   Bar,
@@ -42,6 +48,9 @@ import {
   Award,
   Target,
   Activity,
+  Download,
+  FileText,
+  FileSpreadsheet,
 } from "lucide-react";
 
 const COLORS = [
@@ -62,6 +71,8 @@ export const Analytics = () => {
   const [selectedExam, setSelectedExam] = useState("all");
   const [selectedCourse, setSelectedCourse] = useState("all");
   const [analytics, setAnalytics] = useState(null);
+  const { dateRange, setDateRange, filterByDateRange } = useDateRange();
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -71,7 +82,7 @@ export const Analytics = () => {
     if (results.length > 0) {
       calculateAnalytics();
     }
-  }, [results, selectedExam, selectedCourse]);
+  }, [results, selectedExam, selectedCourse, dateRange]);
 
   const loadData = async () => {
     try {
@@ -116,6 +127,9 @@ export const Analytics = () => {
 
   const calculateAnalytics = () => {
     let filteredResults = results;
+
+    // Apply date range filter
+    filteredResults = filterByDateRange(filteredResults, "submittedAt");
 
     if (selectedExam !== "all") {
       filteredResults = filteredResults.filter(
@@ -277,6 +291,83 @@ export const Analytics = () => {
     return "F";
   };
 
+  const handleExport = (format) => {
+    if (!analytics) return;
+
+    const timestamp = new Date().toISOString().split("T")[0];
+    const filename = `analytics-report-${timestamp}`;
+    const title =
+      user?.role === "student"
+        ? "My Performance Analytics Report"
+        : "Advanced Analytics Report";
+
+    try {
+      if (format === "pdf") {
+        // Export summary statistics
+        const summaryData = [
+          { metric: "Total Results", value: analytics.stats.totalResults },
+          { metric: "Average Score", value: `${analytics.stats.avgScore}%` },
+          { metric: "Pass Rate", value: `${analytics.stats.passRate}%` },
+          {
+            metric: "Highest Score",
+            value: `${analytics.stats.highestScore}%`,
+          },
+          { metric: "Lowest Score", value: `${analytics.stats.lowestScore}%` },
+          { metric: "Passed", value: analytics.stats.passed },
+          { metric: "Failed", value: analytics.stats.failed },
+        ];
+
+        exportToPDF(
+          summaryData,
+          [
+            { header: "Metric", dataKey: "metric" },
+            { header: "Value", dataKey: "value" },
+          ],
+          filename,
+          title,
+        );
+      } else if (format === "excel") {
+        // Export detailed analytics data
+        const detailedData = analytics.examPerformance.map((exam) => ({
+          exam: exam.name,
+          averageScore: exam.average,
+          students: exam.students,
+        }));
+
+        exportToExcel(
+          detailedData,
+          [
+            { header: "Exam", dataKey: "exam" },
+            { header: "Average Score (%)", dataKey: "averageScore" },
+            { header: "Students", dataKey: "students" },
+          ],
+          filename,
+          "Analytics",
+        );
+      } else if (format === "csv") {
+        // Export grade distribution
+        const gradeData = analytics.gradeDistribution.map((grade) => ({
+          grade: grade.grade,
+          count: grade.count,
+          percentage: `${grade.percentage}%`,
+        }));
+
+        exportToCSV(
+          gradeData,
+          [
+            { header: "Grade", dataKey: "grade" },
+            { header: "Count", dataKey: "count" },
+            { header: "Percentage", dataKey: "percentage" },
+          ],
+          filename,
+        );
+      }
+      setShowExportMenu(false);
+    } catch (error) {
+      console.error("Export failed:", error);
+    }
+  };
+
   if (loading) {
     return (
       <Layout>
@@ -315,10 +406,66 @@ export const Analytics = () => {
                 : "Comprehensive performance insights and statistics"}
             </p>
           </div>
+
+          {/* Export Button */}
+          {analytics && (
+            <div className="relative">
+              <Button
+                variant="outline"
+                onClick={() => setShowExportMenu(!showExportMenu)}
+                className="gap-2">
+                <Download className="h-4 w-4" />
+                Export Report
+              </Button>
+
+              {showExportMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowExportMenu(false)}
+                  />
+                  <div className="absolute right-0 top-full mt-2 z-50 w-48 rounded-md border bg-popover p-2 shadow-md">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start gap-2"
+                      onClick={() => handleExport("pdf")}>
+                      <FileText className="h-4 w-4" />
+                      Export as PDF
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start gap-2"
+                      onClick={() => handleExport("excel")}>
+                      <FileSpreadsheet className="h-4 w-4" />
+                      Export as Excel
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start gap-2"
+                      onClick={() => handleExport("csv")}>
+                      <FileText className="h-4 w-4" />
+                      Export as CSV
+                    </Button>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
 
-        {/* Filters - Hide course filter for students */}
-        <div className="flex flex-col sm:flex-row gap-4">
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row gap-4 flex-wrap">
+          {/* Date Range Filter */}
+          <DateRangePicker
+            value={dateRange}
+            onChange={setDateRange}
+            className="w-full sm:w-auto"
+          />
+
+          {/* Course Filter - Hide for students */}
           {user?.role !== "student" && courses.length > 0 && (
             <Select value={selectedCourse} onValueChange={setSelectedCourse}>
               <SelectTrigger className="w-full sm:w-64">
@@ -335,6 +482,7 @@ export const Analytics = () => {
             </Select>
           )}
 
+          {/* Exam Filter */}
           {exams.length > 0 && (
             <Select value={selectedExam} onValueChange={setSelectedExam}>
               <SelectTrigger className="w-full sm:w-64">
